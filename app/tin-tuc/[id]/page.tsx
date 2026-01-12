@@ -149,7 +149,7 @@ export default function NewsDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                {NEWS_LIST.map((news) => (
                   <Link key={news.id} href={`/tin-tuc/${news.id}`} className="group bg-white p-6 space-y-6 shadow-sm hover:shadow-2xl transition-all">
-                     <div className="relative aspect-video overflow-hidden grayscale group-hover:grayscale-0 transition-all">
+                     <div className="relative aspect-video overflow-hidden transition-all">
                         <Image src={news.image} alt={news.title} fill className="object-cover group-hover:scale-105 transition-transform" />
                      </div>
                      <div className="space-y-3">

@@ -21,23 +21,94 @@ import { cn } from "@/lib/utils";
 const PROJECTS = [
   {
     id: "1",
-    title: "Messer Thái Nguyên & Dung Quất",
-    location: "Thái Nguyên / Quảng Ngãi",
-    desc: "Cung cấp khớp nối cao su Toaflex (Nhật Bản) và giải pháp van điều khiển cho hệ thống khí nén.",
-    image: "https://saigonvalve.vn/uploads/files/2024/06/12/Blue-and-White-Clean-Modern-Technology-Conference-Zoom-Virtual-Background-2-.png",
-    client: "Tập Đoàn Messer",
-    year: "2024",
-    field: "Công nghiệp khí hiếm",
+    title: "LẮP ĐẶT HỆ THỐNG QUAN TRẮC CHẤT LƯỢNG NƯỚC TẠI CẦN THƠ",
+    location: "Cần Thơ, Việt Nam",
+    desc: "Cần Thơ là đô thị trung tâm của vùng Đồng bằng sông Cửu Long, nơi nước sông đóng vai trò then chốt trong sinh hoạt và phát triển kinh tế.",
+    image: "https://saigonvalve.vn/uploads/files/2025/07/16/thumbs/z6809258125215_0bfd24b1d2a12247ce2fe99f8bc81598-306x234-5.jpg",
+    client: "Cấp nước Cần Thơ",
+    year: "2025",
+    field: "Quan trắc nước",
+    content: `Dự án lắp đặt hệ thống quan trắc chất lượng nước tại Cần Thơ – bước tiến quan trọng trong giám sát nguồn nước bền vững.`,
+    solutions: [
+      "Hệ thống cảm biến đo chất lượng nước",
+      "Datalogger SV1-DAQ truyền dữ liệu 4G/LTE",
+      "Phần mềm giám sát trực tuyến SCADA",
+    ],
+    results: [
+      "Giám sát liên tục 24/7",
+      "Cảnh báo sớm ô nhiễm nguồn nước",
+      "Quản lý từ xa hiệu quả",
+    ],
   },
   {
     id: "2",
-    title: "Formosa Hà Tĩnh Steel Corporation",
-    location: "Hà Tĩnh, Việt Nam",
-    desc: "Cung cấp khớp xoay Niigata (Nhật Bản) và thiết bị van chịu nhiệt độ cao cho nhà máy thép.",
-    image: "https://saigonvalve.vn/uploads/files/2024/06/12/Blue-and-White-Clean-Modern-Technology-Conference-Zoom-Virtual-Background-2-.png",
-    client: "FHS Steel",
-    year: "2023",
-    field: "Luyện kim",
+    title: "DỰ ÁN LẮP ĐẶT HỆ THỐNG QUAN TRẮC CHẤT LƯỢNG NƯỚC TẠI HUẾ",
+    location: "Huế, Việt Nam",
+    desc: "SÀI GÒN VALVE triển khai dự án lắp đặt hệ thống quan trắc chất lượng nước tại Huế – thành phố du lịch nổi tiếng gắn liền với sông Hương và sông Bồ.",
+    image: "https://saigonvalve.vn/uploads/files/2025/07/16/thumbs/495000495_642796432091557_8112711184192443493_n-306x234-5.jpg",
+    client: "Cấp nước Huế",
+    year: "2025",
+    field: "Quan trắc nước",
+    content: `Dự án lắp đặt hệ thống quan trắc chất lượng nước tại Huế – giải pháp bảo vệ nguồn nước bền vững.`,
+    solutions: [
+      "Thiết bị đo pH, độ đục, Clo",
+      "Hệ thống truyền dữ liệu IoT",
+      "Phần mềm quản lý tập trung",
+    ],
+    results: [
+      "Đảm bảo chất lượng nước đầu vào",
+      "Phát hiện sớm sự cố nguồn nước",
+      "Tiết kiệm chi phí vận hành",
+    ],
+  },
+  {
+    id: "3",
+    title: "DỰ ÁN LẮP ĐẶT VAN GIẢM ÁP ĐA HẰNG SỐ TẠI TP. HỒ CHÍ MINH",
+    location: "TP. Hồ Chí Minh, Việt Nam",
+    desc: "Thành phố Hồ Chí Minh là thành phố lớn nhất Việt Nam về quy mô dân số và là trung tâm kinh tế, giải trí, một trong hai trung tâm văn hóa và giáo dục quan trọng tại Việt Nam.",
+    image: "https://saigonvalve.vn/uploads/files/2024/12/18/thumbs/z6137753576652_79e515094e627d29c077813506e5c349-306x234-5.jpg",
+    client: "Sawaco TP.HCM",
+    year: "2024",
+    field: "Van giảm áp",
+    content: `Thành phố Hồ Chí Minh có diện tích khoảng 2.095 km², là trung tâm kinh tế, văn hóa và công nghiệp lớn nhất Việt Nam. Với hơn 10 triệu người (bao gồm dân cư chính thức và tạm trú), nhu cầu sử dụng nước sạch tại TP.HCM ngày càng gia tăng mạnh mẽ.
+
+Hiện Trạng Hệ Thống Cấp Nước Tại TP.HCM:
+- Áp lực nước không đồng đều tại các khu vực khác nhau.
+- Rò rỉ nước do áp lực vượt mức trong đường ống, gây thất thoát nguồn tài nguyên quan trọng.
+- Nhu cầu đảm bảo sự ổn định áp lực nước để phục vụ cư dân trong giờ cao điểm.
+
+Dự án lắp đặt van giảm áp SV3-PRV giúp tối ưu hóa áp lực nước để áp lực nước luôn duy trì ổn định trong mạng lưới cấp nước, giảm thiểu sự dao động áp suất. Bên cạnh đó giảm thất thoát nước, giảm áp lực dư thừa làm hạn chế rò rỉ và vỡ đường ống. Ngoài ra còn giúp nâng cao hiệu suất cấp nước, đảm bảo nguồn cấp nước sạch được phân phối hiệu quả, đặc biệt ở các khu vực xa trung tâm.`,
+    solutions: [
+      "Van giảm áp đa hằng số SV3-PRV",
+      "Hệ thống giám sát áp lực từ xa",
+      "Phần mềm theo dõi van giảm áp",
+    ],
+    results: [
+      "Duy trì áp lực ổn định trong mạng lưới",
+      "Giảm thất thoát nước đáng kể",
+      "Tăng tuổi thọ đường ống và thiết bị",
+    ],
+  },
+  {
+    id: "4",
+    title: "DỰ ÁN LẮP ĐẶT VAN GIẢM ÁP ĐA HẰNG SỐ SV3-PRV TẠI QUẢNG NINH",
+    location: "Quảng Ninh, Việt Nam",
+    desc: "Là một trong những tỉnh thành phát triển có diện tích lớn và quy mô dân số cao, vấn đề đặt ra cho doanh nghiệp cấp nước làm sao để nguồn nước của người dân luôn ổn định.",
+    image: "https://saigonvalve.vn/uploads/files/2025/02/17/thumbs/H-nh-nh-qu-ng-ninh-306x234-5.png",
+    client: "Cấp nước Quảng Ninh",
+    year: "2024",
+    field: "Van giảm áp",
+    content: `Dự án lắp đặt van giảm áp đa hằng số SV3-PRV tại Quảng Ninh giúp ổn định áp lực nước cho người dân.`,
+    solutions: [
+      "Van giảm áp đa hằng số SV3-PRV",
+      "Hệ thống cảm biến áp suất",
+      "Phần mềm giám sát trực tuyến",
+    ],
+    results: [
+      "Áp lực nước ổn định 24/7",
+      "Giảm rò rỉ đường ống",
+      "Nâng cao chất lượng cấp nước",
+    ],
   },
 ];
 
@@ -113,24 +184,23 @@ export default function ProjectDetailPage() {
                  </div>
                  
                  <div className="space-y-8 text-muted-foreground leading-loose font-medium">
-                    <p>Trong dự án triển khai cho {project.client}, Sài Gòn Valve đã đóng vai trò là nhà thầu cung cấp thiết bị kỹ thuật chiến lược. Chúng tôi không chỉ cung cấp sản phẩm mà còn trực tiếp tham gia vào khâu tư vấn thiết kế và giám sát lắp đặt tại hiện trường.</p>
-                    <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic pt-6 border-b border-slate-100 pb-4">Giải pháp kỹ thuật tiêu biểu</h3>
-                    <p>Hệ thống van và khớp nối được lựa chọn dựa trên các tiêu chí khắt khe về áp suất, nhiệt độ và tính ăn mòn của môi trường khí hiếm/thép. Việc ứng dụng linh kiện chính hãng từ Nhật Bản giúp kéo dài tuổi thọ hệ thống lên đến 15 năm và giảm thiểu chi phí bảo trì định kỳ.</p>
+                    <div className="whitespace-pre-line">{project.content}</div>
+                    <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic pt-6 border-b border-slate-100 pb-4">Giải pháp kỹ thuật</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-slate-50 p-12 border-t-4 border-brand-secondary">
                        <div className="space-y-4">
                           <h4 className="text-[11px] font-black text-brand-primary uppercase tracking-widest">Hạng mục cung cấp</h4>
                           <ul className="space-y-2 text-xs font-bold uppercase tracking-tight">
-                             <li>• Khớp nối cao su Toaflex chống rung</li>
-                             <li>• Van bi điều khiển khí nén Noah</li>
-                             <li>• Hệ thống giám sát IoT tập trung</li>
+                             {project.solutions.map((item, i) => (
+                               <li key={i}>• {item}</li>
+                             ))}
                           </ul>
                        </div>
                        <div className="space-y-4">
                           <h4 className="text-[11px] font-black text-brand-primary uppercase tracking-widest">Kết quả đạt được</h4>
                           <ul className="space-y-2 text-xs font-bold uppercase tracking-tight">
-                             <li>• Hệ thống vận hành ổn định 24/7</li>
-                             <li>• Giảm 20% rung chấn đường ống</li>
-                             <li>• Tối ưu hóa giám sát từ xa</li>
+                             {project.results.map((item, i) => (
+                               <li key={i}>• {item}</li>
+                             ))}
                           </ul>
                        </div>
                     </div>

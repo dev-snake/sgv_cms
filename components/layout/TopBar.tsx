@@ -1,11 +1,24 @@
 "use client";
 
+import * as React from "react";
 import { Phone, Mail, Clock, Facebook, Linkedin, Youtube } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function TopBar() {
+  const [isScrolled, setIsScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="hidden lg:block bg-brand-secondary py-2 border-b border-white/5">
+    <div className={cn(
+      "hidden lg:block fixed top-0 left-0 right-0 z-60 bg-brand-secondary py-2 border-b border-white/5 transition-all duration-300",
+      isScrolled && "-translate-y-full opacity-0"
+    )}>
       <div className="container mx-auto px-8">
         <div className="flex items-center justify-between text-white/70">
           
