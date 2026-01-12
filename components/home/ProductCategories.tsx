@@ -7,9 +7,9 @@ import { motion } from "motion/react";
 
 const SECTORS = [
   { name: "Tổng thầu thi công", desc: "Xử lý nước thải & Cấp nước đô thị", image: "https://saigonvalve.vn/themes/seval.com.vn/assets/imgs/home/field/field-2.png" },
-  { name: "Tư vấn thiết kế", desc: "Giải pháp trạm quan trắc tự động", image: "https://saigonvalve.vn/uploads/files/2024/04/10/thumbs/pccc-800x600.jpg" },
-  { name: "Cung cấp thiết bị", desc: "Van công nghiệp & Actuator cao cấp", image: "https://saigonvalve.vn/uploads/files/2024/04/10/thumbs/dau-khi-800x600.jpg" },
-  { name: "Bảo trì & Vận hành", desc: "Dịch vụ kỹ thuật chuyên sâu 24/7", image: "https://saigonvalve.vn/uploads/files/2024/04/10/thumbs/hvac-800x600.jpg" },
+  { name: "Tư vấn thiết kế", desc: "Giải pháp trạm quan trắc tự động", image: "https://giaiphapnhaxanh.com/upload/elfinder/TH%C3%81NG%208/Dien%20c%C3%B4ng%20nghi%E1%BB%87p/bao-duong-he-thong-cap-thoat-ok4.png" },
+  { name: "Cung cấp thiết bị", desc: "Van công nghiệp & Actuator cao cấp", image: "https://vancongnghiepatp.com/upload/files/sanpham/van_bi_gang.jpg" },
+  { name: "Bảo trì & Vận hành", desc: "Dịch vụ kỹ thuật chuyên sâu 24/7", image: "https://vanhanoi.com/files/assets/van_cong/bao_tri_bao_duong_van_cong.jpg" },
 ];
 
 export default function ProductCategories() {
