@@ -1,0 +1,221 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { Menu, X, ChevronDown, Search, Globe, Phone, Mail } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { cn } from "@/lib/utils";
+import ThemeToggle from "./ThemeToggle";
+
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+
+const NAV_LINKS = [
+  { label: "TRANG CHỦ", href: "/" },
+  { 
+    label: "GIỚI THIỆU", 
+    href: "/gioi-thieu",
+    submenu: [
+      { title: "Về Sài Gòn Valve", href: "/gioi-thieu" },
+      { title: "Tầm nhìn & Sứ mệnh", href: "/gioi-thieu#vision" },
+      { title: "Đội ngũ lãnh đạo", href: "/gioi-thieu#team" },
+      { title: "Năng lực thiết bị", href: "/gioi-thieu#equipment" },
+    ]
+  },
+  { 
+    label: "SẢN PHẨM", 
+    href: "/san-pham",
+    featured: [
+      { title: "Van OKM Japan", desc: "Dòng van bướm, van bi cao cấp đạt chuẩn quốc tế.", href: "/san-pham" },
+      { title: "Actuator Noah Korea", desc: "Bộ điều khiển điện, khí nén chính xác cao.", href: "/san-pham" },
+      { title: "IoT Ngành Nước", desc: "Cảm biến, Datalogger và phần mềm giám sát mạng lưới.", href: "/san-pham" },
+    ]
+  },
+  { label: "DỰ ÁN", href: "/du-an" },
+  { label: "TIN TỨC", href: "/tin-tuc" },
+  { label: "LIÊN HỆ", href: "/lien-he" },
+];
+
+export default function Header() {
+  const [isScrolled, setIsScrolled] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const pathname = usePathname();
+
+  React.useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <header 
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        isScrolled 
+          ? "bg-white dark:bg-background shadow-md py-3" 
+          : "bg-white dark:bg-background border-b border-border py-5"
+      )}
+    >
+      <div className="container mx-auto px-4 lg:px-8">
+        <nav className="flex items-center justify-between">
+          
+          {/* Logo */}
+          <Link href="/" className="relative h-14 w-56 shrink-0 group">
+            <Image
+              src="https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png"
+              alt="Sài Gòn Valve Logo"
+              fill
+              className="object-contain group-hover:scale-105 transition-transform"
+              priority
+              onError={(e: any) => {
+                e.target.src = "https://via.placeholder.com/200x60?text=SAI+GON+VALVE";
+              }}
+            />
+          </Link>
+
+          {/* Desktop Nav */}
+          <div className="hidden lg:flex items-center gap-2">
+            <NavigationMenu>
+              <NavigationMenuList className="gap-2">
+                {NAV_LINKS.map((link) => (
+                  <NavigationMenuItem key={link.label}>
+                    {link.submenu || link.featured ? (
+                      <>
+                        <NavigationMenuTrigger 
+                          className={cn(
+                            "h-10 px-4 text-[10px] font-black uppercase tracking-widest bg-transparent hover:text-brand-primary active:bg-transparent data-[state=open]:text-brand-primary transition-colors",
+                            pathname === link.href && "text-brand-primary"
+                          )}
+                        >
+                          {link.label}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent className="bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-slate-100 dark:ring-white/10">
+                          <ul className={cn(
+                            "grid gap-4 p-8",
+                            link.featured ? "w-[700px] grid-cols-2" : "w-[280px] grid-cols-1"
+                          )}>
+                            {(link.submenu || link.featured)?.map((item) => (
+                              <li key={item.title}>
+                                <NavigationMenuLink asChild>
+                                  <Link
+                                    href={item.href}
+                                    className="group block select-none space-y-2 rounded-sm p-4 leading-none no-underline outline-none transition-all hover:bg-slate-50 dark:hover:bg-white/5"
+                                  >
+                                    <div className="text-xs font-black uppercase tracking-tight group-hover:text-brand-primary transition-colors">{item.title}</div>
+                                    {"desc" in item && <p className="line-clamp-2 text-[11px] leading-relaxed text-muted-foreground font-medium italic">{item.desc}</p>}
+                                  </Link>
+                                </NavigationMenuLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </NavigationMenuContent>
+                      </>
+                    ) : (
+                      <NavigationMenuLink asChild active={pathname === link.href}>
+                        <Link 
+                          href={link.href}
+                          className={cn(
+                            "group inline-flex h-10 w-max items-center justify-center rounded-sm bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-colors hover:text-brand-primary focus:outline-none",
+                            pathname === link.href ? "text-brand-primary" : "text-foreground"
+                          )}
+                        >
+                          {link.label}
+                        </Link>
+                      </NavigationMenuLink>
+                    )}
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+
+            {/* Actions */}
+            <div className="flex items-center gap-6 ml-8 pl-8 border-l border-slate-100 dark:border-white/10">
+               <button className="text-foreground hover:text-brand-primary transition-colors transform hover:scale-110">
+                 <Search size={18} />
+               </button>
+               <ThemeToggle />
+               <div className="flex items-center ml-2 border border-slate-100 dark:border-white/10 px-3 py-1 bg-slate-50 dark:bg-white/5 rounded-sm">
+                  <Globe size={14} className="mr-2 text-brand-primary" />
+                  <span className="text-[10px] font-black tracking-widest">VN</span>
+               </div>
+            </div>
+          </div>
+
+          {/* Mobile Toggle */}
+          <div className="flex items-center gap-4 lg:hidden">
+            <ThemeToggle />
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-foreground hover:text-brand-primary transition-colors"
+            >
+              {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, scaleY: 0 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            exit={{ opacity: 0, scaleY: 0 }}
+            className="lg:hidden absolute top-full left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-white/10 overflow-y-auto origin-top"
+          >
+            <div className="container mx-auto px-6 py-12 space-y-10">
+              {NAV_LINKS.map((link) => (
+                <div key={link.label} className="space-y-6">
+                  <Link 
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-2xl font-black uppercase tracking-tighter hover:text-brand-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                  {(link.submenu || link.featured) && (
+                    <div className="pl-6 grid grid-cols-1 gap-6 border-l-2 border-brand-primary/20">
+                      {(link.submenu || link.featured)?.map((item) => (
+                        <Link
+                          key={item.title}
+                          href={item.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-brand-primary transition-colors"
+                        >
+                          {item.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              <div className="pt-12 border-t border-slate-100 dark:border-white/10 space-y-8">
+                 <div className="flex items-center gap-6 text-muted-foreground group">
+                    <div className="h-10 w-10 flex items-center justify-center bg-slate-50 dark:bg-white/5 text-brand-primary rounded-sm">
+                       <Phone size={20} />
+                    </div>
+                    <span className="font-black text-sm tracking-widest">(028) 3535 8739</span>
+                 </div>
+                 <div className="flex items-center gap-6 text-muted-foreground group">
+                    <div className="h-10 w-10 flex items-center justify-center bg-slate-50 dark:bg-white/5 text-brand-primary rounded-sm">
+                       <Mail size={20} />
+                    </div>
+                    <span className="font-black text-sm tracking-widest uppercase">info@saigonvalve.vn</span>
+                 </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
+  );
+}
