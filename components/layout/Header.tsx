@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown, Search, Globe, Phone, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
-import ThemeToggle from "./ThemeToggle";
 
 import {
   NavigationMenu,
@@ -109,7 +108,7 @@ export default function Header() {
                                     href={item.href}
                                     className="group block select-none space-y-2 rounded-sm p-4 leading-none no-underline outline-none transition-all hover:bg-slate-50 dark:hover:bg-white/5"
                                   >
-                                    <div className="text-xs font-black uppercase tracking-tight group-hover:text-brand-primary transition-colors">{item.title}</div>
+                                    <div className="text-xs font-black uppercase tracking-tight group-hover:text-brand-primary transition-colors">{item.title as string}</div>
                                     {"desc" in item && <p className="line-clamp-2 text-[11px] leading-relaxed text-muted-foreground font-medium italic">{item.desc}</p>}
                                   </Link>
                                 </NavigationMenuLink>
@@ -141,7 +140,6 @@ export default function Header() {
                <button className="text-foreground hover:text-brand-primary transition-colors transform hover:scale-110">
                  <Search size={18} />
                </button>
-               <ThemeToggle />
                <div className="flex items-center ml-2 border border-slate-100 dark:border-white/10 px-3 py-1 bg-slate-50 dark:bg-white/5 rounded-sm">
                   <Globe size={14} className="mr-2 text-brand-primary" />
                   <span className="text-[10px] font-black tracking-widest">VN</span>
@@ -151,7 +149,6 @@ export default function Header() {
 
           {/* Mobile Toggle */}
           <div className="flex items-center gap-4 lg:hidden">
-            <ThemeToggle />
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-foreground hover:text-brand-primary transition-colors"
