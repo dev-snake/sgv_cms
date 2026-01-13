@@ -30,15 +30,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
+import { PORTAL_ROUTES } from "@/lib/portal-routes";
 
 export default function ProjectsManagementPage() {
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [itemToDelete, setItemToDelete] = React.useState<Project | null>(null);
   
   const filteredProjects = PROJECTS.filter(project => 
     project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     project.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
     project.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDeleteClick = (project: Project) => {
+    setItemToDelete(project);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete) {
+      console.log("Deleting:", itemToDelete.id);
+    }
+    setDeleteDialogOpen(false);
+    setItemToDelete(null);
+  };
 
   const getStatusBadge = (status: Project["status"]) => {
     switch (status) {
@@ -70,34 +87,34 @@ export default function ProjectsManagementPage() {
           <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Quản lý dự án</h1>
           <p className="text-slate-500 font-medium italic mt-2 text-sm">Danh sách các dự án và công trình trọng điểm đã thực hiện.</p>
         </div>
-        <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
-          <Plus className="mr-2 size-4" /> Thêm dự án mới
-        </Button>
+        <Link href={PORTAL_ROUTES.cms.projects.add}>
+          <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+            <Plus className="mr-2 size-4" /> Thêm dự án mới
+          </Button>
+        </Link>
       </div>
 
       <div className="bg-white rounded-none border border-slate-100 overflow-hidden">
-        {/* Table Filters */}
         <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row gap-6 items-center justify-between bg-white">
           <div className="relative w-full md:w-1/2 group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-300 group-focus-within:text-brand-primary transition-colors" />
             <Input 
               placeholder="TÌM KIẾM THEO TÊN DỰ ÁN, ĐỊA ĐIỂM HOẶC LOẠI HÌNH..." 
-              className="pl-12 bg-slate-50 border-none text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20 h-14 rounded-xl"
+              className="pl-12 bg-slate-50 border-none text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20 h-14 rounded-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto">
-             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 h-14 border-slate-100 rounded-xl hover:bg-slate-50">
+             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 h-14 border-slate-100 rounded-none hover:bg-slate-50">
                 <Filter className="mr-2 size-4 text-slate-400" /> Bộ lọc
              </Button>
-             <Button variant="outline" className="text-[10px) font-black uppercase tracking-widest px-6 h-14 border-slate-100 rounded-xl hover:bg-slate-50">
+             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 h-14 border-slate-100 rounded-none hover:bg-slate-50">
                 <ArrowUpDown className="mr-2 size-4 text-slate-400" /> Sắp xếp
              </Button>
           </div>
         </div>
 
-        {/* Table Content */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -114,12 +131,12 @@ export default function ProjectsManagementPage() {
                 <tr key={project.id} className="hover:bg-slate-50/30 transition-colors group">
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-6">
-                       <div className="relative h-16 w-24 rounded-xl overflow-hidden shrink-0 border border-slate-100 transition-transform group-hover:scale-105">
+                       <div className="relative h-16 w-24 rounded-none overflow-hidden shrink-0 border border-slate-100 transition-transform group-hover:scale-105">
                           <Image src={project.image} alt={project.name} fill className="object-cover" />
                        </div>
                        <div className="max-w-[400px]">
                           <div className="text-sm font-black text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-1 uppercase tracking-tight mb-1">{project.name}</div>
-                          <Badge variant="outline" className="text-[9px] font-bold text-slate-400 border-slate-200 uppercase tracking-widest px-2 py-0">
+                          <Badge variant="outline" className="text-[9px] font-bold text-slate-400 border-slate-200 uppercase tracking-widest px-2 py-0 rounded-none">
                              {project.category}
                           </Badge>
                        </div>
@@ -143,23 +160,28 @@ export default function ProjectsManagementPage() {
                   <td className="px-8 py-6 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-12 w-12 p-0 hover:bg-white hover:text-brand-primary border border-transparent hover:border-slate-100 rounded-xl transition-all">
+                        <Button variant="ghost" className="h-12 w-12 p-0 hover:bg-white hover:text-brand-primary border border-transparent hover:border-slate-100 rounded-none transition-all">
                           <MoreHorizontal className="h-5 w-5" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-64 p-2 rounded-xl border border-slate-100 bg-white">
+                      <DropdownMenuContent align="end" className="w-64 p-2 rounded-none border border-slate-100 bg-white">
                         <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-4 py-3">Tùy chọn dự án</DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-slate-50" />
                         <DropdownMenuItem className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
                            <Eye size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
                            <span className="text-xs font-bold uppercase tracking-tight">Hồ sơ dự án</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
-                           <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
-                           <span className="text-xs font-bold uppercase tracking-tight text-slate-900">Sửa thông tin</span>
+                        <DropdownMenuItem asChild>
+                           <Link href={PORTAL_ROUTES.cms.projects.edit(project.id)} className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
+                              <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
+                              <span className="text-xs font-bold uppercase tracking-tight text-slate-900">Sửa thông tin</span>
+                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-slate-50" />
-                        <DropdownMenuItem className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-rose-50 group">
+                        <DropdownMenuItem 
+                          className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-rose-50 group"
+                          onClick={() => handleDeleteClick(project)}
+                        >
                            <Trash2 size={16} className="text-slate-400 group-hover:text-rose-600 transition-colors" />
                            <span className="text-xs font-bold uppercase tracking-tight text-rose-600">Xóa dự án</span>
                         </DropdownMenuItem>
@@ -172,15 +194,23 @@ export default function ProjectsManagementPage() {
           </table>
         </div>
 
-        {/* Pagination Footer */}
         <div className="p-8 bg-slate-50/20 border-t border-slate-50 flex items-center justify-between">
            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Đang hiển thị {filteredProjects.length} dự án trên tổng số {PROJECTS.length}</p>
            <div className="flex items-center gap-3">
-              <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-xl">Trước</Button>
-              <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-xl">Sau</Button>
+              <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-none">Trước</Button>
+              <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-none">Sau</Button>
            </div>
         </div>
       </div>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Xóa dự án"
+        description="Dự án sẽ bị xóa vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác."
+        itemName={itemToDelete?.name}
+      />
     </div>
   );
 }

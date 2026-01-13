@@ -25,14 +25,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
+import { PORTAL_ROUTES } from "@/lib/portal-routes";
 
 export default function NewsManagementPage() {
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [itemToDelete, setItemToDelete] = React.useState<NewsArticle | null>(null);
   
   const filteredNews = NEWS_LIST.filter(news => 
     news.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     news.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDeleteClick = (news: NewsArticle) => {
+    setItemToDelete(news);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete) {
+      // TODO: Implement API call to delete news
+      console.log("Deleting:", itemToDelete.id);
+    }
+    setDeleteDialogOpen(false);
+    setItemToDelete(null);
+  };
 
   return (
     <div className="space-y-10">
@@ -41,7 +59,7 @@ export default function NewsManagementPage() {
           <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Quản lý tin tức</h1>
           <p className="text-slate-500 font-medium italic mt-2 text-sm">Cập nhật tin tức, sự kiện và kiến thức kỹ thuật của Sài Gòn Valve.</p>
         </div>
-        <Link href="/portal/cms/news/add">
+        <Link href={PORTAL_ROUTES.cms.news.add}>
           <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
             <Plus className="mr-2 size-4" /> Viết bài mới
           </Button>
@@ -125,13 +143,16 @@ export default function NewsManagementPage() {
                            <span className="text-xs font-bold uppercase tracking-tight">Xem chi tiết</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                           <Link href={`/portal/cms/news/${news.id}`} className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
+                           <Link href={PORTAL_ROUTES.cms.news.edit(news.id)} className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
                               <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
                               <span className="text-xs font-bold uppercase tracking-tight text-slate-900">Sửa nội dung</span>
                            </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-slate-50" />
-                        <DropdownMenuItem className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-rose-50 group">
+                        <DropdownMenuItem 
+                          className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-rose-50 group"
+                          onClick={() => handleDeleteClick(news)}
+                        >
                            <Trash2 size={16} className="text-slate-400 group-hover:text-rose-600 transition-colors" />
                            <span className="text-xs font-bold uppercase tracking-tight text-rose-600">Xóa bài viết</span>
                         </DropdownMenuItem>
@@ -146,13 +167,23 @@ export default function NewsManagementPage() {
 
         {/* Pagination Footer */}
         <div className="p-8 bg-slate-50/20 border-t border-slate-50 flex items-center justify-between">
-           <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Đang hiển thị {filteredNews.length} sản phẩm trên tổng số {NEWS_LIST.length}</p>
+           <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Đang hiển thị {filteredNews.length} bài viết trên tổng số {NEWS_LIST.length}</p>
            <div className="flex items-center gap-3">
               <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-none">Trước</Button>
               <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-none">Sau</Button>
            </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Xóa bài viết"
+        description="Bài viết sẽ bị xóa vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác."
+        itemName={itemToDelete?.title}
+      />
     </div>
   );
 }

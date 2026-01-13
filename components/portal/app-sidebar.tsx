@@ -9,7 +9,6 @@ import {
   ChevronRight,
   User,
   LogOut,
-  PieChart,
   Lock,
 } from "lucide-react";
 import Image from "next/image";
@@ -37,37 +36,33 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import { PORTAL_ROUTES } from "@/lib/portal-routes";
 
 const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/portal",
+      url: PORTAL_ROUTES.dashboard,
       icon: LayoutDashboard,
     },
     {
        title: "Quản lý Tin tức",
-       url: "/portal/cms/news",
+       url: PORTAL_ROUTES.cms.news.list,
        icon: FileText,
     },
     {
        title: "Quản lý Dự án",
-       url: "/portal/cms/projects",
+       url: PORTAL_ROUTES.cms.projects.list,
        icon: Briefcase,
     },
     {
        title: "Quản lý Sản phẩm",
-       url: "/portal/cms/products",
+       url: PORTAL_ROUTES.cms.products.list,
        icon: Box,
     },
     {
-       title: "Báo cáo & Thống kê",
-       url: "/portal/reports",
-       icon: PieChart,
-    },
-    {
       title: "Cài đặt hệ thống",
-      url: "/portal/settings",
+      url: PORTAL_ROUTES.settings,
       icon: Settings,
     },
   ],
@@ -98,7 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       } as React.CSSProperties}
     >
       <SidebarHeader className="h-16 border-b border-white/5 flex items-center justify-start px-4 bg-[#002d6b] shrink-0 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
-        <Link href="/portal" className="flex items-center gap-3 group/logo relative w-full h-full justify-center px-1 group-data-[collapsible=icon]:px-0!">
+        <Link href={PORTAL_ROUTES.dashboard} className="flex items-center gap-3 group/logo relative w-full h-full justify-center px-1 group-data-[collapsible=icon]:px-0!">
            <div className="relative flex items-center gap-3 group-data-[collapsible=icon]:hidden w-full px-1">
                  <div className="bg-white p-1 rounded-none flex items-center justify-center h-8 w-8 shrink-0">
                     <Image
@@ -127,7 +122,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup className="p-0">
           <SidebarMenu className="gap-0 group-data-[collapsible=icon]:items-center">
             {data.navMain.map((item) => {
-              const isActive = item.url === "/portal" ? pathname === "/portal" : pathname.startsWith(item.url);
+              const isActive = item.url === PORTAL_ROUTES.dashboard ? pathname === PORTAL_ROUTES.dashboard : pathname.startsWith(item.url);
               return (
                 <SidebarMenuItem key={item.title} className="w-full flex justify-center">
                   <SidebarMenuButton 
@@ -201,4 +196,3 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     </Sidebar>
   );
 }
-
