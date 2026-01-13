@@ -1,0 +1,204 @@
+"use client";
+
+import {
+  LayoutDashboard,
+  Settings,
+  FileText,
+  Briefcase,
+  Box,
+  ChevronRight,
+  User,
+  LogOut,
+  PieChart,
+  Lock,
+} from "lucide-react";
+import Image from "next/image";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  SidebarFooter,
+} from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { cn } from "@/lib/utils";
+
+const data = {
+  navMain: [
+    {
+      title: "Dashboard",
+      url: "/portal",
+      icon: LayoutDashboard,
+    },
+    {
+       title: "Quản lý Tin tức",
+       url: "/portal/cms/news",
+       icon: FileText,
+    },
+    {
+       title: "Quản lý Dự án",
+       url: "/portal/cms/projects",
+       icon: Briefcase,
+    },
+    {
+       title: "Quản lý Sản phẩm",
+       url: "/portal/cms/products",
+       icon: Box,
+    },
+    {
+       title: "Báo cáo & Thống kê",
+       url: "/portal/reports",
+       icon: PieChart,
+    },
+    {
+      title: "Cài đặt hệ thống",
+      url: "/portal/settings",
+      icon: Settings,
+    },
+  ],
+  user: {
+    name: "Quản trị viên",
+    email: "admin@saigonvalve.vn",
+    avatar: "AD",
+  },
+};
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
+
+  return (
+    <Sidebar 
+      collapsible="icon" 
+      {...props} 
+      className="border-none bg-[#002d6b]"
+      style={{
+        "--sidebar-background": "#002d6b",
+        "--sidebar-foreground": "white",
+        "--sidebar-primary": "white",
+        "--sidebar-primary-foreground": "#002d6b",
+        "--sidebar-accent": "rgba(255, 255, 255, 0.08)",
+        "--sidebar-accent-foreground": "white",
+        "--sidebar-border": "rgba(255, 255, 255, 0.05)",
+        "--sidebar-ring": "#fbbf24",
+      } as React.CSSProperties}
+    >
+      <SidebarHeader className="h-16 border-b border-white/5 flex items-center justify-start px-4 bg-[#002d6b] shrink-0 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+        <Link href="/portal" className="flex items-center gap-3 group/logo relative w-full h-full justify-center px-1 group-data-[collapsible=icon]:px-0!">
+           <div className="relative flex items-center gap-3 group-data-[collapsible=icon]:hidden w-full px-1">
+                 <div className="bg-white p-1 rounded-none flex items-center justify-center h-8 w-8 shrink-0">
+                    <Image
+                      src="https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png"
+                      alt="Logo"
+                      width={22}
+                      height={22}
+                      className="object-contain"
+                    />
+                 </div>
+                 <span className="text-[11px] font-black tracking-tighter leading-none text-white whitespace-nowrap uppercase">SÀI GÒN VALVE</span>
+           </div>
+           <div className="hidden group-data-[collapsible=icon]:flex h-8 w-8 items-center justify-center rounded-none bg-white p-1 shrink-0">
+              <Image
+                src="https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png"
+                alt="Logo"
+                width={20}
+                height={20}
+                className="object-contain"
+              />
+           </div>
+        </Link>
+      </SidebarHeader>
+      
+      <SidebarContent className="scrollbar-hide bg-[#002d6b] py-2 overflow-x-hidden">
+        <SidebarGroup className="p-0">
+          <SidebarMenu className="gap-0 group-data-[collapsible=icon]:items-center">
+            {data.navMain.map((item) => {
+              const isActive = item.url === "/portal" ? pathname === "/portal" : pathname.startsWith(item.url);
+              return (
+                <SidebarMenuItem key={item.title} className="w-full flex justify-center">
+                  <SidebarMenuButton 
+                    asChild 
+                    tooltip={item.title} 
+                    className={cn(
+                      "text-[10px] font-black py-3 px-4 transition-all duration-200 uppercase tracking-widest rounded-none h-auto group-data-[collapsible=icon]:px-0! group-data-[collapsible=icon]:justify-center",
+                      isActive 
+                        ? "bg-white text-[#002d6b] hover:bg-white hover:text-[#002d6b]" 
+                        : "text-white/70 hover:bg-white/5 hover:text-white"
+                    )}
+                  >
+                    <Link href={item.url} className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center!">
+                      <div className="flex items-center justify-center shrink-0 size-5">
+                        {item.icon && <item.icon className={cn("size-4", isActive ? "text-[#002d6b]" : "text-[#fbbf24]")} />}
+                      </div>
+                      <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter className="p-0 bg-[#002d6b] gap-0 border-t border-white/5 shrink-0 overflow-hidden flex flex-col group-data-[collapsible=icon]:items-center">
+        <DropdownMenu>
+           <DropdownMenuTrigger asChild>
+              <SidebarMenuButton
+                size="lg"
+                className="w-full h-14 items-center gap-3 px-4 bg-[#001d4a] hover:bg-[#001d4a] text-white rounded-none group-data-[collapsible=icon]:px-0! group-data-[collapsible=icon]:justify-center cursor-pointer"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-none bg-[#fbbf24] text-[10px] font-black text-[#002d6b] shrink-0">
+                  {data.user.avatar}
+                </div>
+                <div className="flex flex-col items-start leading-none group-data-[collapsible=icon]:hidden overflow-hidden ms-1">
+                  <span className="text-[10px] font-black uppercase tracking-tight truncate w-full">{data.user.name}</span>
+                  <span className="text-[8px] font-medium text-white/30 lowercase mt-0.5 truncate w-full">{data.user.email}</span>
+                </div>
+                <ChevronRight className="ml-auto size-3 text-white/20 group-data-[collapsible=icon]:hidden" />
+              </SidebarMenuButton>
+           </DropdownMenuTrigger>
+           <DropdownMenuContent
+             side="right"
+             align="end"
+             className="w-52 p-0 rounded-none border-none bg-[#011c42] text-white shadow-2xl ml-2"
+           >
+              <DropdownMenuLabel className="px-5 py-3 bg-[#001d4a]/80">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Tài khoản</p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-white/5 m-0" />
+              <DropdownMenuItem className="px-5 py-3 focus:bg-white/10 focus:text-white cursor-pointer rounded-none group border-none outline-none">
+                <User className="size-4 text-[#fbbf24] mr-3" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Hồ sơ</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="px-5 py-3 focus:bg-white/10 focus:text-white cursor-pointer rounded-none group border-none outline-none">
+                <Lock className="size-4 text-[#fbbf24] mr-3" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Bảo mật</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/5 m-0" />
+              <DropdownMenuItem className="px-5 py-3 focus:bg-rose-500/10 focus:text-rose-500 text-rose-500 cursor-pointer rounded-none group border-none outline-none">
+                <LogOut className="size-4 mr-3" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Đăng xuất</span>
+              </DropdownMenuItem>
+           </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarFooter>
+
+      <SidebarRail className="bg-white/5 opacity-0 hover:opacity-100 transition-opacity" />
+    </Sidebar>
+  );
+}
+

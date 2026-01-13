@@ -4,9 +4,6 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import ApiProvider from "@/components/providers/api-provider";
 import { Toaster } from "@/components/ui/sonner";
-import TopBar from "@/components/layout/TopBar";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,12 +34,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ApiProvider>
-            <TopBar />
-            <Header />
-            <main className="relative flex min-h-screen flex-col">
-              {children}
-            </main>
-            <Footer />
+            {children}
             <Toaster />
           </ApiProvider>
         </ThemeProvider>

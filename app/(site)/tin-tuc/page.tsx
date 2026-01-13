@@ -29,89 +29,7 @@ import {
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 
-const NEWS_LIST = [
-  {
-    id: 1,
-    title: "Thiết bị thu nhận và truyền dữ liệu DATALOGGER SV1-DAQ",
-    desc: "SV1-DAQ là thiết bị thu nhận và truyền dữ liệu thông minh, được thiết kế đặc biệt cho các hệ thống giám sát môi trường, ngành nước và hạ tầng kỹ thuật, ứng dụng mạng 4G/LTE.",
-    date: "24/06/2025",
-    image: "https://saigonvalve.vn/uploads/files/2025/06/24/thumbs/datalogger-1-636x417-5.png",
-    category: "CÔNG NGHỆ",
-    author: "Admin",
-    readTime: "5 phút",
-    featured: true,
-  },
-  {
-    id: 2,
-    title: "HỆ THỐNG QUAN TRẮC CHẤT LƯỢNG NƯỚC TỰ ĐỘNG",
-    desc: "Giải pháp tích hợp các thiết bị đo lường, truyền thông và phần mềm điều khiển nhằm giám sát liên tục và tự động các chỉ số nước tại hiện trường một cách chính xác nhất.",
-    date: "24/06/2025",
-    image: "https://saigonvalve.vn/uploads/files/2025/06/24/thumbs/495616963_642796365424897_6462862703532989991_n-306x234-5.jpg",
-    category: "DỰ ÁN",
-    author: "Kỹ sư SGV",
-    readTime: "8 phút",
-  },
-  {
-    id: 3,
-    title: "Delta Group lập cú đúp danh hiệu 2025: Top 50 doanh nghiệp xuất sắc",
-    desc: "Khẳng định vị thế dẫn đầu trong lĩnh vực xây dựng và hạ tầng tại Việt Nam với những dự án trọng điểm quốc gia.",
-    date: "20/06/2025",
-    image: "https://saigonvalve.vn/uploads/files/2024/06/12/Blue-and-White-Clean-Modern-Technology-Conference-Zoom-Virtual-Background-2-.png",
-    category: "CÔNG TY",
-    author: "Ban Truyền Thông",
-    readTime: "3 phút",
-  },
-  {
-    id: 4,
-    title: "Xu hướng tự động hóa trong ngành nước năm 2025",
-    desc: "Tìm hiểu về các công nghệ mới nhất đang thay đổi cách chúng ta quản lý tài nguyên nước bền vững.",
-    date: "15/06/2025",
-    image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=800",
-    category: "CÔNG NGHỆ",
-    author: "Admin",
-    readTime: "6 phút",
-  },
-  {
-    id: 5,
-    title: "SGV ký kết hợp tác chiến lược với đối tác Nhật Bản",
-    desc: "Mở rộng mạng lưới phân phối và chuyển giao công nghệ van bướm cao cấp đạt chuẩn quốc tế.",
-    date: "10/06/2025",
-    image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&q=80&w=800",
-    category: "HỢP TÁC",
-    author: "Ban Lãnh Đạo",
-    readTime: "4 phút",
-  },
-  {
-    id: 6,
-    title: "Hướng dẫn bảo trì van công nghiệp định kỳ",
-    desc: "Quy trình chuẩn giúp kéo dài tuổi thọ thiết bị và đảm bảo an toàn vận hành hệ thống.",
-    date: "05/06/2025",
-    image: "https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?auto=format&fit=crop&q=80&w=800",
-    category: "KỸ THUẬT",
-    author: "Kỹ sư SGV",
-    readTime: "10 phút",
-  },
-  {
-    id: 7,
-    title: "Cảm biến áp suất SV-Press: Độ chính xác vượt trội",
-    desc: "Thế hệ cảm biến mới tích hợp công nghệ bù nhiệt giúp đo lường ổn định trong mọi môi trường.",
-    date: "01/06/2025",
-    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc51?auto=format&fit=crop&q=80&w=800",
-    category: "SẢN PHẨM",
-    author: "Phòng R&D",
-    readTime: "5 phút",
-  },
-  {
-    id: 8,
-    title: "SGV tham gia triển lãm VietWater 2025",
-    desc: "Giới thiệu bộ giải pháp trọn gói từ thiết bị đến phần mềm quản lý mạng lưới cấp nước thông minh.",
-    date: "28/05/2025",
-    image: "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?auto=format&fit=crop&q=80&w=800",
-    category: "SỰ KIỆN",
-    author: "Phòng Marketing",
-    readTime: "2 phút",
-  },
-];
+import { NEWS_LIST } from "@/lib/news";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -153,51 +71,7 @@ export default function NewsPage() {
         </div>
       </section>
 
-      {/* Featured News */}
-      <section className="py-20 bg-slate-50 border-b border-slate-100">
-        <div className="container mx-auto px-4 lg:px-8">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden bg-white shadow-2xl rounded-sm border border-slate-100 group"
-          >
-            <div className="relative aspect-video lg:aspect-auto h-full overflow-hidden">
-              <Image
-                src={featuredNews.image}
-                alt={featuredNews.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-1000"
-              />
-              <div className="absolute top-8 left-8">
-                <span className="bg-brand-primary px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-xl backdrop-blur-sm bg-opacity-90">
-                  {featuredNews.category}
-                </span>
-              </div>
-            </div>
-            <div className="p-12 lg:p-20 flex flex-col justify-center space-y-8 bg-white relative">
-              <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-brand-primary/60">
-                <span className="flex items-center gap-2"><CalendarDays size={14} /> {featuredNews.date}</span>
-                <span className="flex items-center gap-2"><User size={14} /> {featuredNews.author}</span>
-              </div>
-              <h2 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight uppercase leading-tight group-hover:text-brand-primary transition-colors">
-                <Link href={`/tin-tuc/${featuredNews.id}`}>{featuredNews.title}</Link>
-              </h2>
-              <p className="text-xl text-muted-foreground font-medium leading-relaxed italic border-l-8 border-brand-primary/20 pl-8">
-                {featuredNews.desc}
-              </p>
-              <div className="pt-6">
-                <Link 
-                  href={`/tin-tuc/${featuredNews.id}`}
-                  className="inline-flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-900 group/btn"
-                >
-                  ĐỌC CHI TIẾT <ArrowRight size={20} className="transition-transform group-hover/btn:translate-x-3 text-brand-primary" />
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+
 
       {/* News Grid */}
       <section className="py-24">
