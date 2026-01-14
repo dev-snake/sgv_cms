@@ -24,7 +24,6 @@ export async function GET(
 
     return apiResponse(product);
   } catch (error) {
-    console.error("Error fetching product:", error);
     return apiError("Internal Server Error", 500);
   }
 }
