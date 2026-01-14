@@ -27,6 +27,7 @@ export interface Product {
   price: string;
   stock: string;
   image: string;
+  image_url?: string;
   sku: string;
 }
 
@@ -40,6 +41,7 @@ export interface Project {
   category_id: string;
   category?: string;
   image: string;
+  image_url?: string;
   status: "ongoing" | "completed";
 }
 

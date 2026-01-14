@@ -31,6 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
+import { TablePagination } from "@/components/portal/table-pagination";
 import { PORTAL_ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 
@@ -40,12 +41,25 @@ export default function ProjectsManagementPage() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [itemToDelete, setItemToDelete] = React.useState<Project | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
-  const fetchProjects = async () => {
+  // Pagination state
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
+  const [totalItems, setTotalItems] = React.useState(0);
+
+  const fetchProjects = async (page: number = 1, limit: number = 10) => {
     setIsLoading(true);
     try {
-      const res = await api.get("/api/projects");
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+      });
+      const res = await api.get(`/api/projects?${params.toString()}`);
       setProjectsList(res.data.data || []);
+      if (res.data.meta) {
+        setTotalItems(res.data.meta.total || 0);
+      }
     } catch (error) {
       console.error(error);
       toast.error("Không thể tải danh sách dự án");
@@ -55,8 +69,8 @@ export default function ProjectsManagementPage() {
   };
 
   React.useEffect(() => {
-    fetchProjects();
-  }, []);
+    fetchProjects(currentPage, pageSize);
+  }, [currentPage, pageSize]);
 
   const filteredProjects = projectsList.filter(project => 
     project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -72,15 +86,16 @@ export default function ProjectsManagementPage() {
   const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
     
+    setIsDeleting(true);
     try {
       await api.delete(`/api/projects/${itemToDelete.id}`);
-      
       toast.success("Đã xóa dự án thành công");
-      setProjectsList(projectsList.filter(p => p.id !== itemToDelete.id));
+      fetchProjects(currentPage, pageSize);
     } catch (error) {
       console.error(error);
       toast.error("Lỗi khi xóa dự án");
     } finally {
+      setIsDeleting(false);
       setDeleteDialogOpen(false);
       setItemToDelete(null);
     }
@@ -180,8 +195,8 @@ export default function ProjectsManagementPage() {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-6">
                          <div className="relative h-16 w-24 rounded-none overflow-hidden shrink-0 border border-slate-100 transition-transform group-hover:scale-105 bg-slate-100">
-                            {project.image ? (
-                              <Image src={project.image} alt={project.name} fill className="object-cover" />
+                            {project.image_url ? (
+                              <Image src={project.image_url} alt={project.name} fill className="object-cover" />
                             ) : (
                               <div className="flex items-center justify-center h-full w-full text-slate-300">
                                 <Layout size={20} />
@@ -259,14 +274,18 @@ export default function ProjectsManagementPage() {
         )}
 
         {/* Pagination Footer */}
-        {!isLoading && projectsList.length > 0 && (
-          <div className="p-8 bg-slate-50/20 border-t border-slate-50 flex items-center justify-between">
-             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Đang hiển thị {filteredProjects.length} dự án trên tổng số {projectsList.length}</p>
-             <div className="flex items-center gap-3">
-                <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-none">Trước</Button>
-                <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-none">Sau</Button>
-             </div>
-          </div>
+        {!isLoading && totalItems > 0 && (
+          <TablePagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setCurrentPage(1);
+            }}
+            itemLabel="dự án"
+          />
         )}
       </div>
 
@@ -278,6 +297,8 @@ export default function ProjectsManagementPage() {
         title="Xóa dự án"
         description="Dự án sẽ bị xóa vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác."
         itemName={itemToDelete?.name}
+        itemLabel="Dự án"
+        loading={isDeleting}
       />
     </div>
   );

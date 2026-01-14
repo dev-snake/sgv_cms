@@ -30,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
+import { TablePagination } from "@/components/portal/table-pagination";
 import { PORTAL_ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 
@@ -39,12 +40,25 @@ export default function ProductsManagementPage() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [itemToDelete, setItemToDelete] = React.useState<Product | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
-  const fetchProducts = async () => {
+  // Pagination state
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
+  const [totalItems, setTotalItems] = React.useState(0);
+
+  const fetchProducts = async (page: number = 1, limit: number = 10) => {
     setIsLoading(true);
     try {
-      const res = await api.get("/api/products");
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+      });
+      const res = await api.get(`/api/products?${params.toString()}`);
       setProductsList(res.data.data || []);
+      if (res.data.meta) {
+        setTotalItems(res.data.meta.total || 0);
+      }
     } catch (error) {
       console.error(error);
       toast.error("Không thể tải danh sách sản phẩm");
@@ -54,8 +68,8 @@ export default function ProductsManagementPage() {
   };
 
   React.useEffect(() => {
-    fetchProducts();
-  }, []);
+    fetchProducts(currentPage, pageSize);
+  }, [currentPage, pageSize]);
 
   const filteredProducts = productsList.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -71,15 +85,16 @@ export default function ProductsManagementPage() {
   const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
     
+    setIsDeleting(true);
     try {
       await api.delete(`/api/products/${itemToDelete.id}`);
-      
       toast.success("Đã xóa sản phẩm thành công");
-      setProductsList(productsList.filter(p => p.id !== itemToDelete.id));
+      fetchProducts(currentPage, pageSize);
     } catch (error) {
       console.error(error);
       toast.error("Lỗi khi xóa sản phẩm");
     } finally {
+      setIsDeleting(false);
       setDeleteDialogOpen(false);
       setItemToDelete(null);
     }
@@ -174,8 +189,8 @@ export default function ProductsManagementPage() {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-6">
                          <div className="relative h-16 w-24 rounded-none overflow-hidden shrink-0 border border-slate-100 transition-transform group-hover:scale-105 bg-slate-100">
-                            {product.image ? (
-                              <Image src={product.image} alt={product.name} fill className="object-cover" />
+                            {product.image_url ? (
+                              <Image src={product.image_url} alt={product.name} fill className="object-cover" />
                             ) : (
                               <div className="flex items-center justify-center h-full w-full text-slate-300">
                                 <Package size={20} />
@@ -247,14 +262,18 @@ export default function ProductsManagementPage() {
         )}
 
         {/* Pagination Footer */}
-        {!isLoading && productsList.length > 0 && (
-          <div className="p-8 bg-slate-50/20 border-t border-slate-50 flex items-center justify-between">
-             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Đang hiển thị {filteredProducts.length} sản phẩm trên tổng số {productsList.length}</p>
-             <div className="flex items-center gap-3">
-                <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-none">Trước</Button>
-                <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-none">Sau</Button>
-             </div>
-          </div>
+        {!isLoading && totalItems > 0 && (
+          <TablePagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setCurrentPage(1);
+            }}
+            itemLabel="sản phẩm"
+          />
         )}
       </div>
 
@@ -265,6 +284,8 @@ export default function ProductsManagementPage() {
         title="Xóa sản phẩm"
         description="Sản phẩm sẽ bị xóa vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác."
         itemName={itemToDelete?.name}
+        itemLabel="Sản phẩm"
+        loading={isDeleting}
       />
     </div>
   );
