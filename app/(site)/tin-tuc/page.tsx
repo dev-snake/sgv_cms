@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 
-import { NEWS_LIST } from "@/lib/news";
+import { NEWS_LIST } from "@/data/news";
 
 const ITEMS_PER_PAGE = 6;
 

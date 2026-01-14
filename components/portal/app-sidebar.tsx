@@ -33,10 +33,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import api from "@/lib/axios";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
-import { PORTAL_ROUTES } from "@/lib/portal-routes";
+import { PORTAL_ROUTES } from "@/constants/routes";
 
 const data = {
   navMain: [
@@ -75,6 +77,19 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/api/auth/logout");
+      toast.success("Đã đăng xuất");
+      router.push("/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout failed", error);
+      toast.error("Lỗi khi đăng xuất");
+    }
+  };
 
   return (
     <Sidebar 
@@ -184,7 +199,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <span className="text-[10px] font-black uppercase tracking-widest">Bảo mật</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/5 m-0" />
-              <DropdownMenuItem className="px-5 py-3 focus:bg-rose-500/10 focus:text-rose-500 text-rose-500 cursor-pointer rounded-none group border-none outline-none">
+              <DropdownMenuItem 
+                onSelect={handleLogout}
+                className="px-5 py-3 focus:bg-rose-500/10 focus:text-rose-500 text-rose-500 cursor-pointer rounded-none group border-none outline-none"
+              >
                 <LogOut className="size-4 mr-3" />
                 <span className="text-[10px] font-black uppercase tracking-widest">Đăng xuất</span>
               </DropdownMenuItem>

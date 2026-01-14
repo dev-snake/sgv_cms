@@ -1,0 +1,55 @@
+import { db } from "@/db";
+import { categories, categoryTypes } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { apiResponse, apiError } from "@/lib/api-response";
+
+// GET /api/categories - List all categories
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type"); // e.g., 'news', 'product', 'project'
+
+    let query = db.select({
+      id: categories.id,
+      name: categories.name,
+      category_type_id: categories.category_type_id,
+      type: categoryTypes.name,
+    })
+    .from(categories)
+    .innerJoin(categoryTypes, eq(categories.category_type_id, categoryTypes.id));
+
+    if (type) {
+      // Filter by type name
+      const results = await query.where(eq(categoryTypes.name, type));
+      return apiResponse(results);
+    }
+
+    const results = await query;
+    return apiResponse(results);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return apiError("Internal Server Error", 500);
+  }
+}
+
+// POST /api/categories - Create a new category
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { name, category_type_id } = body;
+
+    if (!name || !category_type_id) {
+      return apiError("Missing required fields", 400);
+    }
+
+    const [newCategory] = await db.insert(categories).values({
+      name,
+      category_type_id,
+    }).returning();
+
+    return apiResponse(newCategory, { status: 201 });
+  } catch (error) {
+    console.error("Error creating category:", error);
+    return apiError("Internal Server Error", 500);
+  }
+}

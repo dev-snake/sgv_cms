@@ -2,11 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, ImagePlus, Package } from "lucide-react";
+import { useRouter } from "next/navigation";
+import api from "@/lib/axios";
+import { ArrowLeft, Save, Package, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/portal/rich-text-editor";
 import {
   Select,
   SelectContent,
@@ -14,38 +16,84 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PORTAL_ROUTES } from "@/lib/portal-routes";
+import { PORTAL_ROUTES } from "@/constants/routes";
+import { StatusFormSection } from "@/components/portal/status-form-section";
+import { toast } from "sonner";
 
-const PRODUCT_CATEGORIES = [
-  "Van bướm",
-  "Van cổng",
-  "Van cầu",
-  "Van điều khiển",
-  "Van một chiều",
-  "Thiết bị IoT",
-  "Phụ kiện",
-];
-
-const PRODUCT_STATUSES = [
-  { value: "available", label: "Sẵn có" },
-  { value: "out_of_stock", label: "Hết hàng" },
-  { value: "discontinued", label: "Ngừng kinh doanh" },
-];
+interface Category {
+  id: string;
+  name: string;
+}
 
 export default function AddProductPage() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [categories, setCategories] = React.useState<Category[]>([]);
+  
   const [formData, setFormData] = React.useState({
     name: "",
-    sku: "",
+    slug: "",
     description: "",
-    category: "",
-    status: "available",
+    price: "0",
+    sku: "",
+    stock: "0",
+    category_id: "",
+    status: "active" as "active" | "inactive",
     image: "",
-    specifications: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/api/categories?type=product");
+        setCategories(res.data);
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+        toast.error("Không thể tải danh mục sản phẩm");
+      }
+    };
+    
+    fetchCategories();
+  }, []);
+
+  const handleNameChange = (name: string) => {
+    const slug = name
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[đĐ]/g, "d")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+    
+    setFormData((prev) => ({ 
+      ...prev, 
+      name, 
+      slug: prev.slug === "" || prev.slug === prev.name.toLowerCase().replace(/\s+/g, "-") ? slug : prev.slug,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting:", formData);
+    if (!formData.category_id) {
+      toast.error("Vui lòng chọn danh mục");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await api.post("/api/products", formData);
+
+      toast.success("Đã tạo sản phẩm thành công");
+      router.push(PORTAL_ROUTES.cms.products.list);
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.error || error.message || "Lỗi khi tạo sản phẩm";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -59,15 +107,26 @@ export default function AddProductPage() {
           </Link>
           <div>
             <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Thêm sản phẩm mới</h1>
-            <p className="text-slate-500 font-medium italic mt-2 text-sm">Thêm sản phẩm mới vào danh mục catalog.</p>
+            <p className="text-slate-500 font-medium italic mt-2 text-sm">Thêm sản phẩm mới vào danh mục catalog với chuẩn dữ liệu database.</p>
           </div>
         </div>
-        <Button onClick={handleSubmit} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
-          <Save className="mr-2 size-4" /> Lưu sản phẩm
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 rounded-none text-slate-500"
+            onClick={() => router.back()}
+            disabled={isSubmitting}
+          >
+            Hủy bỏ
+          </Button>
+          <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+            {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />} 
+            Lưu sản phẩm
+          </Button>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -78,82 +137,107 @@ export default function AddProductPage() {
                 <Input
                   id="name"
                   placeholder="Nhập tên sản phẩm..."
-                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300"
+                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => handleNameChange(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-3">
                 <Label htmlFor="sku" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  <Package size={12} className="inline mr-1" /> Mã SKU *
+                  <Package size={12} className="inline mr-1" /> Mã SKU
                 </Label>
                 <Input
                   id="sku"
                   placeholder="VD: SGV-BV-001"
-                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300"
+                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20"
                   value={formData.sku}
                   onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="price" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Giá bán (VNĐ) *
+                </Label>
+                <Input
+                  id="price"
+                  type="number"
+                  placeholder="0"
+                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   required
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="stock" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Số lượng tồn kho *
+                </Label>
+                <Input
+                  id="stock"
+                  type="number"
+                  placeholder="0"
+                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20"
+                  value={formData.stock}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="slug" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Slug (URL) *</Label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-sm font-medium">/</span>
+                <Input 
+                  id="slug" 
+                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none pl-6 focus-visible:ring-brand-primary/20" 
+                  value={formData.slug} 
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })} 
+                  required 
                 />
               </div>
             </div>
 
             <div className="space-y-3">
               <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                Mô tả sản phẩm
+                Mô tả sản phẩm *
               </Label>
-              <Textarea
-                id="description"
+              <RichTextEditor
+                content={formData.description}
+                onChange={(content: string) => setFormData({ ...formData, description: content })}
                 placeholder="Mô tả chi tiết về sản phẩm..."
-                className="min-h-[150px] bg-slate-50 border-none text-sm font-medium rounded-none placeholder:text-slate-300"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="specifications" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                Thông số kỹ thuật
-              </Label>
-              <Textarea
-                id="specifications"
-                placeholder="Nhập thông số kỹ thuật (mỗi dòng một thông số)..."
-                className="min-h-[150px] bg-slate-50 border-none text-sm font-medium rounded-none placeholder:text-slate-300"
-                value={formData.specifications}
-                onChange={(e) => setFormData({ ...formData, specifications: e.target.value })}
               />
             </div>
           </div>
         </div>
 
         <div className="space-y-8">
+          <StatusFormSection 
+            isActive={formData.status === "active"}
+            onActiveChange={(isActive) => setFormData({ ...formData, status: isActive ? "active" : "inactive" })}
+            label="Trạng thái hiển thị"
+            description="Cho phép sản phẩm hiển thị trên website catalog."
+          />
+
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">
-              Phân loại
+              Phân loại sản phẩm
             </h3>
             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Danh mục *</Label>
-              <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold">
+              <Label htmlFor="category_id" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Danh mục *</Label>
+              <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
+                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold shadow-none focus:ring-1 focus:ring-brand-primary/20">
                   <SelectValue placeholder="Chọn danh mục" />
                 </SelectTrigger>
                 <SelectContent className="rounded-none border-slate-100">
-                  {PRODUCT_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat} className="text-sm font-bold rounded-none">{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Trạng thái *</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold">
-                  <SelectValue placeholder="Chọn trạng thái" />
-                </SelectTrigger>
-                <SelectContent className="rounded-none border-slate-100">
-                  {PRODUCT_STATUSES.map((s) => (
-                    <SelectItem key={s.value} value={s.value} className="text-sm font-bold rounded-none">{s.label}</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id} className="text-sm font-bold rounded-none">
+                      {cat.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -162,28 +246,18 @@ export default function AddProductPage() {
 
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">
-              Hình ảnh
+              Hình ảnh sản phẩm
             </h3>
             <div className="space-y-3">
-              <Label htmlFor="image" className="text-[10px] font-black uppercase tracking-widest text-slate-500">URL hình ảnh</Label>
+              <Label htmlFor="image" className="text-[10px] font-black uppercase tracking-widest text-slate-500">URL hình ảnh đại diện</Label>
               <Input
                 id="image"
-                placeholder="https://example.com/image.jpg"
+                placeholder="https://example.com/product.jpg"
                 className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300"
                 value={formData.image}
                 onChange={(e) => setFormData({ ...formData, image: e.target.value })}
               />
             </div>
-            {formData.image ? (
-              <div className="relative aspect-video bg-slate-100 overflow-hidden">
-                <img src={formData.image} alt="Preview" className="object-cover w-full h-full" />
-              </div>
-            ) : (
-              <div className="aspect-video bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-3 text-slate-300">
-                <ImagePlus size={32} />
-                <span className="text-[10px] font-black uppercase tracking-widest">Chưa có ảnh</span>
-              </div>
-            )}
           </div>
         </div>
       </form>

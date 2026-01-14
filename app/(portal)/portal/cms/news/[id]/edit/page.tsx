@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/portal/rich-text-editor";
 import {
   Select,
   SelectContent,
@@ -15,8 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { NEWS_LIST } from "@/lib/news";
-import { PORTAL_ROUTES } from "@/lib/portal-routes";
+import { NEWS_LIST } from "@/data/news";
+import { PORTAL_ROUTES } from "@/constants/routes";
+import { StatusFormSection } from "@/components/portal/status-form-section";
 
 const NEWS_CATEGORIES = [
   "Tin tức",
@@ -34,11 +36,13 @@ export default function EditNewsPage() {
 
   const [formData, setFormData] = React.useState({
     title: existingNews?.title || "",
-    desc: existingNews?.desc || "",
+    slug: existingNews?.title?.toLowerCase().replace(/\s+/g, "-") || "",
+    summary: existingNews?.summary || "",
     content: "",
-    category: existingNews?.category || "",
-    image: existingNews?.image || "",
-    author: existingNews?.author || "Admin",
+    category_id: "1",
+    author_id: "1",
+    status: "published" as "draft" | "published",
+    published_at: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -68,11 +72,11 @@ export default function EditNewsPage() {
           </Link>
           <div>
             <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Chỉnh sửa bài viết</h1>
-            <p className="text-slate-500 font-medium italic mt-2 text-sm">Cập nhật nội dung bài viết tin tức.</p>
+            <p className="text-slate-500 font-medium italic mt-2 text-sm">Cập nhật nội dung bài viết tin tức và chuẩn hóa dữ liệu.</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 rounded-none">
+          <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 rounded-none text-slate-500">
             Hủy thay đổi
           </Button>
           <Button onClick={handleSubmit} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
@@ -81,55 +85,73 @@ export default function EditNewsPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
             <div className="space-y-3">
               <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tiêu đề bài viết *</Label>
-              <Input id="title" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
+              <Input id="title" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
             </div>
+            
             <div className="space-y-3">
-              <Label htmlFor="desc" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Mô tả ngắn *</Label>
-              <Textarea id="desc" className="min-h-[100px] bg-slate-50 border-none text-sm font-medium rounded-none" value={formData.desc} onChange={(e) => setFormData({ ...formData, desc: e.target.value })} required />
+              <Label htmlFor="slug" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Slug (URL) *</Label>
+              <Input id="slug" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
             </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="summary" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Mô tả ngắn *</Label>
+              <Textarea id="summary" className="min-h-[100px] bg-slate-50 border-none text-sm font-medium rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.summary} onChange={(e) => setFormData({ ...formData, summary: e.target.value })} required />
+            </div>
+            
             <div className="space-y-3">
               <Label htmlFor="content" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Nội dung bài viết *</Label>
-              <Textarea id="content" className="min-h-[300px] bg-slate-50 border-none text-sm font-medium rounded-none" value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} required />
+              <RichTextEditor
+                content={formData.content}
+                onChange={(content: string) => setFormData({ ...formData, content })}
+                placeholder="Nhập nội dung chi tiết của bài viết..."
+              />
             </div>
           </div>
         </div>
 
         <div className="space-y-8">
+          <StatusFormSection 
+            isActive={formData.status === "published"}
+            onActiveChange={(isActive) => setFormData({ ...formData, status: isActive ? "published" : "draft" })}
+            label="Trạng thái xuất bản"
+            description="Cho phép bài viết hiển thị công khai trên website."
+          />
+
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">Thông tin bài viết</h3>
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">Phân loại & Tác giả</h3>
             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Danh mục *</Label>
-              <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold"><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
+              <Label htmlFor="category_id" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Danh mục *</Label>
+              <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
+                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold shadow-none focus:ring-1 focus:ring-brand-primary/20"><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
                 <SelectContent className="rounded-none border-slate-100">
-                  {NEWS_CATEGORIES.map((cat) => (<SelectItem key={cat} value={cat} className="text-sm font-bold rounded-none">{cat}</SelectItem>))}
+                  <SelectItem value="1" className="text-sm font-bold rounded-none">Tin tức chung</SelectItem>
+                  <SelectItem value="2" className="text-sm font-bold rounded-none">Sự kiện công ty</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-3">
-              <Label htmlFor="author" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tác giả</Label>
-              <Input id="author" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.author} onChange={(e) => setFormData({ ...formData, author: e.target.value })} />
+              <Label htmlFor="author_id" className="text-[10px] font-black uppercase tracking-widest text-slate-500">ID Tác giả *</Label>
+              <Input id="author_id" type="number" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20" value={formData.author_id} onChange={(e) => setFormData({ ...formData, author_id: e.target.value })} required />
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="published_at" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Ngày xuất bản</Label>
+              <Input id="published_at" type="datetime-local" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20" value={formData.published_at} onChange={(e) => setFormData({ ...formData, published_at: e.target.value })} />
             </div>
           </div>
-          <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">Ảnh đại diện</h3>
-            <div className="space-y-3">
-              <Label htmlFor="image" className="text-[10px] font-black uppercase tracking-widest text-slate-500">URL hình ảnh</Label>
-              <Input id="image" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} />
-            </div>
-            {formData.image ? (
-              <div className="relative aspect-video bg-slate-100 overflow-hidden"><img src={formData.image} alt="Preview" className="object-cover w-full h-full" /></div>
-            ) : (
-              <div className="aspect-video bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-3 text-slate-300"><ImagePlus size={32} /><span className="text-[10px] font-black uppercase tracking-widest">Chưa có ảnh</span></div>
-            )}
+
+          <div className="p-6 bg-brand-primary/5 border border-brand-primary/10">
+            <p className="text-[10px] text-slate-500 leading-relaxed italic">
+              Dữ liệu được chuẩn hóa theo cấu trúc database CMS.
+            </p>
           </div>
         </div>
       </form>
     </div>
   );
 }
+

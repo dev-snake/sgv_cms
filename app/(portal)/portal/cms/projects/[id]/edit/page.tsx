@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/portal/rich-text-editor";
 import {
   Select,
   SelectContent,
@@ -15,23 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PROJECTS } from "@/lib/projects";
-import { PORTAL_ROUTES } from "@/lib/portal-routes";
-
-const PROJECT_CATEGORIES = [
-  "Hệ thống SCADA",
-  "Trạm bơm",
-  "Xử lý nước thải",
-  "Cấp nước đô thị",
-  "Công nghiệp",
-  "Nông nghiệp",
-];
-
-const PROJECT_STATUSES = [
-  { value: "completed", label: "Đã hoàn thành" },
-  { value: "ongoing", label: "Đang triển khai" },
-  { value: "planning", label: "Đang lập kế hoạch" },
-];
+import { PROJECTS } from "@/data/projects";
+import { PORTAL_ROUTES } from "@/constants/routes";
+import { StatusFormSection } from "@/components/portal/status-form-section";
 
 export default function EditProjectPage() {
   const params = useParams();
@@ -41,10 +28,12 @@ export default function EditProjectPage() {
 
   const [formData, setFormData] = React.useState({
     name: existingProject?.name || "",
+    slug: existingProject?.name?.toLowerCase().replace(/\s+/g, "-") || "",
     description: "",
-    location: existingProject?.location || "",
-    year: existingProject?.year?.toString() || new Date().getFullYear().toString(),
-    category: existingProject?.category || "",
+    client_name: existingProject?.client_name || "",
+    start_date: existingProject?.start_date || "",
+    end_date: existingProject?.end_date || "",
+    category_id: existingProject?.category_id || "1",
     status: existingProject?.status || "ongoing",
     image: existingProject?.image || "",
   });
@@ -76,74 +65,97 @@ export default function EditProjectPage() {
           </Link>
           <div>
             <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Chỉnh sửa dự án</h1>
-            <p className="text-slate-500 font-medium italic mt-2 text-sm">Cập nhật thông tin dự án.</p>
+            <p className="text-slate-500 font-medium italic mt-2 text-sm">Cập nhật thông tin dự án và chuẩn hóa dữ liệu.</p>
           </div>
         </div>
-        <Button onClick={handleSubmit} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
-          <Save className="mr-2 size-4" /> Lưu thay đổi
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 rounded-none text-slate-500">
+            Hủy thay đổi
+          </Button>
+          <Button onClick={handleSubmit} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+            <Save className="mr-2 size-4" /> Lưu thay đổi
+          </Button>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
             <div className="space-y-3">
               <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tên dự án *</Label>
-              <Input id="name" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+              <Input id="name" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
             </div>
+
             <div className="space-y-3">
-              <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Mô tả dự án</Label>
-              <Textarea id="description" className="min-h-[200px] bg-slate-50 border-none text-sm font-medium rounded-none" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+              <Label htmlFor="slug" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Slug (URL) *</Label>
+              <Input id="slug" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
             </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Mô tả dự án *</Label>
+              <RichTextEditor
+                content={formData.description}
+                onChange={(content: string) => setFormData({ ...formData, description: content })}
+                placeholder="Mô tả chi tiết về dự án, phạm vi công việc..."
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="client_name" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tên khách hàng / Chủ đầu tư</Label>
+              <Input id="client_name" placeholder="Ví dụ: Tập đoàn ABC" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.client_name} onChange={(e) => setFormData({ ...formData, client_name: e.target.value })} />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <Label htmlFor="location" className="text-[10px] font-black uppercase tracking-widest text-slate-500"><MapPin size={12} className="inline mr-1" /> Địa điểm *</Label>
-                <Input id="location" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} required />
+                <Label htmlFor="start_date" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Ngày bắt đầu</Label>
+                <Input id="start_date" type="date" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} />
               </div>
               <div className="space-y-3">
-                <Label htmlFor="year" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Năm thực hiện *</Label>
-                <Input id="year" type="number" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.year} onChange={(e) => setFormData({ ...formData, year: e.target.value })} required />
+                <Label htmlFor="end_date" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Ngày kết thúc (Dự kiến)</Label>
+                <Input id="end_date" type="date" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20" value={formData.end_date} onChange={(e) => setFormData({ ...formData, end_date: e.target.value })} />
               </div>
             </div>
           </div>
         </div>
 
         <div className="space-y-8">
+          <StatusFormSection 
+            isActive={formData.status === "completed"}
+            onActiveChange={(isActive) => setFormData({ ...formData, status: isActive ? "completed" : "ongoing" })}
+            label="Trạng thái hoàn thành"
+            description="Đánh dấu dự án đã hoàn thành và bàn giao."
+          />
+
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">Phân loại</h3>
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">Phân loại dự án</h3>
             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Danh mục *</Label>
-              <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold"><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
+              <Label htmlFor="category_id" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Danh mục *</Label>
+              <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
+                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold shadow-none focus:ring-1 focus:ring-brand-primary/20"><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
                 <SelectContent className="rounded-none border-slate-100">
-                  {PROJECT_CATEGORIES.map((cat) => (<SelectItem key={cat} value={cat} className="text-sm font-bold rounded-none">{cat}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Trạng thái *</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as "completed" | "ongoing" | "planning" })}>
-                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold"><SelectValue placeholder="Chọn trạng thái" /></SelectTrigger>
-                <SelectContent className="rounded-none border-slate-100">
-                  {PROJECT_STATUSES.map((s) => (<SelectItem key={s.value} value={s.value} className="text-sm font-bold rounded-none">{s.label}</SelectItem>))}
+                  <SelectItem value="1" className="text-sm font-bold rounded-none">Hệ Thống Cấp Nước</SelectItem>
+                  <SelectItem value="2" className="text-sm font-bold rounded-none">Xử Lý Nước Thải</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
+
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">Hình ảnh</h3>
             <div className="space-y-3">
               <Label htmlFor="image" className="text-[10px] font-black uppercase tracking-widest text-slate-500">URL hình ảnh</Label>
-              <Input id="image" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} />
+              <Input id="image" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300" value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} />
             </div>
-            {formData.image ? (
-              <div className="relative aspect-video bg-slate-100 overflow-hidden"><img src={formData.image} alt="Preview" className="object-cover w-full h-full" /></div>
-            ) : (
-              <div className="aspect-video bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-3 text-slate-300"><ImagePlus size={32} /><span className="text-[10px] font-black uppercase tracking-widest">Chưa có ảnh</span></div>
-            )}
+          </div>
+
+          <div className="p-6 bg-brand-primary/5 border border-brand-primary/10">
+            <p className="text-[10px] text-slate-500 leading-relaxed italic">
+              Thông tin dự án được chuẩn hóa theo cấu trúc database CMS.
+            </p>
           </div>
         </div>
       </form>
     </div>
   );
 }
+

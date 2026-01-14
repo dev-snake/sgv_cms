@@ -2,11 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, ImagePlus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import api from "@/lib/axios";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/portal/rich-text-editor";
 import {
   Select,
   SelectContent,
@@ -14,30 +17,98 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PORTAL_ROUTES } from "@/lib/portal-routes";
+import { PORTAL_ROUTES } from "@/constants/routes";
+import { StatusFormSection } from "@/components/portal/status-form-section";
+import { toast } from "sonner";
 
-const NEWS_CATEGORIES = [
-  "Tin tức",
-  "Sự kiện",
-  "Kiến thức kỹ thuật",
-  "Thông báo",
-  "Khuyến mãi",
-];
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface Author {
+  id: string;
+  name: string;
+}
 
 export default function AddNewsPage() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [categories, setCategories] = React.useState<Category[]>([]);
+  const [authors, setAuthors] = React.useState<Author[]>([]);
+  
   const [formData, setFormData] = React.useState({
     title: "",
-    desc: "",
+    slug: "",
+    summary: "",
     content: "",
-    category: "",
-    image: "",
-    author: "Admin",
+    category_id: "",
+    author_id: "",
+    status: "draft" as "draft" | "published",
+    published_at: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [catsRes, authorsRes] = await Promise.all([
+          api.get("/api/categories?type=news"),
+          api.get("/api/authors")
+        ]);
+        
+        setCategories(catsRes.data);
+        const authorsData = authorsRes.data;
+        setAuthors(authorsData);
+        if (authorsData.length > 0) {
+          setFormData(prev => ({ ...prev, author_id: authorsData[0].id }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch form data", error);
+        toast.error("Không thể tải danh mục hoặc tác giả");
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+  const handleTitleChange = (title: string) => {
+    const slug = title
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[đĐ]/g, "d")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+    
+    setFormData((prev) => ({ 
+      ...prev, 
+      title, 
+      slug: prev.slug === "" || prev.slug === prev.title.toLowerCase().replace(/\s+/g, "-") ? slug : prev.slug,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement API call to save news
-    console.log("Submitting:", formData);
+    if (!formData.category_id || !formData.author_id) {
+      toast.error("Vui lòng chọn danh mục và tác giả");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await api.post("/api/news", formData);
+
+      toast.success("Đã tạo bài viết thành công");
+      router.push(PORTAL_ROUTES.cms.news.list);
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.error || error.message || "Lỗi khi tạo bài viết";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -51,21 +122,26 @@ export default function AddNewsPage() {
           </Link>
           <div>
             <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Thêm bài viết mới</h1>
-            <p className="text-slate-500 font-medium italic mt-2 text-sm">Tạo bài viết tin tức mới cho website Sài Gòn Valve.</p>
+            <p className="text-slate-500 font-medium italic mt-2 text-sm">Tạo bài viết tin tức mới với chuẩn dữ liệu chuyên nghiệp.</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 rounded-none">
-            Lưu nháp
+          <Button 
+            variant="outline" 
+            className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 rounded-none text-slate-500"
+            onClick={() => router.back()}
+            disabled={isSubmitting}
+          >
+            Hủy bỏ
           </Button>
-          <Button onClick={handleSubmit} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
-            <Save className="mr-2 size-4" /> Xuất bản
+          <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+            {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />} 
+            Xuất bản bài viết
           </Button>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
             <div className="space-y-3">
@@ -77,21 +153,35 @@ export default function AddNewsPage() {
                 placeholder="Nhập tiêu đề bài viết..."
                 className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) => handleTitleChange(e.target.value)}
                 required
               />
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="desc" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+              <Label htmlFor="slug" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Slug (URL) *</Label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-sm font-medium">/</span>
+                <Input 
+                  id="slug" 
+                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none pl-6 focus-visible:ring-brand-primary/20" 
+                  value={formData.slug} 
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })} 
+                  required 
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="summary" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
                 Mô tả ngắn *
               </Label>
               <Textarea
-                id="desc"
+                id="summary"
                 placeholder="Nhập mô tả ngắn cho bài viết (hiển thị trên danh sách)..."
                 className="min-h-[100px] bg-slate-50 border-none text-sm font-medium rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20"
-                value={formData.desc}
-                onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
+                value={formData.summary}
+                onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
                 required
               />
             </div>
@@ -100,37 +190,40 @@ export default function AddNewsPage() {
               <Label htmlFor="content" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
                 Nội dung bài viết *
               </Label>
-              <Textarea
-                id="content"
+              <RichTextEditor
+                content={formData.content}
+                onChange={(content: string) => setFormData({ ...formData, content })}
                 placeholder="Nhập nội dung chi tiết của bài viết..."
-                className="min-h-[300px] bg-slate-50 border-none text-sm font-medium rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20"
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                required
               />
             </div>
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-8">
+          <StatusFormSection 
+            isActive={formData.status === "published"}
+            onActiveChange={(isActive) => setFormData({ ...formData, status: isActive ? "published" : "draft" })}
+            label="Trạng thái xuất bản"
+            description="Cho phép bài viết hiển thị công khai trên website."
+          />
+
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">
-              Thông tin bài viết
+              Phân loại bài viết
             </h3>
 
             <div className="space-y-3">
-              <Label htmlFor="category" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+              <Label htmlFor="category_id" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
                 Danh mục *
               </Label>
-              <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold">
+              <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
+                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold shadow-none focus:ring-1 focus:ring-brand-primary/20">
                   <SelectValue placeholder="Chọn danh mục" />
                 </SelectTrigger>
                 <SelectContent className="rounded-none border-slate-100">
-                  {NEWS_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat} className="text-sm font-bold rounded-none">
-                      {cat}
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id} className="text-sm font-bold rounded-none">
+                      {cat.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -138,46 +231,35 @@ export default function AddNewsPage() {
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="author" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                Tác giả
+              <Label htmlFor="author_id" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Tác giả *
               </Label>
-              <Input
-                id="author"
-                className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none"
-                value={formData.author}
-                onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-              />
+              <Select value={formData.author_id} onValueChange={(value) => setFormData({ ...formData, author_id: value })}>
+                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold shadow-none focus:ring-1 focus:ring-brand-primary/20">
+                  <SelectValue placeholder="Chọn tác giả" />
+                </SelectTrigger>
+                <SelectContent className="rounded-none border-slate-100">
+                  {authors.map((author) => (
+                    <SelectItem key={author.id} value={author.id} className="text-sm font-bold rounded-none">
+                      {author.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </div>
-
-          <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">
-              Ảnh đại diện
-            </h3>
 
             <div className="space-y-3">
-              <Label htmlFor="image" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                URL hình ảnh
+              <Label htmlFor="published_at" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Ngày xuất bản
               </Label>
               <Input
-                id="image"
-                placeholder="https://example.com/image.jpg"
-                className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300"
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                id="published_at"
+                type="datetime-local"
+                className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20"
+                value={formData.published_at}
+                onChange={(e) => setFormData({ ...formData, published_at: e.target.value })}
               />
             </div>
-
-            {formData.image ? (
-              <div className="relative aspect-video bg-slate-100 overflow-hidden">
-                <img src={formData.image} alt="Preview" className="object-cover w-full h-full" />
-              </div>
-            ) : (
-              <div className="aspect-video bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-3 text-slate-300">
-                <ImagePlus size={32} />
-                <span className="text-[10px] font-black uppercase tracking-widest">Chưa có ảnh</span>
-              </div>
-            )}
           </div>
         </div>
       </form>

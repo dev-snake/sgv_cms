@@ -19,7 +19,7 @@ import {
   Printer
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { NEWS_LIST } from "@/lib/news";
+import { NEWS_LIST } from "@/data/news";
 import {
   Breadcrumb,
   BreadcrumbItem,

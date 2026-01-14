@@ -1,6 +1,7 @@
 "use client";
 
-import { NEWS_LIST, NewsArticle } from "@/lib/news";
+import { NEWS_LIST } from "@/data/news";
+import { NewsArticle } from "@/types";
 import { 
   ArrowLeft, 
   Save, 
@@ -19,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { RichTextEditor } from "@/components/portal/rich-text-editor";
 
 export default function NewsFormPage() {
   const params = useParams();
@@ -104,16 +106,11 @@ export default function NewsFormPage() {
                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
                       <FileText size={14} className="text-brand-primary" /> Nội dung bài viết (HTML)
                    </label>
-                   <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" className="h-8 px-3 text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-brand-primary">Mã nguồn</Button>
-                      <Button variant="ghost" size="sm" className="h-8 px-3 text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-brand-primary">Trực quan</Button>
-                   </div>
                 </div>
-                <textarea 
-                  value={formData.content}
-                  onChange={(e) => setFormData({...formData, content: e.target.value})}
-                  className="w-full min-h-[500px] p-8 text-sm font-medium text-slate-900 bg-slate-50/50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all rounded-sm font-mono leading-relaxed"
-                  placeholder="<p>BẮT ĐẦU VIẾT NỘI DUNG TẠI ĐÂY...</p>"
+                <RichTextEditor
+                   content={formData.content || ""}
+                   onChange={(content) => setFormData({...formData, content: content})}
+                   placeholder="Bắt đầu viết nội dung tại đây..."
                 />
              </div>
           </div>
