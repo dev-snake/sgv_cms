@@ -11,9 +11,9 @@ import {
   Trash2, 
   ShieldCheck,
   Loader2,
-  Mail
 } from "lucide-react";
 import * as React from "react";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -32,6 +33,8 @@ export default function UsersManagementPage() {
   const [users, setUsers] = React.useState<User[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [itemToDelete, setItemToDelete] = React.useState<User | null>(null);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -50,6 +53,26 @@ export default function UsersManagementPage() {
     fetchUsers();
   }, []);
 
+  const handleDeleteClick = (user: User) => {
+    setItemToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+    try {
+      await api.delete(`/api/users/${itemToDelete.id}`);
+      toast.success("Đã xóa tài khoản thành công");
+      setUsers(users.filter(u => u.id !== itemToDelete.id));
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi khi xóa tài khoản");
+    } finally {
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+    }
+  };
+
   const filteredUsers = users.filter(user => 
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
@@ -62,9 +85,11 @@ export default function UsersManagementPage() {
           <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Quản lý tài khoản</h1>
           <p className="text-slate-500 font-medium italic mt-2 text-sm">Quản lý danh sách quản trị viên và phân quyền truy cập hệ thống.</p>
         </div>
-        <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
-          <Plus className="mr-2 size-4" /> Tạo tài khoản mới
-        </Button>
+        <Link href="/portal/users/add">
+          <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+            <Plus className="mr-2 size-4" /> Tạo tài khoản mới
+          </Button>
+        </Link>
       </div>
 
       <div className="bg-white rounded-none border border-slate-100 overflow-hidden min-h-[500px]">
@@ -130,12 +155,17 @@ export default function UsersManagementPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-64 p-2 rounded-none border border-slate-100 bg-white">
-                          <DropdownMenuItem className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
-                             <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
-                             <span className="text-xs font-bold uppercase tracking-tight">Sửa thông tin</span>
+                          <DropdownMenuItem asChild className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
+                             <Link href={`/portal/users/${user.id}`} className="flex items-center gap-3 w-full">
+                               <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
+                               <span className="text-xs font-bold uppercase tracking-tight">Sửa thông tin</span>
+                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-slate-50" />
-                          <DropdownMenuItem className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-rose-50 group">
+                          <DropdownMenuItem 
+                            className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-rose-50 group"
+                            onClick={() => handleDeleteClick(user)}
+                          >
                              <Trash2 size={16} className="text-slate-400 group-hover:text-rose-600 transition-colors" />
                              <span className="text-xs font-bold uppercase tracking-tight text-rose-600">Xóa tài khoản</span>
                           </DropdownMenuItem>
@@ -154,6 +184,15 @@ export default function UsersManagementPage() {
           </div>
         )}
       </div>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Xóa tài khoản"
+        description="Tài khoản này sẽ bị xóa vĩnh viễn và không thể truy cập vào hệ thống nữa."
+        itemName={itemToDelete?.username}
+      />
     </div>
   );
 }
