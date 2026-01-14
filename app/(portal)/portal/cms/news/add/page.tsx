@@ -56,8 +56,8 @@ export default function AddNewsPage() {
           api.get("/api/authors")
         ]);
         
-        setCategories(catsRes.data);
-        const authorsData = authorsRes.data;
+        setCategories(catsRes.data.data || []);
+        const authorsData = authorsRes.data.data || [];
         setAuthors(authorsData);
         if (authorsData.length > 0) {
           setFormData(prev => ({ ...prev, author_id: authorsData[0].id }));

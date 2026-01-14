@@ -47,7 +47,7 @@ export default function AddProjectPage() {
     const fetchCategories = async () => {
       try {
         const res = await api.get("/api/categories?type=project");
-        setCategories(res.data);
+        setCategories(res.data.data || []);
       } catch (error) {
         console.error("Failed to fetch categories", error);
         toast.error("Không thể tải danh mục dự án");

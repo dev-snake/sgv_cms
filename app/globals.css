@@ -144,7 +144,7 @@
     background-color: #020617;
     background-repeat: repeat;
   }
-  
+
   .industrial-overlay {
     @apply absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent;
   }
@@ -160,4 +160,13 @@
 
 .btn-corporate {
   @apply px-8 py-3 bg-brand-primary text-white font-bold transition-all hover:bg-brand-secondary active:scale-[0.98] disabled:opacity-50;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

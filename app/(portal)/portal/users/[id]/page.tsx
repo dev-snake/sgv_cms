@@ -16,14 +16,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export default function EditUserPage() {
   const router = useRouter();
@@ -48,7 +42,7 @@ export default function EditUserPage() {
           username: user.username,
           password: "",
           full_name: user.full_name || "",
-          role: user.role,
+          role: user.role || "admin",
         });
       } catch (error) {
         console.error(error);
@@ -91,107 +85,119 @@ export default function EditUserPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[500px] space-y-4">
         <Loader2 size={48} className="animate-spin text-brand-primary opacity-20" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đang tải thông tin...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đang đồng bộ dữ liệu...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-10 max-w-4xl mx-auto">
+    <div className="space-y-12 pb-20">
       <div className="flex items-center gap-6">
         <Link href="/portal/users">
-          <Button variant="outline" className="h-14 w-14 p-0 border-slate-100 rounded-none hover:bg-slate-50">
+          <Button variant="outline" className="h-14 w-14 p-0 border-slate-100 rounded-none hover:bg-slate-50 transition-all active:scale-95">
             <ArrowLeft size={20} />
           </Button>
         </Link>
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Sửa tài khoản</h1>
-          <p className="text-slate-500 font-medium italic mt-2 text-sm">Cập nhật thông tin định danh và phân quyền tài khoản.</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Chỉnh sửa tài khoản</h1>
+          <p className="text-slate-500 font-medium italic mt-2 text-sm">Cập nhật thông tin định danh và bảo mật cho quản trị viên.</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white border border-slate-100 rounded-none overflow-hidden">
-        <div className="p-10 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <UserIcon size={12} className="text-brand-primary" /> Username <span className="text-rose-500">*</span>
-              </Label>
-              <Input 
-                placeholder="VD: NGUYENVANA"
-                className="h-14 bg-slate-50 border-none text-xs font-bold uppercase tracking-widest focus:ring-1 focus:ring-brand-primary/20 rounded-none"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value.toUpperCase() })}
-                disabled={isSubmitting}
-              />
-            </div>
-            <div className="space-y-4">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <Lock size={12} className="text-brand-primary" /> Mật khẩu mới
-              </Label>
-              <Input 
-                type="password"
-                placeholder="ĐỂ TRỐNG NẾU KHÔNG MUỐN ĐỔI"
-                className="h-14 bg-slate-50 border-none text-xs font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20 placeholder:text-[9px]"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                disabled={isSubmitting}
-              />
-              <div className="flex items-center gap-2 text-[9px] text-slate-400 italic">
-                <AlertCircle size={10} />
-                Chỉ nhập nếu bạn muốn thay đổi mật khẩu hiện tại.
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-7">
+          <form onSubmit={handleSubmit} className="bg-white p-10 border-l-4 border-l-fbbf24 shadow-[20px_20px_60px_-15px_rgba(0,0,0,0.03)] space-y-10 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-fbbf24/5 -mr-16 -mt-16 rounded-full group-hover:scale-110 transition-transform duration-1000"></div>
+            
+            <div className="space-y-8 relative">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                    <UserIcon size={12} className="text-[#002d6b]" /> Username <span className="text-rose-500">*</span>
+                  </Label>
+                  <Input 
+                    placeholder="VD: NGUYENVANA"
+                    className="h-16 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-fbbf24/20 rounded-none transition-all"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value.toUpperCase() })}
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                    <Lock size={12} className="text-[#002d6b]" /> Mật khẩu mới
+                  </Label>
+                  <Input 
+                    type="password"
+                    placeholder="ĐỂ TRỐNG NẾU KHÔNG ĐỔI"
+                    className="h-16 bg-slate-50 border-none text-xs font-bold rounded-none focus:ring-2 focus:ring-fbbf24/20 transition-all placeholder:text-[9px] placeholder:italic"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Họ và tên hiển thị</Label>
+                <Input 
+                  placeholder="VD: NGUYỄN VĂN A"
+                  className="h-16 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-fbbf24/20 rounded-none transition-all"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="pt-6 border-t border-slate-50">
+                 <div className="flex items-start gap-4 p-5 bg-fbbf24/5 border-l-2 border-l-fbbf24">
+                    <Shield size={20} className="text-[#002d6b] shrink-0 mt-1" />
+                    <div className="space-y-1">
+                       <p className="text-[10px] font-black uppercase tracking-widest text-[#002d6b]">Cấp độ: Toàn quyền hệ thống</p>
+                       <p className="text-[11px] text-slate-500 font-medium leading-relaxed italic">Tài khoản này được định danh là Admin cấp cao nhất.</p>
+                    </div>
+                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Họ và tên</Label>
-              <Input 
-                placeholder="VD: NGUYỄN VĂN A"
-                className="h-14 bg-slate-50 border-none text-xs font-bold uppercase tracking-widest focus:ring-1 focus:ring-brand-primary/20 rounded-none"
-                value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                disabled={isSubmitting}
-              />
-            </div>
-            <div className="space-y-4">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <Shield size={12} className="text-brand-primary" /> Vai trò
-              </Label>
-              <Select 
-                value={formData.role} 
-                onValueChange={(val) => setFormData({ ...formData, role: val })}
+            <div className="pt-4">
+              <Button 
+                type="submit" 
+                className="w-full md:w-auto bg-[#002d6b] hover:bg-brand-primary text-[10px] font-black uppercase tracking-[0.2em] px-16 py-8 h-auto shadow-2xl shadow-brand-primary/20 transition-all rounded-none hover:-translate-y-1 active:scale-95"
                 disabled={isSubmitting}
               >
-                <SelectTrigger className="h-14 bg-slate-50 border-none text-xs font-bold uppercase tracking-widest rounded-none focus:ring-1 focus:ring-brand-primary/20">
-                  <SelectValue placeholder="Chọn vai trò" />
-                </SelectTrigger>
-                <SelectContent className="rounded-none border-slate-100">
-                  <SelectItem value="admin" className="text-xs font-bold uppercase tracking-tight focus:bg-brand-primary/5 focus:text-brand-primary rounded-none">Admin (Toàn quyền)</SelectItem>
-                  <SelectItem value="editor" className="text-xs font-bold uppercase tracking-tight focus:bg-brand-primary/5 focus:text-brand-primary rounded-none">Editor (Chỉnh sửa nội dung)</SelectItem>
-                  <SelectItem value="viewer" className="text-xs font-bold uppercase tracking-tight focus:bg-brand-primary/5 focus:text-brand-primary rounded-none">Viewer (Chỉ xem)</SelectItem>
-                </SelectContent>
-              </Select>
+                {isSubmitting ? (
+                  <Loader2 className="mr-3 size-5 animate-spin" />
+                ) : (
+                  <Save className="mr-3 size-5" />
+                )}
+                Lưu mọi thay đổi
+              </Button>
             </div>
-          </div>
+          </form>
         </div>
 
-        <div className="p-10 bg-slate-50 border-t border-slate-100 flex justify-end">
-          <Button 
-            type="submit" 
-            className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-12 py-6 h-auto shadow-xl shadow-brand-primary/20 transition-all rounded-none"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            ) : (
-              <Save className="mr-2 size-4" />
-            )}
-            Lưu thay đổi
-          </Button>
+        <div className="lg:col-span-5 space-y-6">
+           <div className="p-8 bg-slate-50 border border-slate-100 space-y-6">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 border-l-4 border-l-brand-primary pl-4">Thông tin bổ sung</h3>
+              <div className="space-y-4">
+                 {[
+                   { label: "Trạng thái", value: "Đang hoạt động", color: "text-emerald-600" },
+                   { label: "Cấp độ", value: "Root Administrator", color: "text-brand-primary" },
+                   { label: "Hệ thống", value: "Sài Gòn Valve CMS", color: "text-slate-400" },
+                 ].map((item, i) => (
+                   <div key={i} className="flex items-center justify-between py-3 border-b border-slate-200/50 last:border-none">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.label}</span>
+                      <span className={cn("text-[10px] font-black uppercase tracking-widest", item.color)}>{item.value}</span>
+                   </div>
+                 ))}
+              </div>
+              <p className="text-[11px] text-slate-400 italic font-medium leading-relaxed pt-4 border-t border-slate-200/50">
+                 * Việc thay đổi mật khẩu sẽ có hiệu lực ngay trong lần đăng nhập kế tiếp của người dùng này.
+              </p>
+           </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

@@ -46,7 +46,7 @@ export default function AddProductPage() {
     const fetchCategories = async () => {
       try {
         const res = await api.get("/api/categories?type=product");
-        setCategories(res.data);
+        setCategories(res.data.data || []);
       } catch (error) {
         console.error("Failed to fetch categories", error);
         toast.error("Không thể tải danh mục sản phẩm");
