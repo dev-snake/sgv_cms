@@ -3,14 +3,20 @@ import { products } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 
-// GET /api/products/[slug] - Get a single product by slug
+// GET /api/products/[slug] - Get a single product by slug or ID
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { slug } = await params;
-    const [product] = await db.select().from(products).where(eq(products.slug, slug));
+    
+    // Check if slug is a UUID to fetch by ID instead
+    const isId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+    
+    const [product] = await db.select().from(products).where(
+      isId ? eq(products.id, slug) : eq(products.slug, slug)
+    );
 
     if (!product) {
       return apiError("Product not found", 404);
@@ -26,10 +32,10 @@ export async function GET(
 // PATCH /api/products/[id] - Update a product
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> } // Named 'slug' because folder is [slug]
 ) {
   try {
-    const { id } = await params;
+    const { slug: id } = await params;
     const body = await request.json();
     
     // Prepare updates
@@ -37,7 +43,11 @@ export async function PATCH(
     if (updates.id) delete updates.id;
     if (updates.created_at) delete updates.created_at;
     if (updates.updated_at) updates.updated_at = new Date();
-    if (updates.price) updates.price = updates.price.toString();
+    
+    // Ensure price is string if provided
+    if (updates.price !== undefined && updates.price !== null) {
+      updates.price = updates.price.toString();
+    }
 
     const [updatedProduct] = await db.update(products)
       .set(updates)
@@ -58,10 +68,10 @@ export async function PATCH(
 // DELETE /api/products/[id] - Delete a product
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> } // Named 'slug' because folder is [slug]
 ) {
   try {
-    const { id } = await params;
+    const { slug: id } = await params;
     const [deletedProduct] = await db.delete(products)
       .where(eq(products.id, id))
       .returning();

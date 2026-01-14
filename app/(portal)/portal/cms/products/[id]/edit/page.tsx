@@ -2,12 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { ArrowLeft, Save, ImagePlus, Package } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { ArrowLeft, Save, Package, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { RichTextEditor } from "@/components/portal/rich-text-editor";
 import {
   Select,
@@ -16,44 +15,109 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PRODUCTS } from "@/data/products";
+import api from "@/services/axios";
 import { PORTAL_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
+import { toast } from "sonner";
 
-const PRODUCT_CATEGORIES = [
-  "Van bướm",
-  "Van cổng",
-  "Van cầu",
-  "Van điều khiển",
-  "Van một chiều",
-  "Thiết bị IoT",
-  "Phụ kiện",
-];
+interface Category {
+  id: string;
+  name: string;
+}
 
 export default function EditProductPage() {
   const params = useParams();
+  const router = useRouter();
   const productId = params.id as string;
 
-  const existingProduct = PRODUCTS.find((p) => p.id === productId);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [categories, setCategories] = React.useState<Category[]>([]);
 
   const [formData, setFormData] = React.useState({
-    name: existingProduct?.name || "",
-    slug: existingProduct?.name?.toLowerCase().replace(/\s+/g, "-") || "",
-    sku: existingProduct?.sku || "",
+    name: "",
+    slug: "",
+    sku: "",
     description: "",
-    price: existingProduct?.price || "0",
-    stock: existingProduct?.stock || "0",
-    category_id: existingProduct?.category_id || "1",
-    status: (existingProduct?.status as any) || "active",
-    image: existingProduct?.image || "",
+    price: "0",
+    stock: "0",
+    category_id: "",
+    status: "active" as "active" | "inactive",
+    image: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch categories and product in parallel
+        const [categoriesRes, productRes] = await Promise.all([
+          api.get("/api/categories?type=product"),
+          api.get(`/api/products/${productId}`)
+        ]);
+
+        setCategories(categoriesRes.data.data || []);
+        
+        const product = productRes.data.data;
+        if (product) {
+          setFormData({
+            name: product.name || "",
+            slug: product.slug || "",
+            sku: product.sku || "",
+            description: product.description || "",
+            price: product.price || "0",
+            stock: product.stock?.toString() || "0",
+            category_id: product.category_id || "",
+            status: product.status || "active",
+            image: product.image_url || "",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+        toast.error("Không thể tải thông tin sản phẩm");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (productId) {
+      fetchData();
+    }
+  }, [productId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Updating:", formData);
+    setIsSubmitting(true);
+    try {
+      // Map 'image' back to 'image_url' for the API
+      const submissionData = {
+        ...formData,
+        image_url: formData.image
+      };
+      
+      await api.patch(`/api/products/${productId}`, submissionData);
+
+      toast.success("Cập nhật sản phẩm thành công");
+      router.push(PORTAL_ROUTES.cms.products.list);
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.error || error.message || "Lỗi khi cập nhật sản phẩm";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  if (!existingProduct) {
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+        <p className="mt-4 text-slate-500 font-medium italic animate-pulse">Đang tải thông tin sản phẩm...</p>
+      </div>
+    );
+  }
+
+  if (!formData.name && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <p className="text-slate-500 font-medium">Không tìm thấy sản phẩm.</p>
@@ -68,7 +132,7 @@ export default function EditProductPage() {
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-6">
-          <Link href="/portal/cms/products">
+          <Link href={PORTAL_ROUTES.cms.products.list}>
             <Button variant="outline" className="h-14 w-14 p-0 border-slate-100 rounded-none hover:bg-slate-50">
               <ArrowLeft size={20} />
             </Button>
@@ -79,11 +143,17 @@ export default function EditProductPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 rounded-none text-slate-500">
+          <Button 
+            variant="outline" 
+            className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 rounded-none text-slate-500"
+            onClick={() => router.back()}
+            disabled={isSubmitting}
+          >
             Hủy thay đổi
           </Button>
-          <Button onClick={handleSubmit} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
-            <Save className="mr-2 size-4" /> Lưu thay đổi
+          <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+            {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />} 
+            Lưu thay đổi
           </Button>
         </div>
       </div>
@@ -139,8 +209,11 @@ export default function EditProductPage() {
               <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
                 <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold shadow-none focus:ring-1 focus:ring-brand-primary/20"><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
                 <SelectContent className="rounded-none border-slate-100">
-                  <SelectItem value="1" className="text-sm font-bold rounded-none">Van Công Nghiệp</SelectItem>
-                  <SelectItem value="2" className="text-sm font-bold rounded-none">Thiết Bị Đo Lường</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id} className="text-sm font-bold rounded-none">
+                      {cat.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

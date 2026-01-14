@@ -2,35 +2,66 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PORTAL_ROUTES } from "@/constants/routes";
 import { CategoryForm, CategoryFormData } from "@/components/portal/category-form";
-
-// Mock data
-const PRODUCT_CATEGORIES = [
-  { id: "cat-1", name: "Van bướm", slug: "van-buom", description: "Các loại van bướm công nghiệp", parentId: "none", isActive: true, orderIndex: 0, metaTitle: "Van bướm Sài Gòn Valve", metaDescription: "Cung cấp van bướm chất lượng cao", imageUrl: "" },
-  { id: "cat-2", name: "Van cổng", slug: "van-cong", description: "Các loại van cổng chịu áp lực", parentId: "none", isActive: true, orderIndex: 1, metaTitle: "Van cổng công nghiệp", metaDescription: "Van cổng cho hệ thống nước", imageUrl: "" },
-  { id: "cat-3", name: "Van cầu", slug: "van-cau", description: "Van cầu điều tiết lưu lượng", parentId: "none", isActive: true, orderIndex: 2, metaTitle: "Van cầu hơi nóng", metaDescription: "Van cầu cho lò hơi và nhiệt", imageUrl: "" },
-  { id: "cat-4", name: "Van điều khiển", slug: "van-dieu-khien", description: "Van điều khiển điện và khí nén", parentId: "none", isActive: true, orderIndex: 3, metaTitle: "Van điều khiển tự động", metaDescription: "Giải pháp van thông minh", imageUrl: "" },
-  { id: "cat-5", name: "Van một chiều", slug: "van-mot-chieu", description: "Van ngăn dòng chảy ngược", parentId: "none", isActive: true, orderIndex: 4, metaTitle: "Van một chiều lá lật", metaDescription: "Van một chiều các loại", imageUrl: "" },
-  { id: "cat-6", name: "Thiết bị IoT", slug: "thiet-bi-iot", description: "Cảm biến và thiết bị kết nối", parentId: "none", isActive: true, orderIndex: 5, metaTitle: "Thiết bị IoT ngành nước", metaDescription: "Giám sát hệ thống qua IoT", imageUrl: "" },
-  { id: "cat-7", name: "Phụ kiện", slug: "phu-kien", description: "Mặt bích, bù lông, khớp nối", parentId: "none", isActive: true, orderIndex: 6, metaTitle: "Phụ kiện đường ống", metaDescription: "Đầy đủ phụ kiện van vòi", imageUrl: "" },
-];
+import api from "@/services/axios";
+import { toast } from "sonner";
 
 export default function EditProductCategoryPage() {
   const params = useParams();
+  const router = useRouter();
   const categoryId = params.id as string;
 
-  const existingCategory = PRODUCT_CATEGORIES.find(c => c.id === categoryId);
+  const [category, setCategory] = React.useState<CategoryFormData | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const handleFormSubmit = (data: CategoryFormData) => {
-    console.log("Updating Product Category:", categoryId, data);
-    // TODO: Connect to actual backend API
+  React.useEffect(() => {
+    const fetchCategory = async () => {
+      setIsLoading(true);
+      try {
+        const res = await api.get(`/api/categories/${categoryId}`);
+        setCategory(res.data.data);
+      } catch (err: any) {
+        console.error("Failed to fetch category", err);
+        toast.error("Không tìm thấy danh mục hoặc lỗi máy chủ.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (categoryId) {
+      fetchCategory();
+    }
+  }, [categoryId]);
+
+  const handleFormSubmit = async (data: CategoryFormData) => {
+    setIsSubmitting(true);
+    try {
+      await api.patch(`/api/categories/${categoryId}`, data);
+      toast.success("Cập nhật danh mục thành công");
+      router.push(PORTAL_ROUTES.cms.products.categories.list);
+    } catch (err: any) {
+      console.error("Failed to update category", err);
+      toast.error(err.response?.data?.error || "Lỗi khi cập nhật danh mục");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  if (!existingCategory) {
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+        <p className="mt-4 text-slate-500 font-medium italic animate-pulse">Đang tải dữ liệu danh mục...</p>
+      </div>
+    );
+  }
+
+  if (!category) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <p className="text-slate-500 font-medium">Không tìm thấy danh mục.</p>
@@ -61,7 +92,7 @@ export default function EditProductCategoryPage() {
         <CategoryForm 
           type="product" 
           isEditing={true}
-          initialData={existingCategory}
+          initialData={category}
           onSubmit={handleFormSubmit} 
           backUrl={PORTAL_ROUTES.cms.products.categories.list} 
         />
