@@ -35,6 +35,7 @@ export interface Project {
   id: string;
   slug: string;
   name: string;
+  description: string;
   client_name?: string;
   start_date?: string;
   end_date?: string;
