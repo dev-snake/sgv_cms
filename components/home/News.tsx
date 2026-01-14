@@ -1,35 +1,49 @@
 "use client";
 
+import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, MoveRight, Plus } from "lucide-react";
+import { CalendarDays, MoveRight, Newspaper, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
+import api from "@/services/axios";
 
-const NEWS_ITEMS = [
-  {
-    id: 1,
-    title: "Delta Group lập cú đúp danh hiệu 2025: Top 50 doanh nghiệp xuất sắc",
-    date: "24/06/2025",
-    image: "https://saigonvalve.vn/uploads/files/2025/06/24/thumbs/datalogger-1-636x417-5.png",
-    category: "CÔNG TY",
-  },
-  {
-    id: 2,
-    title: "Sài Gòn Valve đồng hành cùng thế hệ kỹ sư tương lai",
-    date: "20/06/2025",
-    image: "https://saigonvalve.vn/uploads/files/2025/06/24/thumbs/495616963_642796365424897_6462862703532989991_n-306x234-5.jpg",
-    category: "SỰ KIỆN",
-  },
-  {
-    id: 3,
-    title: "Giải pháp quan trắc nước thông minh ứng dụng công nghệ 4G/LTE",
-    date: "15/06/2025",
-    image: "https://saigonvalve.vn/uploads/files/2024/06/12/Blue-and-White-Clean-Modern-Technology-Conference-Zoom-Virtual-Background-2-.png",
-    category: "CÔNG NGHỆ",
-  },
-];
+interface NewsItem {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string;
+  category?: string;
+  image_url?: string;
+  published_at?: string;
+  created_at: string;
+}
+
+function formatDate(dateString: string | null): string {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
 
 export default function News() {
+  const [news, setNews] = React.useState<NewsItem[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await api.get("/api/news?status=published&limit=3");
+        if (response.data.success) {
+          setNews(response.data.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching news:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNews();
+  }, []);
+
   return (
     <section className="bg-white py-24 sm:py-32">
       <div className="container mx-auto px-4 lg:px-8">
@@ -45,42 +59,60 @@ export default function News() {
           </p>
         </div>
 
-        {/* News Grid - Delta style overlay */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {NEWS_ITEMS.map((news, i) => (
-            <motion.article
-              key={news.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="group relative h-[300px] overflow-hidden cursor-pointer"
-            >
-              <Image
-                src={news.image}
-                alt={news.title}
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
-              
-              <div className="absolute bottom-6 left-6 right-6 space-y-3">
-                <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-widest text-brand-accent">
-                   {news.category}
-                   <span className="h-1 w-1 rounded-full bg-white/40"></span>
-                   {news.date}
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex items-center justify-center h-[300px]">
+            <Loader2 size={40} className="animate-spin text-brand-primary opacity-30" />
+          </div>
+        ) : news.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-[300px] text-slate-400">
+            <Newspaper size={48} className="mb-4 opacity-30" />
+            <p className="text-sm font-medium">Chưa có bài viết nào</p>
+          </div>
+        ) : (
+          /* News Grid - Delta style overlay */
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {news.map((item, i) => (
+              <motion.article
+                key={item.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group relative h-[300px] overflow-hidden cursor-pointer bg-slate-100"
+              >
+                {item.image_url ? (
+                  <Image
+                    src={item.image_url}
+                    alt={item.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-200">
+                    <Newspaper size={48} className="text-slate-300" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
+                
+                <div className="absolute bottom-6 left-6 right-6 space-y-3">
+                  <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-widest text-brand-accent">
+                     {item.category || "Tin tức"}
+                     <span className="h-1 w-1 rounded-full bg-white/40"></span>
+                     {formatDate(item.published_at || item.created_at)}
+                  </div>
+                  <h3 className="text-[15px] font-bold text-white leading-tight transition-colors group-hover:text-brand-accent line-clamp-2 uppercase">
+                     {item.title}
+                  </h3>
                 </div>
-                <h3 className="text-[15px] font-bold text-white leading-tight transition-colors group-hover:text-brand-accent line-clamp-2 uppercase">
-                   {news.title}
-                </h3>
-              </div>
 
-              <Link href={`/tin-tuc/${news.id}`} className="absolute inset-0 z-10">
-                <span className="sr-only">Đọc tiếp {news.title}</span>
-              </Link>
-            </motion.article>
-          ))}
-        </div>
+                <Link href={`/tin-tuc/${item.slug}`} className="absolute inset-0 z-10">
+                  <span className="sr-only">Đọc tiếp {item.title}</span>
+                </Link>
+              </motion.article>
+            ))}
+          </div>
+        )}
 
         <div className="mt-16 text-center">
            <Link 
