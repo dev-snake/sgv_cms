@@ -56,16 +56,19 @@ async function main() {
   }
   
   // 4. Seed Default User
-  const existingUser = await db.select().from(users).where(eq(users.username, 'admin'));
+  const adminUsername = process.env.SEED_ADMIN_USERNAME || 'admin';
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'admin123';
+
+  const existingUser = await db.select().from(users).where(eq(users.username, adminUsername));
   if (existingUser.length === 0) {
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
     await db.insert(users).values({ 
-      username: 'admin', 
+      username: adminUsername, 
       password: hashedPassword,
       full_name: 'Administrator',
       role: 'admin'
     });
-    console.log('Added default user: admin / admin123');
+    console.log(`Added default user: ${adminUsername} / ${adminPassword}`);
   }
 
   // 5. Seed Detailed Products
