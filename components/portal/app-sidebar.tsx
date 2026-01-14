@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import api from "@/lib/axios";
+import api from "@/services/axios";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";

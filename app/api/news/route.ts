@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { newsArticles, categories, authors } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { apiResponse, apiError } from "@/lib/api-response";
+import { apiResponse, apiError } from "@/utils/api-response";
 
 // GET /api/news - List news articles
 export async function GET(request: Request) {

@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { contacts } from "@/db/schema";
-import { apiResponse, apiError } from "@/lib/api-response";
-import { sendThankYouEmail } from "@/lib/mail";
+import { apiResponse, apiError } from "@/utils/api-response";
+import { sendThankYouEmail } from "@/services/mail";
 import { desc } from "drizzle-orm";
 
 export async function POST(request: Request) {

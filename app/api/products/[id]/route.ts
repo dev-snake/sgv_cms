@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { products } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { apiResponse, apiError } from "@/lib/api-response";
+import { apiResponse, apiError } from "@/utils/api-response";
 
 // GET /api/products/[id] - Get a single product
 export async function GET(

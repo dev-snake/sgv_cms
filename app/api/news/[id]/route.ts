@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { newsArticles } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { apiResponse, apiError } from "@/lib/api-response";
+import { apiResponse, apiError } from "@/utils/api-response";
 
 // GET /api/news/[id] - Get a single article
 export async function GET(

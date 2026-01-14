@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { decrypt } from "./lib/auth";
+import { decrypt } from "@/services/auth";
 
 // Add paths that don't require authentication
 const publicPaths = [

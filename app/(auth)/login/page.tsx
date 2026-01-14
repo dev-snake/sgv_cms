@@ -6,7 +6,7 @@ import { ShieldCheck, Lock, User, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import api from "@/lib/axios";
+import api from "@/services/axios";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 

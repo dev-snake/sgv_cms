@@ -2,8 +2,8 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
-import { login } from "@/lib/auth";
-import { apiResponse, apiError } from "@/lib/api-response";
+import { login } from "@/services/auth";
+import { apiResponse, apiError } from "@/utils/api-response";
 
 export async function POST(request: Request) {
   try {

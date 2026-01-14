@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { authors } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { apiResponse, apiError } from "@/lib/api-response";
+import { apiResponse, apiError } from "@/utils/api-response";
 
 // GET /api/authors - List all authors
 export async function GET() {

@@ -1,5 +1,5 @@
-import { logout } from "@/lib/auth";
-import { apiResponse } from "@/lib/api-response";
+import { logout } from "@/services/auth";
+import { apiResponse } from "@/utils/api-response";
 
 export async function POST() {
   await logout();

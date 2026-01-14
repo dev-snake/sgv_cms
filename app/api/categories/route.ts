@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { categories, categoryTypes } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { apiResponse, apiError } from "@/lib/api-response";
+import { apiResponse, apiError } from "@/utils/api-response";
 
 // GET /api/categories - List all categories
 export async function GET(request: Request) {

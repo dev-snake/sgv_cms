@@ -1,7 +1,7 @@
 "use client";
 
 import { Product } from "@/types";
-import api from "@/lib/axios";
+import api from "@/services/axios";
 import { 
   Plus, 
   Search, 

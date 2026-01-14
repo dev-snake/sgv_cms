@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { projects, categories } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { apiResponse, apiError } from "@/lib/api-response";
+import { apiResponse, apiError } from "@/utils/api-response";
 
 // GET /api/projects - List projects
 export async function GET(request: Request) {
