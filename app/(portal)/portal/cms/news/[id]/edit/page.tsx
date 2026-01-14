@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Save, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,41 +16,105 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { NEWS_LIST } from "@/data/news";
 import { PORTAL_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
+import api from "@/services/axios";
+import { toast } from "sonner";
 
-const NEWS_CATEGORIES = [
-  "Tin tức",
-  "Sự kiện",
-  "Kiến thức kỹ thuật",
-  "Thông báo",
-  "Khuyến mãi",
-];
+interface NewsArticle {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  category_id: string;
+  author_id: string;
+  status: string;
+  published_at: string | null;
+}
 
 export default function EditNewsPage() {
   const params = useParams();
+  const router = useRouter();
   const newsId = params.id as string;
 
-  const existingNews = NEWS_LIST.find((n) => n.id === newsId);
+  const [loading, setLoading] = React.useState(true);
+  const [saving, setSaving] = React.useState(false);
+  const [article, setArticle] = React.useState<NewsArticle | null>(null);
+  const [categories, setCategories] = React.useState<any[]>([]);
 
   const [formData, setFormData] = React.useState({
-    title: existingNews?.title || "",
-    slug: existingNews?.title?.toLowerCase().replace(/\s+/g, "-") || "",
-    summary: existingNews?.summary || "",
+    title: "",
+    slug: "",
+    summary: "",
     content: "",
-    category_id: "1",
-    author_id: "1",
-    status: "published" as "draft" | "published",
+    category_id: "",
+    author_id: "",
+    status: "draft" as "draft" | "published",
     published_at: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch article by ID
+        const articleRes = await api.get(`/api/news/${newsId}`);
+        if (articleRes.data.success) {
+          const a = articleRes.data.data;
+          setArticle(a);
+          setFormData({
+            title: a.title || "",
+            slug: a.slug || "",
+            summary: a.summary || "",
+            content: a.content || "",
+            category_id: a.category_id || "",
+            author_id: a.author_id || "",
+            status: a.status || "draft",
+            published_at: a.published_at ? a.published_at.slice(0, 16) : "",
+          });
+        }
+
+        // Fetch categories
+        const catRes = await api.get("/api/categories?type=news");
+        if (catRes.data.success) {
+          setCategories(catRes.data.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching article:", error);
+        toast.error("Không thể tải thông tin bài viết");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [newsId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Updating:", formData);
+    setSaving(true);
+    try {
+      const response = await api.patch(`/api/news/${newsId}`, formData);
+      if (response.data.success) {
+        toast.success("Cập nhật bài viết thành công!");
+        router.push(PORTAL_ROUTES.cms.news.list);
+      }
+    } catch (error) {
+      console.error("Error updating article:", error);
+      toast.error("Không thể cập nhật bài viết");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  if (!existingNews) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+      </div>
+    );
+  }
+
+  if (!article) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <p className="text-slate-500 font-medium">Không tìm thấy bài viết.</p>
@@ -60,6 +124,7 @@ export default function EditNewsPage() {
       </div>
     );
   }
+
 
   return (
     <div className="space-y-10">
@@ -129,8 +194,9 @@ export default function EditNewsPage() {
               <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
                 <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold shadow-none focus:ring-1 focus:ring-brand-primary/20"><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
                 <SelectContent className="rounded-none border-slate-100">
-                  <SelectItem value="1" className="text-sm font-bold rounded-none">Tin tức chung</SelectItem>
-                  <SelectItem value="2" className="text-sm font-bold rounded-none">Sự kiện công ty</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id} className="text-sm font-bold rounded-none">{cat.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

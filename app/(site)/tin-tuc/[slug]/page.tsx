@@ -165,7 +165,7 @@ export default function NewsDetailPage() {
 
       {/* Content Area */}
       <section className="pb-16 sm:pb-24">
-        <div className="container mx-auto px-4 lg:px-8 max-w-4xl">
+        <div className="container mx-auto px-4 lg:px-8">
           <div className="bg-white">
             {/* Featured Image */}
             <div className="relative aspect-21/9 w-full overflow-hidden rounded-2xl mb-12 shadow-sm">

@@ -1,16 +1,22 @@
 import { db } from "@/db";
-import { newsArticles } from "@/db/schema";
+import { newsArticles, categories, authors } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 
-// GET /api/news/[slug] - Get a single article by slug
+// UUID regex pattern
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// GET /api/news/[slug] - Get a single article by slug or ID
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { slug } = await params;
-    const [article] = await db.select().from(newsArticles).where(eq(newsArticles.slug, slug));
+    const isUUID = UUID_REGEX.test(slug);
+    
+    const whereCondition = isUUID ? eq(newsArticles.id, slug) : eq(newsArticles.slug, slug);
+    const [article] = await db.select().from(newsArticles).where(whereCondition);
 
     if (!article) {
       return apiError("Article not found", 404);
@@ -23,25 +29,29 @@ export async function GET(
   }
 }
 
-// PATCH /api/news/[id] - Update an article
+// PATCH /api/news/[slug] - Update an article by ID or slug
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { slug } = await params;
     const body = await request.json();
+    const isUUID = UUID_REGEX.test(slug);
     
     // Prepare updates
     const updates: any = { ...body };
     if (updates.id) delete updates.id;
+    if (updates.category) delete updates.category;
+    if (updates.author) delete updates.author;
     if (updates.created_at) delete updates.created_at;
-    if (updates.updated_at) updates.updated_at = new Date();
+    updates.updated_at = new Date();
     if (updates.published_at) updates.published_at = new Date(updates.published_at);
 
+    const whereCondition = isUUID ? eq(newsArticles.id, slug) : eq(newsArticles.slug, slug);
     const [updatedArticle] = await db.update(newsArticles)
       .set(updates)
-      .where(eq(newsArticles.id, id))
+      .where(whereCondition)
       .returning();
 
     if (!updatedArticle) {
@@ -55,15 +65,18 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/news/[id] - Delete an article
+// DELETE /api/news/[slug] - Delete an article by ID or slug
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { slug } = await params;
+    const isUUID = UUID_REGEX.test(slug);
+    
+    const whereCondition = isUUID ? eq(newsArticles.id, slug) : eq(newsArticles.slug, slug);
     const [deletedArticle] = await db.delete(newsArticles)
-      .where(eq(newsArticles.id, id))
+      .where(whereCondition)
       .returning();
 
     if (!deletedArticle) {
@@ -76,3 +89,4 @@ export async function DELETE(
     return apiError("Internal Server Error", 500);
   }
 }
+
