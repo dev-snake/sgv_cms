@@ -12,6 +12,7 @@
   --color-brand-primary: var(--brand-primary);
   --color-brand-secondary: var(--brand-secondary);
   --color-brand-accent: var(--brand-accent);
+  --color-brand-cyan: var(--brand-cyan);
 
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
@@ -48,8 +49,9 @@
 :root {
   /* Brand hex colors */
   --brand-primary: #00429a;
-  --brand-secondary: #002d6b;
-  --brand-accent: #f59e0b;
+  --brand-secondary: #001d4a;
+  --brand-accent: #fbbf24;
+  --brand-cyan: #06b6d4;
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.12 0 0);
@@ -79,19 +81,12 @@
   --radius: 0rem;
 
   --sidebar: hsl(0 0% 98%);
-
   --sidebar-foreground: hsl(240 5.3% 26.1%);
-
   --sidebar-primary: hsl(240 5.9% 10%);
-
   --sidebar-primary-foreground: hsl(0 0% 98%);
-
   --sidebar-accent: hsl(240 4.8% 95.9%);
-
   --sidebar-accent-foreground: hsl(240 5.9% 10%);
-
   --sidebar-border: hsl(220 13% 91%);
-
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
@@ -143,19 +138,26 @@
   }
 }
 
+@layer utilities {
+  .bg-carbon {
+    background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+    background-color: #020617;
+    background-repeat: repeat;
+  }
+  
+  .industrial-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent;
+  }
+
+  .text-stroke-white {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
+  }
+}
+
 .card-hover {
   @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
 }
 
 .btn-corporate {
   @apply px-8 py-3 bg-brand-primary text-white font-bold transition-all hover:bg-brand-secondary active:scale-[0.98] disabled:opacity-50;
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
 }

@@ -6,10 +6,10 @@ import { apiResponse, apiError } from "@/utils/api-response";
 // GET /api/categories/[id] - Get a single category
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const [category] = await db.select().from(categories).where(eq(categories.id, id));
 
     if (!category) {
@@ -26,10 +26,10 @@ export async function GET(
 // PATCH /api/categories/[id] - Update a category
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const body = await request.json();
     const { name, category_type_id } = body;
 
@@ -55,10 +55,10 @@ export async function PATCH(
 // DELETE /api/categories/[id] - Delete a category
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const [deletedCategory] = await db.delete(categories)
       .where(eq(categories.id, id))
       .returning();

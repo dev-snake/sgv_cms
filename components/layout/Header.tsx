@@ -109,7 +109,7 @@ export default function Header() {
                                     className="group block select-none space-y-2 rounded-sm p-4 leading-none no-underline outline-none transition-all hover:bg-slate-50 dark:hover:bg-white/5"
                                   >
                                     <div className="text-xs font-black uppercase tracking-tight group-hover:text-brand-primary transition-colors">{item.title as string}</div>
-                                    {"desc" in item && <p className="line-clamp-2 text-[11px] leading-relaxed text-muted-foreground font-medium italic">{item.desc}</p>}
+                                    {"desc" in item && <p className="line-clamp-2 text-[11px] leading-relaxed text-muted-foreground font-medium italic">{item.desc as string}</p>}
                                   </Link>
                                 </NavigationMenuLink>
                               </li>

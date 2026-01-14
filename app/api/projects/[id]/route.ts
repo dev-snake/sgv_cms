@@ -6,10 +6,10 @@ import { apiResponse, apiError } from "@/utils/api-response";
 // GET /api/projects/[id] - Get a single project
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const [project] = await db.select().from(projects).where(eq(projects.id, id));
 
     if (!project) {
@@ -26,10 +26,10 @@ export async function GET(
 // PATCH /api/projects/[id] - Update a project
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const body = await request.json();
     
     // Prepare updates
@@ -59,10 +59,10 @@ export async function PATCH(
 // DELETE /api/projects/[id] - Delete a project
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const [deletedProject] = await db.delete(projects)
       .where(eq(projects.id, id))
       .returning();

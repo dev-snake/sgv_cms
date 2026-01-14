@@ -6,10 +6,10 @@ import { apiResponse, apiError } from "@/utils/api-response";
 // GET /api/products/[id] - Get a single product
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const [product] = await db.select().from(products).where(eq(products.id, id));
 
     if (!product) {
@@ -26,10 +26,10 @@ export async function GET(
 // PATCH /api/products/[id] - Update a product
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const body = await request.json();
     
     // Prepare updates
@@ -58,10 +58,10 @@ export async function PATCH(
 // DELETE /api/products/[id] - Delete a product
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const [deletedProduct] = await db.delete(products)
       .where(eq(products.id, id))
       .returning();

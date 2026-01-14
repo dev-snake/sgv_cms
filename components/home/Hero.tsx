@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import { MoveRight, MousePointer2 } from "lucide-react";
+import { MoveRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SLIDES = [
@@ -71,8 +71,8 @@ export default function Hero() {
               e.target.src = SLIDES[current].fallback;
             }}
           />
-          <div className="absolute inset-0 bg-linear-to-b from-slate-950/80 via-transparent to-slate-950/90"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(2,6,23,0.4)_100%)]"></div>
+          <div className="absolute inset-0 bg-carbon mix-blend-overlay"></div>
+          <div className="absolute inset-0 bg-linear-to-b from-slate-950/90 via-transparent to-slate-950/95"></div>
         </motion.div>
       </AnimatePresence>
 
@@ -89,32 +89,29 @@ export default function Hero() {
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 className="space-y-8"
               >
-                <div className="inline-flex items-center gap-4 bg-white/5 border border-white/10 px-6 py-3 text-[10px] font-black uppercase tracking-[0.4em] text-brand-accent backdrop-blur-sm">
-                  <span className="h-1.5 w-1.5 rounded-full bg-brand-primary animate-pulse"></span>
+                <div className="inline-flex items-center gap-4 bg-white/5 border border-white/10 px-6 py-3 text-[10px] font-black uppercase tracking-[0.4em] text-brand-cyan backdrop-blur-sm">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand-cyan animate-pulse"></span>
                   {SLIDES[current].accent}
                 </div>
 
-                <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.1] uppercase">
+                <h1 className="text-6xl sm:text-7xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] uppercase">
                   {SLIDES[current].title} <br />
-                  <span className="text-brand-accent drop-shadow-[0_0_30px_rgba(245,158,11,0.3)]">{SLIDES[current].highlight}</span> <br />
+                  <span className="text-brand-cyan drop-shadow-[0_0_30px_rgba(6,182,212,0.3)]">{SLIDES[current].highlight}</span> <br />
                   <span className="text-white/90">{SLIDES[current].titleSuffix}</span>
                 </h1>
 
-                <p className="max-w-2xl text-xl text-slate-300 font-medium leading-relaxed border-l-8 border-brand-primary pl-10">
+                <p className="max-w-2xl text-xl text-slate-300 font-medium leading-relaxed border-l-8 border-brand-cyan pl-10">
                   {SLIDES[current].desc}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-8 pt-8">
                   <Link 
                     href="/san-pham" 
-                    className="relative group overflow-hidden inline-flex items-center justify-center gap-6 px-14 py-6 bg-brand-primary text-white text-[10px] font-black uppercase tracking-[0.3em] transition-all"
+                    className="relative group overflow-hidden inline-flex items-center justify-center gap-6 px-14 py-6 bg-brand-cyan text-slate-950 text-[10px] font-black uppercase tracking-[0.3em] transition-all"
                   >
                     <span className="relative z-10">KHÁM PHÁ GIẢI PHÁP</span>
                     <MoveRight size={20} className="relative z-10 transition-transform group-hover:translate-x-2" />
-                    <div className="absolute bottom-0 left-0 h-0 w-full bg-white transition-all duration-300 group-hover:h-full group-hover:bg-white"></div>
-                    <style jsx>{`
-                      .group:hover { color: #020617 !important; }
-                    `}</style>
+                    <div className="absolute bottom-0 left-0 h-0 w-full bg-white transition-all duration-300 group-hover:h-full"></div>
                   </Link>
                   <Link 
                     href="/gioi-thieu" 
@@ -137,7 +134,7 @@ export default function Hero() {
                   }}
                   className={cn(
                     "h-1.5 transition-all duration-500 rounded-full",
-                    current === i ? "w-20 bg-brand-accent" : "w-10 bg-white/20 hover:bg-white/40"
+                    current === i ? "w-20 bg-brand-cyan" : "w-10 bg-white/20 hover:bg-white/40"
                   )}
                 />
               ))}
@@ -161,9 +158,6 @@ export default function Hero() {
         </div>
         <span className="text-[9px] font-black uppercase tracking-[0.5em]">SCROLL</span>
       </motion.div>
-
-      {/* Corporate Pattern Overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.05] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
     </section>
   );
 }

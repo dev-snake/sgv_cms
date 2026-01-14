@@ -6,10 +6,10 @@ import { apiResponse, apiError } from "@/utils/api-response";
 // GET /api/news/[id] - Get a single article
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const [article] = await db.select().from(newsArticles).where(eq(newsArticles.id, id));
 
     if (!article) {
@@ -26,10 +26,10 @@ export async function GET(
 // PATCH /api/news/[id] - Update an article
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const body = await request.json();
     
     // Prepare updates
@@ -58,10 +58,10 @@ export async function PATCH(
 // DELETE /api/news/[id] - Delete an article
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const [deletedArticle] = await db.delete(newsArticles)
       .where(eq(newsArticles.id, id))
       .returning();

@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "vanhanoi.com",
       },
+      {
+        protocol: "https",
+        hostname: "www.victaulic.com",
+      },
     ],
   },
 };
