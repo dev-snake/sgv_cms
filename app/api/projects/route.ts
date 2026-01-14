@@ -1,15 +1,37 @@
 import { db } from "@/db";
 import { projects, categories } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 
-// GET /api/projects - List projects
+// GET /api/projects - List projects with pagination
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const categoryId = searchParams.get("categoryId");
     const status = searchParams.get("status") as "ongoing" | "completed" | null;
 
+    // Parse pagination params
+    const { page, limit } = parsePaginationParams(searchParams, { limit: 12 });
+    const offset = calculateOffset(page, limit);
+
+    // Build where conditions
+    const conditions = [];
+    if (categoryId) {
+      conditions.push(eq(projects.category_id, categoryId));
+    }
+    if (status) {
+      conditions.push(eq(projects.status, status));
+    }
+
+    // Count total items
+    const countQuery = db.select({ count: sql<number>`count(*)` }).from(projects);
+    if (conditions.length > 0) {
+      countQuery.where(and(...conditions));
+    }
+    const [{ count: total }] = await countQuery;
+
+    // Build main query with pagination
     let query = db.select({
       id: projects.id,
       name: projects.name,
@@ -23,25 +45,26 @@ export async function GET(request: Request) {
     })
     .from(projects)
     .innerJoin(categories, eq(projects.category_id, categories.id))
-    .orderBy(desc(projects.created_at));
+    .orderBy(desc(projects.created_at))
+    .limit(limit)
+    .offset(offset);
 
-    if (categoryId) {
-      // @ts-ignore
-      query = query.where(eq(projects.category_id, categoryId));
-    }
-
-    if (status) {
-      // @ts-ignore
-      query = query.where(eq(projects.status, status));
+    if (conditions.length > 0) {
+      // @ts-ignore - Drizzle type issue with dynamic conditions
+      query = query.where(and(...conditions));
     }
 
     const results = await query;
-    return apiResponse(results);
+    
+    return apiResponse(results, {
+      meta: createPaginationMeta(page, limit, Number(total)),
+    });
   } catch (error) {
     console.error("Error fetching projects:", error);
     return apiError("Internal Server Error", 500);
   }
 }
+
 
 // POST /api/projects - Create a new project
 export async function POST(request: Request) {

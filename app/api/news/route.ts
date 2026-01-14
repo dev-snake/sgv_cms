@@ -1,16 +1,37 @@
 import { db } from "@/db";
 import { newsArticles, categories, authors } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 
-// GET /api/news - List news articles
+// GET /api/news - List news articles with pagination
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status") as "draft" | "published" | null;
     const categoryId = searchParams.get("categoryId");
-    const featured = searchParams.get("featured");
 
+    // Parse pagination params
+    const { page, limit } = parsePaginationParams(searchParams, { limit: 10 });
+    const offset = calculateOffset(page, limit);
+
+    // Build where conditions
+    const conditions = [];
+    if (status) {
+      conditions.push(eq(newsArticles.status, status));
+    }
+    if (categoryId) {
+      conditions.push(eq(newsArticles.category_id, categoryId));
+    }
+
+    // Count total items
+    const countQuery = db.select({ count: sql<number>`count(*)` }).from(newsArticles);
+    if (conditions.length > 0) {
+      countQuery.where(and(...conditions));
+    }
+    const [{ count: total }] = await countQuery;
+
+    // Build main query with pagination
     let query = db.select({
       id: newsArticles.id,
       title: newsArticles.title,
@@ -28,40 +49,38 @@ export async function GET(request: Request) {
     .from(newsArticles)
     .innerJoin(categories, eq(newsArticles.category_id, categories.id))
     .innerJoin(authors, eq(newsArticles.author_id, authors.id))
-    .orderBy(desc(newsArticles.created_at));
+    .orderBy(desc(newsArticles.created_at))
+    .limit(limit)
+    .offset(offset);
 
-    if (status) {
-      // @ts-ignore - Drizzle enum type check can be tricky with string params
-      query = query.where(eq(newsArticles.status, status));
-    }
-
-    if (categoryId) {
-      // @ts-ignore
-      query = query.where(eq(newsArticles.category_id, categoryId));
+    if (conditions.length > 0) {
+      // @ts-ignore - Drizzle type issue with dynamic conditions
+      query = query.where(and(...conditions));
     }
 
     const results = await query;
     
     // Transform results to include derived fields
     const transformedResults = results.map((article) => {
-      // Calculate read time: ~200 words per minute
       const wordCount = article.content ? article.content.split(/\s+/).length : 0;
       const readTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
       
       return {
         ...article,
         readTime: `${readTimeMinutes} PHÚT`,
-        // Use a placeholder image if none exists (would need image_url column in future)
         image: `https://saigonvalve.vn/uploads/files/2025/06/24/thumbs/datalogger-1-306x234-5.png`,
       };
     });
     
-    return apiResponse(transformedResults);
+    return apiResponse(transformedResults, {
+      meta: createPaginationMeta(page, limit, Number(total)),
+    });
   } catch (error) {
     console.error("Error fetching news:", error);
     return apiError("Internal Server Error", 500);
   }
 }
+
 
 
 // POST /api/news - Create a new article

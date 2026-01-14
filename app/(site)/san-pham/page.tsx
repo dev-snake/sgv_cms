@@ -49,29 +49,47 @@ export default function ProductArchive() {
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await api.get("/api/products?status=active");
-        if (response.data.success) {
-          const data = response.data.data || [];
-          setProducts(data);
-          
-          // Extract unique categories from products
+  const fetchProducts = async (page: number = 1) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        status: "active",
+        page: String(page),
+        limit: String(ITEMS_PER_PAGE),
+      });
+      
+      const response = await api.get(`/api/products?${params.toString()}`);
+      if (response.data.success) {
+        const data = response.data.data || [];
+        setProducts(data);
+        
+        // Set pagination from API meta
+        if (response.data.meta) {
+          setTotalPages(response.data.meta.totalPages || 1);
+          setTotal(response.data.meta.total || 0);
+        }
+        
+        // Extract unique categories (only on first load)
+        if (page === 1) {
           const uniqueCategories = ["Tất cả", ...new Set(data.map((p: Product) => p.category).filter(Boolean))];
           setCategories(uniqueCategories as string[]);
         }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
       }
-    };
-    fetchProducts();
-  }, []);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (loading) {
+  useEffect(() => {
+    fetchProducts(currentPage);
+  }, [currentPage]);
+
+  if (loading && products.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
@@ -79,14 +97,13 @@ export default function ProductArchive() {
     );
   }
 
+  // Client-side filtering for category and search (since API already returned paginated data)
   const filteredProducts = products.filter(p => 
     (selectedCategory === "Tất cả" || p.category === selectedCategory) &&
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handleCategoryChange = (cat: string) => {
     setSelectedCategory(cat);
@@ -95,7 +112,11 @@ export default function ProductArchive() {
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
 
@@ -191,7 +212,7 @@ export default function ProductArchive() {
 
                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-px bg-slate-100 border border-slate-100">
                     <AnimatePresence mode="popLayout">
-                       {paginatedProducts.map((product) => (
+                       {filteredProducts.map((product) => (
                         <motion.div
                           layout
                           key={product.id}

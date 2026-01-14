@@ -1,16 +1,42 @@
 import { db } from "@/db";
 import { products, categories } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 
-// GET /api/products - List products
+// GET /api/products - List products with pagination
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const categoryId = searchParams.get("categoryId");
     const status = searchParams.get("status") as "active" | "inactive" | null;
     const isFeatured = searchParams.get("isFeatured") === "true";
+    const search = searchParams.get("search");
+    
+    // Parse pagination params
+    const { page, limit } = parsePaginationParams(searchParams, { limit: 12 });
+    const offset = calculateOffset(page, limit);
 
+    // Build where conditions
+    const conditions = [];
+    if (categoryId) {
+      conditions.push(eq(products.category_id, categoryId));
+    }
+    if (status) {
+      conditions.push(eq(products.status, status));
+    }
+    if (isFeatured) {
+      conditions.push(eq(products.is_featured, true));
+    }
+
+    // Count total items
+    const countQuery = db.select({ count: sql<number>`count(*)` }).from(products);
+    if (conditions.length > 0) {
+      countQuery.where(and(...conditions));
+    }
+    const [{ count: total }] = await countQuery;
+
+    // Build main query with pagination
     let query = db.select({
       id: products.id,
       name: products.name,
@@ -34,30 +60,26 @@ export async function GET(request: Request) {
     })
     .from(products)
     .innerJoin(categories, eq(products.category_id, categories.id))
-    .orderBy(desc(products.created_at));
+    .orderBy(desc(products.created_at))
+    .limit(limit)
+    .offset(offset);
 
-    if (categoryId) {
-      // @ts-ignore
-      query = query.where(eq(products.category_id, categoryId));
-    }
-
-    if (status) {
-      // @ts-ignore
-      query = query.where(eq(products.status, status));
-    }
-
-    if (isFeatured) {
-      // @ts-ignore
-      query = query.where(eq(products.is_featured, true));
+    if (conditions.length > 0) {
+      // @ts-ignore - Drizzle type issue with dynamic conditions
+      query = query.where(and(...conditions));
     }
 
     const results = await query;
-    return apiResponse(results);
+    
+    return apiResponse(results, {
+      meta: createPaginationMeta(page, limit, Number(total)),
+    });
   } catch (error) {
     console.error("Error fetching products:", error);
     return apiError("Internal Server Error", 500);
   }
 }
+
 
 // POST /api/products - Create a new product
 export async function POST(request: Request) {
