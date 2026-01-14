@@ -9,16 +9,20 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status") as "draft" | "published" | null;
     const categoryId = searchParams.get("categoryId");
+    const featured = searchParams.get("featured");
 
     let query = db.select({
       id: newsArticles.id,
       title: newsArticles.title,
       slug: newsArticles.slug,
       summary: newsArticles.summary,
+      content: newsArticles.content,
       status: newsArticles.status,
       published_at: newsArticles.published_at,
       created_at: newsArticles.created_at,
+      category_id: newsArticles.category_id,
       category: categories.name,
+      author_id: newsArticles.author_id,
       author: authors.name,
     })
     .from(newsArticles)
@@ -37,12 +41,28 @@ export async function GET(request: Request) {
     }
 
     const results = await query;
-    return apiResponse(results);
+    
+    // Transform results to include derived fields
+    const transformedResults = results.map((article) => {
+      // Calculate read time: ~200 words per minute
+      const wordCount = article.content ? article.content.split(/\s+/).length : 0;
+      const readTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
+      
+      return {
+        ...article,
+        readTime: `${readTimeMinutes} PHÚT`,
+        // Use a placeholder image if none exists (would need image_url column in future)
+        image: `https://saigonvalve.vn/uploads/files/2025/06/24/thumbs/datalogger-1-306x234-5.png`,
+      };
+    });
+    
+    return apiResponse(transformedResults);
   } catch (error) {
     console.error("Error fetching news:", error);
     return apiError("Internal Server Error", 500);
   }
 }
+
 
 // POST /api/news - Create a new article
 export async function POST(request: Request) {

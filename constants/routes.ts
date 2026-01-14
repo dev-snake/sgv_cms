@@ -60,7 +60,7 @@ export const PORTAL_ROUTES = {
 
 export const ADMIN_ROUTES = {
   ROOT: "/portal",
-  DASHBOARD: "/portal/cms/news", // Current landing for admin
+  DASHBOARD: "/portal/cms/news", 
 } as const;
 
 export const API_ROUTES = {

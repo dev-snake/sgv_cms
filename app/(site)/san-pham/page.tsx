@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -27,41 +27,59 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import api from "@/services/axios";
 
-const CATEGORIES = [
-  "Tất cả",
-  "Van OKM Japan",
-  "Thiết bị Noah Korea",
-  "IoT Ngành Nước",
-  "Khớp nối & Phụ kiện",
-];
-
-const PRODUCTS = [
-  { id: 1, name: "VAN BƯỚM OKM SERIES 612X", category: "Van OKM Japan", image: "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png", desc: "Sử dụng cho hệ thống nước sạch và xử lý nước thải." },
-  { id: 2, name: "ACTUATOR NOAH SERIES NA", category: "Thiết bị Noah Korea", image: "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png", desc: "Bộ điều khiển điện tiêu chuẩn IP67/IP68." },
-  { id: 3, name: "THIẾT BỊ ĐO ĐỘ ĐỤC SGVT420", category: "IoT Ngành Nước", image: "https://saigonvalve.vn/uploads/files/2024/11/14/-c.png", desc: "Cảm biến đo độ đục trực tuyến độ chính xác cao." },
-  { id: 4, name: "DATALOGGER SV1-DAQ", category: "IoT Ngành Nước", image: "https://saigonvalve.vn/uploads/files/2024/11/14/DATALOGGER.png", desc: "Truyền dữ liệu qua mạng 4G/LTE/NBIoT." },
-  { id: 5, name: "VAN BI ĐIỀU KHIỂN ĐIỆN NOAH", category: "Thiết bị Noah Korea", image: "https://saigonvalve.vn/uploads/files/2024/11/14/T-QUAN-TR-C-.png", desc: "Giải pháp đóng mở tự động cho đường ống cỡ nhỏ." },
-  { id: 6, name: "HỆ THỐNG SCADA GIÁM SÁT", category: "IoT Ngành Nước", image: "https://saigonvalve.vn/uploads/files/2024/06/12/Blue-and-White-Clean-Modern-Technology-Conference-Zoom-Virtual-Background-2-.png", desc: "Phần mềm quản lý mạng lưới nước tập trung." },
-  { id: 7, name: "VAN CỔNG TY CHÌM Arita", category: "Van OKM Japan", image: "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png", desc: "Tiêu chuẩn BS5163 dùng trong PCCC & Cấp nước." },
-  { id: 8, name: "KHỚP NỐI MỀM TOAFLEX", category: "Khớp nối & Phụ kiện", image: "https://saigonvalve.vn/uploads/files/2024/11/14/DATALOGGER.png", desc: "Khớp nối cao su giảm chấn chống vặn cho đường ống." },
-  { id: 9, name: "CẢM BIẾN ÁP SUẤT SGV-P10", category: "IoT Ngành Nước", image: "https://saigonvalve.vn/uploads/files/2024/11/14/-c.png", desc: "Đo áp suất mạng lưới, tích hợp ngõ ra 4-20mA." },
-  { id: 10, name: "VAN MỘT CHIỀU CÁNH LẬT OKM", category: "Van OKM Japan", image: "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png", desc: "Ngăn dòng chảy ngược, thiết kế tối ưu hóa lưu lượng." },
-  { id: 11, name: "BỘ ĐIỀU KHIỂN KHÍ NÉN NOAH", category: "Thiết bị Noah Korea", image: "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png", desc: "Pneumatic Actuator cho các ứng dụng công nghiệp nặng." },
-  { id: 12, name: "ĐỒNG HỒ ĐO LƯU LƯỢNG ĐIỆN TỪ", category: "IoT Ngành Nước", image: "https://saigonvalve.vn/uploads/files/2024/11/14/DATALOGGER.png", desc: "Đo lưu lượng nước thải và nước cấp độ chính xác cao." },
-  { id: 13, name: "VAN GIẢM ÁP ARITA", category: "Van OKM Japan", image: "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png", desc: "Ổn định áp suất đường ống trong hệ thống cấp nước." },
-  { id: 14, name: "CÔNG TẮC ÁP SUẤT NOAH", category: "Thiết bị Noah Korea", image: "https://saigonvalve.vn/uploads/files/2024/11/14/-c.png", desc: "Giám sát ngưỡng áp suất cho bơm và bình tích áp." },
-  { id: 15, name: "MODULE TRUYỀN TIN SV1-MOD", category: "IoT Ngành Nước", image: "https://saigonvalve.vn/uploads/files/2024/11/14/DATALOGGER.png", desc: "Chuyển đổi các tín hiệu Modbus RTU sang MQTT/Cloud." },
-];
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  image_url: string | null;
+  tech_summary: string | null;
+  price: string;
+  status: string;
+}
 
 const ITEMS_PER_PAGE = 6;
 
 export default function ProductArchive() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>(["Tất cả"]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredProducts = PRODUCTS.filter(p => 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get("/api/products?status=active");
+        if (response.data.success) {
+          const data = response.data.data || [];
+          setProducts(data);
+          
+          // Extract unique categories from products
+          const uniqueCategories = ["Tất cả", ...new Set(data.map((p: Product) => p.category).filter(Boolean))];
+          setCategories(uniqueCategories as string[]);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+      </div>
+    );
+  }
+
+  const filteredProducts = products.filter(p => 
     (selectedCategory === "Tất cả" || p.category === selectedCategory) &&
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -79,6 +97,7 @@ export default function ProductArchive() {
     setSearchQuery(query);
     setCurrentPage(1);
   };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-white pt-24">
@@ -118,7 +137,7 @@ export default function ProductArchive() {
                          CHUYÊN MỤC
                        </h4>
                        <div className="flex flex-wrap gap-2 lg:flex-col">
-                          {CATEGORIES.map((cat) => (
+                          {categories.map((cat) => (
                             <button
                               key={cat}
                               onClick={() => handleCategoryChange(cat)}
@@ -173,7 +192,7 @@ export default function ProductArchive() {
                         >
                            <div className="relative aspect-square w-full overflow-hidden transition-all duration-500">
                               <Image
-                                src={product.image}
+                                src={product.image_url || "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png"}
                                 alt={product.name}
                                 fill
                                 className="object-contain p-4 group-hover:scale-110 transition-transform duration-1000"
@@ -186,9 +205,9 @@ export default function ProductArchive() {
                               <h3 className="text-sm font-bold text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-2 uppercase min-h-10">
                                  {product.name}
                               </h3>
-                              <p className="text-[11px] text-muted-foreground font-medium line-clamp-2">{product.desc}</p>
+                              <p className="text-[11px] text-muted-foreground font-medium line-clamp-2">{product.tech_summary || "Thiết bị chuyên dụng ngành nước và công nghiệp."}</p>
                               <Link 
-                                 href={`/san-pham/${product.id}`}
+                                 href={`/san-pham/${product.slug}`}
                                  className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-brand-secondary transition-colors pt-4 border-t border-slate-50 w-full"
                               >
                                  CHI TIẾT SẢN PHẨM <ArrowRight size={12} className="ml-auto" />

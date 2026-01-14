@@ -29,20 +29,70 @@ import {
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 import { SITE_ROUTES } from "@/constants/routes";
+import api from "@/services/axios";
 
-import { NEWS_LIST } from "@/data/news";
+interface NewsArticle {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string;
+  content?: string;
+  category: string;
+  author: string;
+  published_at: string | null;
+  created_at: string;
+  readTime: string;
+  image: string;
+}
 
 const ITEMS_PER_PAGE = 6;
 
+// Helper to format date in Vietnamese
+function formatDate(dateString: string | null): string {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day} THÁNG ${month}, ${year}`;
+}
+
 export default function NewsPage() {
+  const [news, setNews] = React.useState<NewsArticle[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const [currentPage, setCurrentPage] = React.useState(1);
+
+  React.useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await api.get("/api/news?status=published");
+        if (response.data.success) {
+          setNews(response.data.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching news:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNews();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+      </div>
+    );
+  }
   
-  const featuredNews = NEWS_LIST.find(n => n.featured) || NEWS_LIST[0];
-  const otherNews = NEWS_LIST.filter(n => n.id !== featuredNews.id);
+  const featuredNews = news[0];
+  const otherNews = news.slice(1);
   
   const totalPages = Math.ceil(otherNews.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentNews = otherNews.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -82,9 +132,9 @@ export default function NewsPage() {
             <div className="lg:w-2/3 space-y-16">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <AnimatePresence mode="popLayout">
-                  {currentNews.map((news) => (
+                  {currentNews.map((article) => (
                     <motion.article 
-                      key={news.id}
+                      key={article.id}
                       layout
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -93,30 +143,30 @@ export default function NewsPage() {
                     >
                       <div className="relative aspect-4/3 overflow-hidden shadow-lg border border-slate-100">
                         <Image
-                          src={news.image}
-                          alt={news.title}
+                          src={article.image}
+                          alt={article.title}
                           fill
                           className="object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                         <div className="absolute top-4 left-4">
                           <span className="bg-white/95 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-brand-primary shadow-sm">
-                            {news.category}
+                            {article.category}
                           </span>
                         </div>
                       </div>
                       <div className="space-y-4">
                         <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                          <span className="flex items-center gap-1.5"><CalendarDays size={12} className="text-brand-primary" /> {news.date}</span>
-                          <span className="flex items-center gap-1.5"><Clock size={12} className="text-brand-primary" /> {news.readTime}</span>
+                          <span className="flex items-center gap-1.5"><CalendarDays size={12} className="text-brand-primary" /> {formatDate(article.published_at)}</span>
+                          <span className="flex items-center gap-1.5"><Clock size={12} className="text-brand-primary" /> {article.readTime}</span>
                         </div>
                         <h3 className="text-xl font-black text-slate-900 group-hover:text-brand-primary transition-colors tracking-tight uppercase leading-tight min-h-12">
-                          <Link href={`/tin-tuc/${news.slug}`}>{news.title}</Link>
+                          <Link href={`/tin-tuc/${article.slug}`}>{article.title}</Link>
                         </h3>
                         <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 font-medium">
-                          {news.summary}
+                          {article.summary}
                         </p>
                         <Link 
-                          href={`/tin-tuc/${news.slug}`}
+                          href={`/tin-tuc/${article.slug}`}
                           className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-brand-secondary border-b border-brand-secondary/20 pb-1 hover:text-brand-primary hover:border-brand-primary transition-all"
                         >
                           XEM THÊM <ChevronRight size={14} />
