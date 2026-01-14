@@ -61,24 +61,37 @@ export default function NewsPage() {
   const [news, setNews] = React.useState<NewsArticle[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [totalPages, setTotalPages] = React.useState(1);
+  const [total, setTotal] = React.useState(0);
+
+  const fetchNews = async (page: number = 1) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        status: 'published',
+        page: String(page),
+        limit: String(ITEMS_PER_PAGE + 1), // +1 for featured
+      });
+      const response = await api.get(`/api/news?${params.toString()}`);
+      if (response.data.success) {
+        setNews(response.data.data || []);
+        if (response.data.meta) {
+          setTotalPages(response.data.meta.totalPages || 1);
+          setTotal(response.data.meta.total || 0);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching news:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   React.useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const response = await api.get("/api/news?status=published");
-        if (response.data.success) {
-          setNews(response.data.data || []);
-        }
-      } catch (error) {
-        console.error("Error fetching news:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchNews();
-  }, []);
+    fetchNews(currentPage);
+  }, [currentPage]);
 
-  if (loading) {
+  if (loading && news.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
@@ -88,10 +101,6 @@ export default function NewsPage() {
   
   const featuredNews = news[0];
   const otherNews = news.slice(1);
-  
-  const totalPages = Math.ceil(otherNews.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentNews = otherNews.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
 
   return (
@@ -132,7 +141,7 @@ export default function NewsPage() {
             <div className="lg:w-2/3 space-y-16">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <AnimatePresence mode="popLayout">
-                  {currentNews.map((article) => (
+                  {otherNews.map((article) => (
                     <motion.article 
                       key={article.id}
                       layout

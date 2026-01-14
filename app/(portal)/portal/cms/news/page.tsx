@@ -26,9 +26,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
+import { TablePagination } from "@/components/portal/table-pagination";
 import { PORTAL_ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 
@@ -38,12 +38,22 @@ export default function NewsManagementPage() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [itemToDelete, setItemToDelete] = React.useState<NewsArticle | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
+  const [totalItems, setTotalItems] = React.useState(0);
 
-  const fetchNews = async () => {
+  const fetchNews = async (page: number = 1, limit: number = 10) => {
     setIsLoading(true);
     try {
-      const res = await api.get("/api/news");
+      const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+      const res = await api.get(`/api/news?${params.toString()}`);
       setNewsList(res.data.data || []);
+      if (res.data.meta) {
+        setTotalItems(res.data.meta.total || 0);
+      }
     } catch (error) {
       console.error(error);
       toast.error("Không thể tải danh sách tin tức");
@@ -53,8 +63,8 @@ export default function NewsManagementPage() {
   };
 
   React.useEffect(() => {
-    fetchNews();
-  }, []);
+    fetchNews(currentPage, pageSize);
+  }, [currentPage, pageSize]);
 
   const filteredNews = newsList.filter(news => 
     news.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -69,15 +79,16 @@ export default function NewsManagementPage() {
   const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
     
+    setIsDeleting(true);
     try {
       await api.delete(`/api/news/${itemToDelete.id}`);
-      
       toast.success("Đã xóa bài viết thành công");
-      setNewsList(newsList.filter(n => n.id !== itemToDelete.id));
+      fetchNews(currentPage, pageSize);
     } catch (error) {
       console.error(error);
       toast.error("Lỗi khi xóa bài viết");
     } finally {
+      setIsDeleting(false);
       setDeleteDialogOpen(false);
       setItemToDelete(null);
     }
@@ -223,14 +234,15 @@ export default function NewsManagementPage() {
         )}
 
         {/* Pagination Footer */}
-        {!isLoading && newsList.length > 0 && (
-          <div className="p-8 bg-slate-50/20 border-t border-slate-50 flex items-center justify-between">
-             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Đang hiển thị {filteredNews.length} bài viết trên tổng số {newsList.length}</p>
-             <div className="flex items-center gap-3">
-                <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-none">Trước</Button>
-                <Button disabled variant="outline" className="text-[10px] font-black uppercase tracking-widest px-8 h-12 border-slate-100 bg-white opacity-50 rounded-none">Sau</Button>
-             </div>
-          </div>
+        {!isLoading && totalItems > 0 && (
+          <TablePagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+            itemLabel="bài viết"
+          />
         )}
       </div>
 
@@ -242,6 +254,8 @@ export default function NewsManagementPage() {
         title="Xóa bài viết"
         description="Bài viết sẽ bị xóa vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác."
         itemName={itemToDelete?.title}
+        itemLabel="Bài viết"
+        loading={isDeleting}
       />
     </div>
   );
