@@ -166,12 +166,11 @@ export default function ProjectDetailPage() {
 
       {/* Project Content */}
       <section className="container mx-auto px-4 lg:px-8 py-16">
-        <div className="max-w-4xl mx-auto space-y-12">
-           <div className="prose prose-slate max-w-none prose-p:text-slate-600 prose-p:leading-relaxed prose-p:text-lg prose-p:font-medium">
-              <div className="whitespace-pre-line">
-                {project.description}
-              </div>
-           </div>
+        <div className="space-y-12">
+           <div 
+             className="prose prose-slate max-w-none prose-p:text-slate-600 prose-p:leading-relaxed prose-p:text-lg prose-p:font-medium prose-headings:font-black prose-headings:text-slate-900"
+             dangerouslySetInnerHTML={{ __html: project.description || '<p>Nội dung đang được cập nhật...</p>' }}
+           />
         </div>
       </section>
 
