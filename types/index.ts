@@ -1,5 +1,6 @@
 export interface NewsArticle {
   id: string;
+  slug: string;
   title: string;
   summary: string;
   desc?: string; // Legacy field for frontend compatibility
@@ -18,6 +19,7 @@ export interface NewsArticle {
 
 export interface Product {
   id: string;
+  slug: string;
   name: string;
   category_id: string;
   category?: string;
@@ -30,6 +32,7 @@ export interface Product {
 
 export interface Project {
   id: string;
+  slug: string;
   name: string;
   client_name?: string;
   start_date?: string;
@@ -51,3 +54,11 @@ export interface Contact {
   created_at: string;
 }
 
+export interface User {
+  id: string;
+  username: string;
+  full_name?: string;
+  role: string;
+  created_at?: string;
+  updated_at?: string;
+}

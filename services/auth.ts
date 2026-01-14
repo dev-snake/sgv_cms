@@ -2,22 +2,54 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-const secretKey = process.env.JWT_SECRET || "secret"; // In production, this should be an env variable
+const secretKey = process.env.JWT_SECRET || "secret";
 const key = new TextEncoder().encode(secretKey);
 
-export async function encrypt(payload: any) {
+export async function encrypt(payload: any, expireTime: string = "24h") {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("24h")
+    .setExpirationTime(expireTime)
     .sign(key);
 }
 
 export async function decrypt(input: string): Promise<any> {
-  const { payload } = await jwtVerify(input, key, {
-    algorithms: ["HS256"],
+  try {
+    const { payload } = await jwtVerify(input, key, {
+      algorithms: ["HS256"],
+    });
+    return payload;
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function generateTokens(user: any) {
+  const accessToken = await encrypt({ user }, "15m");
+  const refreshToken = await encrypt({ user }, "7d");
+  return { accessToken, refreshToken };
+}
+
+export async function setAuthCookies(accessToken: string, refreshToken: string) {
+  const cookieStore = await cookies();
+  
+  // Set Access Token (15 minutes) - not httpOnly so axios interceptor can read it
+  cookieStore.set("accessToken", accessToken, {
+    httpOnly: false, 
+    maxAge: 15 * 60,
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   });
-  return payload;
+
+  // Set Refresh Token (7 days) - httpOnly for security
+  cookieStore.set("refreshToken", refreshToken, {
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60,
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
 }
 
 export async function login(user: any) {
@@ -30,8 +62,10 @@ export async function login(user: any) {
 }
 
 export async function logout() {
-  // Destroy the session
-  (await cookies()).set("session", "", { expires: new Date(0) });
+  const cookieStore = await cookies();
+  cookieStore.set("session", "", { expires: new Date(0) });
+  cookieStore.set("accessToken", "", { expires: new Date(0) });
+  cookieStore.set("refreshToken", "", { expires: new Date(0) });
 }
 
 export async function getSession() {

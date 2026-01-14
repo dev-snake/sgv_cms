@@ -3,14 +3,14 @@ import { newsArticles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 
-// GET /api/news/[id] - Get a single article
+// GET /api/news/[slug] - Get a single article by slug
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { id } = await params;
-    const [article] = await db.select().from(newsArticles).where(eq(newsArticles.id, id));
+    const { slug } = await params;
+    const [article] = await db.select().from(newsArticles).where(eq(newsArticles.slug, slug));
 
     if (!article) {
       return apiError("Article not found", 404);

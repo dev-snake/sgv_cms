@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import api from "@/services/axios";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
+import { API_ROUTES, ADMIN_ROUTES } from "@/constants/routes";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,10 +24,14 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await api.post("/api/auth/login", formData);
+      const res = await api.post(API_ROUTES.AUTH.LOGIN, formData);
+      const { accessToken, refreshToken } = res.data.data;
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+
       toast.success("Đăng nhập thành công! Đang chuyển hướng...");
-      router.push("/portal/cms/news");
-      router.refresh(); // Important for middleware to recognize the new cookie
+      router.push(ADMIN_ROUTES.DASHBOARD);
+      router.refresh(); 
     } catch (error: any) {
       console.error(error);
       const message = error.response?.data?.error || "Sai tài khoản hoặc mật khẩu";
@@ -100,7 +105,7 @@ export default function LoginPage() {
                   <Input 
                     type="text"
                     required
-                    className="h-16 bg-slate-50 border-none pl-12 text-sm font-bold uppercase tracking-tight rounded-none focus-visible:ring-1 focus-visible:ring-brand-primary/20 transition-all"
+                    className="h-16 bg-slate-50 border-none pl-12 text-sm font-bold tracking-tight rounded-none focus-visible:ring-1 focus-visible:ring-brand-primary/20 transition-all"
                     placeholder="ADMIN"
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}

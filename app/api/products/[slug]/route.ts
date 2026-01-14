@@ -3,14 +3,14 @@ import { products } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 
-// GET /api/products/[id] - Get a single product
+// GET /api/products/[slug] - Get a single product by slug
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { id } = await params;
-    const [product] = await db.select().from(products).where(eq(products.id, id));
+    const { slug } = await params;
+    const [product] = await db.select().from(products).where(eq(products.slug, slug));
 
     if (!product) {
       return apiError("Product not found", 404);

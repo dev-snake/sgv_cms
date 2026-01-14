@@ -28,6 +28,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
+import { SITE_ROUTES } from "@/constants/routes";
 
 import { NEWS_LIST } from "@/data/news";
 
@@ -109,13 +110,13 @@ export default function NewsPage() {
                           <span className="flex items-center gap-1.5"><Clock size={12} className="text-brand-primary" /> {news.readTime}</span>
                         </div>
                         <h3 className="text-xl font-black text-slate-900 group-hover:text-brand-primary transition-colors tracking-tight uppercase leading-tight min-h-12">
-                          <Link href={`/tin-tuc/${news.id}`}>{news.title}</Link>
+                          <Link href={`/tin-tuc/${news.slug}`}>{news.title}</Link>
                         </h3>
                         <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 font-medium">
-                          {news.desc}
+                          {news.summary}
                         </p>
                         <Link 
-                          href={`/tin-tuc/${news.id}`}
+                          href={`/tin-tuc/${news.slug}`}
                           className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-brand-secondary border-b border-brand-secondary/20 pb-1 hover:text-brand-primary hover:border-brand-primary transition-all"
                         >
                           XEM THÊM <ChevronRight size={14} />

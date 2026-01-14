@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
-import { login } from "@/services/auth";
+import { login, generateTokens } from "@/services/auth";
 import { apiResponse, apiError } from "@/utils/api-response";
 
 export async function POST(request: Request) {
@@ -33,9 +33,19 @@ export async function POST(request: Request) {
       role: user.role,
     };
 
+    // Generate Tokens
+    const { accessToken, refreshToken } = await generateTokens(sessionUser);
+
+    // Set Cookies
+    const { setAuthCookies } = await import("@/services/auth");
+    await setAuthCookies(accessToken, refreshToken);
+
+    // Prepare session for cookie (backward compatibility for middleware)
     await login(sessionUser);
 
-    return apiResponse({ user: sessionUser });
+    return apiResponse({ 
+      user: sessionUser
+    });
   } catch (error) {
     console.error("Login Error:", error);
     return apiError("Internal Server Error", 500);

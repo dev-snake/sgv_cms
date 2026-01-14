@@ -29,12 +29,47 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
+import api from "@/services/axios";
+
 export default function NewsDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const article = NEWS_LIST.find(n => n.id === params.id) || NEWS_LIST[0];
+  const [article, setArticle] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [relatedArticles, setRelatedArticles] = React.useState<any[]>([]);
 
-  const relatedArticles = NEWS_LIST.filter(n => n.id !== article.id).slice(0, 3);
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [articleRes, relatedRes] = await Promise.all([
+          api.get(`/api/news/${params.slug}`),
+          api.get("/api/news?limit=3")
+        ]);
+        
+        if (articleRes.data.success) {
+          setArticle(articleRes.data.data);
+        }
+        if (relatedRes.data.success) {
+          setRelatedArticles(relatedRes.data.data.filter((n: any) => n.slug !== params.slug).slice(0, 3));
+        }
+      } catch (error) {
+        console.error("Error fetching news detail:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [params.slug]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+      </div>
+    );
+  }
+
+  if (!article) return <div className="pt-44 text-center">Không tìm thấy bài viết</div>;
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -192,7 +227,7 @@ export default function NewsDetailPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {relatedArticles.map((news) => (
-              <Link key={news.id} href={`/tin-tuc/${news.id}`} className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-slate-100 flex flex-col">
+              <Link key={news.id} href={`/tin-tuc/${news.slug}`} className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-slate-100 flex flex-col">
                 <div className="relative aspect-16/10 overflow-hidden">
                   <Image src={news.image} alt={news.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[8px] font-black uppercase tracking-widest text-brand-primary rounded">

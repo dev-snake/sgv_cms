@@ -45,7 +45,7 @@ export default function ProjectsManagementPage() {
     setIsLoading(true);
     try {
       const res = await api.get("/api/projects");
-      setProjectsList(res.data);
+      setProjectsList(res.data.data || []);
     } catch (error) {
       console.error(error);
       toast.error("Không thể tải danh sách dự án");

@@ -44,7 +44,7 @@ export default function ProductsManagementPage() {
     setIsLoading(true);
     try {
       const res = await api.get("/api/products");
-      setProductsList(res.data);
+      setProductsList(res.data.data || []);
     } catch (error) {
       console.error(error);
       toast.error("Không thể tải danh sách sản phẩm");

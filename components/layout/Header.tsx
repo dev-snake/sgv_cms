@@ -17,6 +17,8 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
+import { SITE_ROUTES } from "@/constants/routes";
+
 interface NavLink {
   label: string;
   href: string;
@@ -25,20 +27,20 @@ interface NavLink {
 }
 
 const NAV_LINKS: NavLink[] = [
-  { label: "TRANG CHỦ", href: "/" },
-  { label: "GIỚI THIỆU", href: "/gioi-thieu" },
+  { label: "TRANG CHỦ", href: SITE_ROUTES.HOME },
+  { label: "GIỚI THIỆU", href: SITE_ROUTES.ABOUT },
   { 
     label: "SẢN PHẨM", 
-    href: "/san-pham",
+    href: SITE_ROUTES.PRODUCTS,
     featured: [
-      { title: "Van OKM Japan", desc: "Dòng van bướm, van bi cao cấp đạt chuẩn quốc tế.", href: "/san-pham" },
-      { title: "Actuator Noah Korea", desc: "Bộ điều khiển điện, khí nén chính xác cao.", href: "/san-pham" },
-      { title: "IoT Ngành Nước", desc: "Cảm biến, Datalogger và phần mềm giám sát mạng lưới.", href: "/san-pham" },
+      { title: "Van OKM Japan", desc: "Dòng van bướm, van bi cao cấp đạt chuẩn quốc tế.", href: SITE_ROUTES.PRODUCTS },
+      { title: "Actuator Noah Korea", desc: "Bộ điều khiển điện, khí nén chính xác cao.", href: SITE_ROUTES.PRODUCTS },
+      { title: "IoT Ngành Nước", desc: "Cảm biến, Datalogger và phần mềm giám sát mạng lưới.", href: SITE_ROUTES.PRODUCTS },
     ]
   },
-  { label: "DỰ ÁN", href: "/du-an" },
-  { label: "TIN TỨC", href: "/tin-tuc" },
-  { label: "LIÊN HỆ", href: "/lien-he" },
+  { label: "DỰ ÁN", href: SITE_ROUTES.PROJECTS },
+  { label: "TIN TỨC", href: SITE_ROUTES.NEWS },
+  { label: "LIÊN HỆ", href: SITE_ROUTES.CONTACT },
 ];
 
 export default function Header() {
@@ -65,7 +67,7 @@ export default function Header() {
         <nav className="flex items-center justify-between">
           
           {/* Logo */}
-          <Link href="/" className="relative h-14 w-56 shrink-0 group">
+          <Link href={SITE_ROUTES.HOME} className="relative h-14 w-56 shrink-0 group">
             <Image
               src="https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png"
               alt="Sài Gòn Valve Logo"

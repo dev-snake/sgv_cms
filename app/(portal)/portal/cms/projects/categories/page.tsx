@@ -27,7 +27,7 @@ export default function ProjectCategoriesPage() {
     setIsLoading(true);
     try {
       const res = await api.get("/api/categories?type=project");
-      setCategories(res.data);
+      setCategories(res.data.data || []);
     } catch (error) {
       console.error(error);
       toast.error("Không thể tải danh mục");

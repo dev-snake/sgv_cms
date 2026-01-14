@@ -11,6 +11,7 @@ import {
   LogOut,
   Lock,
   Mail,
+  Users,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -73,6 +74,11 @@ const data = {
        url: PORTAL_ROUTES.contacts,
        icon: Mail,
     },
+    {
+      title: "Tài khoản Admin",
+      url: "/portal/users",
+      icon: Users,
+    },
   ],
   user: {
     name: "Quản trị viên",
@@ -88,6 +94,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const handleLogout = async () => {
     try {
       await api.post("/api/auth/logout");
+      // LocalStorage cleanup is now optional as we use cookies, 
+      // but let's keep it clean if anything was left.
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       toast.success("Đã đăng xuất");
       router.push("/login");
       router.refresh();

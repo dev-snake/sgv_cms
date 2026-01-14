@@ -1,3 +1,18 @@
+/**
+ * Centralized Route Definitions
+ * Use these constants instead of hard-coded strings throughout the app.
+ */
+
+export const SITE_ROUTES = {
+  HOME: "/",
+  ABOUT: "/gioi-thieu",
+  PRODUCTS: "/san-pham",
+  PROJECTS: "/du-an",
+  NEWS: "/tin-tuc",
+  CONTACT: "/lien-he",
+  LOGIN: "/login",
+} as const;
+
 export const PORTAL_ROUTES = {
   // Dashboard
   dashboard: "/portal",
@@ -41,6 +56,25 @@ export const PORTAL_ROUTES = {
 
   // Settings
   settings: "/portal/settings",
+} as const;
+
+export const ADMIN_ROUTES = {
+  ROOT: "/portal",
+  DASHBOARD: "/portal/cms/news", // Current landing for admin
+} as const;
+
+export const API_ROUTES = {
+  AUTH: {
+    LOGIN: "/api/auth/login",
+    LOGOUT: "/api/auth/logout",
+    REFRESH: "/api/auth/refresh",
+  },
+  PRODUCTS: "/api/products",
+  NEWS: "/api/news",
+  PROJECTS: "/api/projects",
+  CONTACTS: "/api/contacts",
+  CATEGORIES: "/api/categories",
+  MEDIA: "/api/media",
 } as const;
 
 export type PortalRoute = typeof PORTAL_ROUTES;

@@ -27,7 +27,7 @@ export default function ProductCategoriesPage() {
     setIsLoading(true);
     try {
       const res = await api.get("/api/categories?type=product");
-      setCategories(res.data);
+      setCategories(res.data.data || []);
     } catch (error) {
       console.error(error);
       toast.error("Không thể tải danh mục");

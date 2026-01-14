@@ -14,68 +14,42 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const PROJECTS = [
-  {
-    id: "1",
-    title: "LẮP ĐẶT HỆ THỐNG QUAN TRẮC CHẤT LƯỢNG NƯỚC TẠI CẦN THƠ",
-    location: "Cần Thơ, Việt Nam",
-    owner: "Công ty Cấp nước Cần Thơ",
-    operator: "Phòng Kỹ thuật CANTHOWASU",
-    dateBuilt: "2024 - 2025",
-    projectType: "Hạ tầng Nước Thông minh",
-    desc: "Cần Thơ là đô thị trung tâm của vùng Đồng bằng sông Cửu Long, nơi nước sông đóng vai trò then chốt trong sinh hoạt và phát triển kinh tế.",
-    image: "https://saigonvalve.vn/uploads/files/2025/07/16/thumbs/z6809258125215_0bfd24b1d2a12247ce2fe99f8bc81598-306x234-5.jpg",
-    gallery: [
-      "https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?auto=format&fit=crop&q=80&w=2000",
-      "https://images.unsplash.com/photo-1581094288338-2314dddb7ecb?auto=format&fit=crop&q=80&w=2000",
-      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=2000",
-    ],
-    solutions: [
-      "Hệ thống cảm biến đo chất lượng nước",
-      "Datalogger SV1-DAQ truyền dữ liệu 4G/LTE",
-      "Phần mềm giám sát trực tuyến SCADA",
-    ],
-    content: `Dự án lắp đặt hệ thống quan TRẮC chất lượng nước tại Cần Thơ – bước tiến quan trọng trong giám sát nguồn nước bền vững.
-
-Sài Gòn Valve tự hào là đơn vị cung cấp giải pháp toàn diện cho hệ thống quan trắc nước tại khu vực ĐBSCL. Với việc sử dụng các thiết bị tiên tiến, chúng tôi giúp khách hàng quản lý dữ liệu một cách trực quan và chính xác nhất.
-
-Hệ thống bao gồm các cụm cảm biến đo đa chỉ tiêu như pH, Độ đục, Clo dư, và COD. Tất cả dữ liệu được tập trung về bộ điều khiển trung tâm và truyền tải lên đám mây thông qua giao thức bảo mật cao.`,
-  },
-  {
-    id: "2",
-    title: "DỰ ÁN LẮP ĐẶT HỆ THỐNG QUAN TRẮC CHẤT LƯỢNG NƯỚC TẠI HUẾ",
-    location: "Thừa Thiên Huế, Việt Nam",
-    owner: "Công ty Cổ phần Cấp nước Thừa Thiên Huế (HueWACO)",
-    operator: "Ban Quản lý Dự án HueWACO",
-    dateBuilt: "2023 - 2024",
-    projectType: "Quan trắc Môi trường",
-    desc: "SÀI GÒN VALVE triển khai dự án lắp đặt hệ thống quan trắc chất lượng nước tại Huế – thành phố du lịch nổi tiếng gắn liền với sông Hương và sông Bồ.",
-    image: "https://saigonvalve.vn/uploads/files/2025/07/16/thumbs/495000495_642796432091557_8112711184192443493_n-306x234-5.jpg",
-    gallery: [
-      "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&q=80&w=2000",
-      "https://images.unsplash.com/photo-1454165205744-3b78555e5572?auto=format&fit=crop&q=80&w=2000",
-    ],
-    solutions: [
-      "Thiết bị đo pH, độ đục, Clo",
-      "Hệ thống truyền dữ liệu IoT",
-      "Phần mềm quản lý tập trung",
-    ],
-    content: `Bảo tồn vẻ đẹp của Sông Hương thông qua công nghệ giám sát hiện đại. Dự án này tập trung vào việc đảm bảo an toàn nguồn cấp nước cho khu vực nội đô và các khu di tích lịch sử.
-
-Chúng tôi đã thiết kế các trạm quan trắc nhỏ gọn, tiết kiệm năng lượng nhưng vẫn đảm bảo độ bền trong điều kiện thời tiết khắc nghiệt của miền Trung.`,
-  },
-];
+import api from "@/services/axios";
 
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params?.id as string;
-  
-  const currentIndex = PROJECTS.findIndex(p => p.id === id);
-  const project = currentIndex !== -1 ? PROJECTS[currentIndex] : PROJECTS[0];
+  const [project, setProject] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
 
-  const prevProject = PROJECTS[currentIndex - 1];
-  const nextProject = PROJECTS[currentIndex + 1];
+  React.useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const response = await api.get(`/api/projects/${params.slug}`);
+        if (response.data.success) {
+          setProject(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching project details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProject();
+  }, [params.slug]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+      </div>
+    );
+  }
+
+  if (!project) return <div className="pt-44 text-center">Không tìm thấy dự án</div>;
+
+  const prevProject: any = null;
+  const nextProject: any = null;
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -87,7 +61,7 @@ export default function ProjectDetailPage() {
             <ChevronRight size={10} />
             <Link href="/du-an" className="hover:text-brand-primary transition-colors">DỰ ÁN</Link>
             <ChevronRight size={10} />
-            <span className="text-slate-600">{project.projectType}</span>
+            <span className="text-slate-600 uppercase tracking-tighter">{project.category || "CÔNG TRÌNH"}</span>
           </nav>
 
           <motion.h1 
@@ -95,7 +69,7 @@ export default function ProjectDetailPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter uppercase leading-tight max-w-5xl"
           >
-            {project.title}
+            {project.name}
           </motion.h1>
         </div>
       </section>
@@ -107,13 +81,17 @@ export default function ProjectDetailPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="relative h-[50vh] min-h-[400px] w-full bg-slate-100 overflow-hidden"
         >
-          <Image
-            src={project.image}
-            alt={project.title}
-            fill
-            className="object-cover"
-            priority
-          />
+          {project.image_url ? (
+            <Image
+              src={project.image_url}
+              alt={project.name}
+              fill
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full w-full bg-slate-100 text-slate-300 italic font-medium">Đang cập nhật hình ảnh...</div>
+          )}
         </motion.div>
       </section>
 
@@ -133,40 +111,32 @@ export default function ProjectDetailPage() {
             <div className="space-y-6">
               <div className="space-y-1">
                 <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">LOẠI DỰ ÁN</p>
-                <p className="text-sm font-bold uppercase">{project.projectType}</p>
+                <p className="text-sm font-bold uppercase">{project.category || "Hạ tầng nước"}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">KHÁCH HÀNG</p>
-                <p className="text-sm font-bold uppercase">{project.owner}</p>
+                <p className="text-sm font-bold uppercase">{project.client_name || "Đang cập nhật"}</p>
               </div>
             </div>
 
             <div className="space-y-6">
               <div className="space-y-1">
                 <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">VỊ TRÍ</p>
-                <p className="text-sm font-bold uppercase">{project.location}</p>
+                <p className="text-sm font-bold uppercase">{project.location || "Việt Nam"}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">ĐƠN VỊ VẬN HÀNH</p>
-                <p className="text-sm font-bold uppercase">{project.operator}</p>
+                <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">TRẠNG THÁI</p>
+                <p className="text-sm font-bold uppercase">{project.status === "completed" ? "ĐÃ HOÀN THÀNH" : "ĐANG TRIỂN KHAI"}</p>
               </div>
             </div>
 
             <div className="space-y-6">
               <div className="space-y-1">
-                <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">GIẢI PHÁP</p>
-                <ul className="text-sm font-bold uppercase space-y-1">
-                  {project.solutions.map((s, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="mt-1.5 h-1 w-2 bg-brand-cyan shrink-0"></span>
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="space-y-1">
                 <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">THỜI GIAN THI CÔNG</p>
-                <p className="text-sm font-bold uppercase">{project.dateBuilt}</p>
+                <p className="text-sm font-bold uppercase">
+                  {project.start_date ? new Date(project.start_date).getFullYear() : "2024"} 
+                  {project.end_date ? ` - ${new Date(project.end_date).getFullYear()}` : ""}
+                </p>
               </div>
             </div>
           </div>
@@ -199,28 +169,8 @@ export default function ProjectDetailPage() {
         <div className="max-w-4xl mx-auto space-y-12">
            <div className="prose prose-slate max-w-none prose-p:text-slate-600 prose-p:leading-relaxed prose-p:text-lg prose-p:font-medium">
               <div className="whitespace-pre-line">
-                {project.content}
+                {project.description}
               </div>
-           </div>
-
-           {/* Gallery Images */}
-           <div className="grid grid-cols-1 gap-12 pt-12">
-              {project.gallery.map((img, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="relative aspect-video w-full bg-slate-50"
-                >
-                   <Image
-                    src={img}
-                    alt={`Gallery ${i}`}
-                    fill
-                    className="object-cover"
-                   />
-                </motion.div>
-              ))}
            </div>
         </div>
       </section>
@@ -230,7 +180,7 @@ export default function ProjectDetailPage() {
         <div className="container mx-auto px-4 lg:px-8 py-12 flex items-center justify-between">
            {prevProject ? (
              <Link 
-              href={`/du-an/${prevProject.id}`}
+              href={`/du-an/${prevProject.slug}`}
               className="group flex items-center gap-6 text-slate-400 hover:text-brand-primary transition-colors"
              >
                 <div className="size-12 border-2 border-slate-200 flex items-center justify-center group-hover:border-brand-primary transition-colors">
@@ -238,19 +188,19 @@ export default function ProjectDetailPage() {
                 </div>
                 <div>
                    <p className="text-[10px] font-black uppercase tracking-widest mb-1">DỰ ÁN TRƯỚC</p>
-                   <p className="text-sm font-bold text-slate-800 uppercase hidden sm:block">{prevProject.title}</p>
+                   <p className="text-sm font-bold text-slate-800 uppercase hidden sm:block">{prevProject.name}</p>
                 </div>
              </Link>
            ) : <div />}
 
            {nextProject ? (
              <Link 
-              href={`/du-an/${nextProject.id}`}
+              href={`/du-an/${nextProject.slug}`}
               className="group flex items-center gap-6 text-slate-400 text-right hover:text-brand-primary transition-colors"
              >
                 <div>
                    <p className="text-[10px] font-black uppercase tracking-widest mb-1">DỰ ÁN TIẾP THEO</p>
-                   <p className="text-sm font-bold text-slate-800 uppercase hidden sm:block">{nextProject.title}</p>
+                   <p className="text-sm font-bold text-slate-800 uppercase hidden sm:block">{nextProject.name}</p>
                 </div>
                 <div className="size-12 border-2 border-slate-200 flex items-center justify-center group-hover:border-brand-primary transition-colors">
                   <ArrowRight size={20} />

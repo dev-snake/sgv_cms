@@ -9,6 +9,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const categoryId = searchParams.get("categoryId");
     const status = searchParams.get("status") as "active" | "inactive" | null;
+    const isFeatured = searchParams.get("isFeatured") === "true";
 
     let query = db.select({
       id: products.id,
@@ -19,6 +20,16 @@ export async function GET(request: Request) {
       stock: products.stock,
       status: products.status,
       image_url: products.image_url,
+      is_featured: products.is_featured,
+      tech_specs: products.tech_specs,
+      features: products.features,
+      gallery: products.gallery,
+      tech_summary: products.tech_summary,
+      catalog_url: products.catalog_url,
+      warranty: products.warranty,
+      origin: products.origin,
+      availability: products.availability,
+      delivery_info: products.delivery_info,
       category: categories.name,
     })
     .from(products)
@@ -33,6 +44,11 @@ export async function GET(request: Request) {
     if (status) {
       // @ts-ignore
       query = query.where(eq(products.status, status));
+    }
+
+    if (isFeatured) {
+      // @ts-ignore
+      query = query.where(eq(products.is_featured, true));
     }
 
     const results = await query;
@@ -73,6 +89,16 @@ export async function POST(request: Request) {
       category_id,
       status: status || 'active',
       image_url: image_url || null,
+      is_featured: body.is_featured || false,
+      tech_specs: body.tech_specs || null,
+      features: body.features || null,
+      gallery: body.gallery || null,
+      tech_summary: body.tech_summary || null,
+      catalog_url: body.catalog_url || null,
+      warranty: body.warranty || null,
+      origin: body.origin || null,
+      availability: body.availability || null,
+      delivery_info: body.delivery_info || null,
     }).returning();
 
     return apiResponse(newProduct, { status: 201 });

@@ -43,7 +43,7 @@ export default function NewsManagementPage() {
     setIsLoading(true);
     try {
       const res = await api.get("/api/news");
-      setNewsList(res.data);
+      setNewsList(res.data.data || []);
     } catch (error) {
       console.error(error);
       toast.error("Không thể tải danh sách tin tức");

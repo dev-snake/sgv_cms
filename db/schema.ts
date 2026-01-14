@@ -1,4 +1,4 @@
-import { pgTable, varchar, text, timestamp, decimal, integer, pgEnum, bigint, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, varchar, text, timestamp, decimal, integer, pgEnum, bigint, uuid, boolean, jsonb } from 'drizzle-orm/pg-core';
 
 export const statusEnum = pgEnum('status', ['draft', 'published']);
 export const productStatusEnum = pgEnum('product_status', ['active', 'inactive']);
@@ -46,6 +46,19 @@ export const products = pgTable('products', {
   category_id: uuid('category_id').references(() => categories.id).notNull(),
   status: productStatusEnum('status').default('active').notNull(),
   image_url: varchar('image_url', { length: 255 }),
+  
+  // New Enhanced Fields
+  is_featured: boolean('is_featured').default(false).notNull(),
+  tech_specs: jsonb('tech_specs'), // JSON format for flexible specifications
+  features: jsonb('features'), // Array of highlighting features
+  gallery: jsonb('gallery'), // Array of image URLs
+  tech_summary: text('tech_summary'),
+  catalog_url: varchar('catalog_url', { length: 255 }),
+  warranty: varchar('warranty', { length: 100 }),
+  origin: varchar('origin', { length: 255 }),
+  availability: varchar('availability', { length: 255 }),
+  delivery_info: varchar('delivery_info', { length: 255 }),
+  
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 });

@@ -39,7 +39,7 @@ export default function ContactsManagementPage() {
     setIsLoading(true);
     try {
       const res = await api.get("/api/contacts");
-      setContacts(res.data);
+      setContacts(res.data.data || []);
     } catch (error) {
       console.error(error);
       toast.error("Không thể tải danh sách liên hệ");
