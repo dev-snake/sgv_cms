@@ -4,7 +4,6 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { motion } from "motion/react";
 import { 
   CalendarDays, 
   User, 
@@ -18,8 +17,6 @@ import {
   Bookmark,
   Printer
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { NEWS_LIST } from "@/data/news";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -218,7 +215,7 @@ export default function NewsDetailPage() {
 
       {/* Relate News */}
       <section className="py-24 bg-slate-50">
-        <div className="container mx-auto px-4 lg:px-8 max-w-6xl">
+        <div className="container mx-auto px-4 lg:px-8">
           <div className="mb-12 flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-black uppercase tracking-tight text-slate-900">BÀI VIẾT LIÊN QUAN</h2>
