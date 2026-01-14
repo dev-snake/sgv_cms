@@ -168,14 +168,16 @@ export default function NewsDetailPage() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="bg-white">
             {/* Featured Image */}
-            <div className="relative aspect-21/9 w-full overflow-hidden rounded-2xl mb-12 shadow-sm">
-              <Image
-                src={article.image}
-                alt={article.title}
-                fill
-                className="object-cover"
-              />
-            </div>
+            {article.image_url && (
+              <div className="relative aspect-21/9 w-full overflow-hidden rounded-2xl mb-12 shadow-sm">
+                <Image
+                  src={article.image_url}
+                  alt={article.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
 
             <div className="space-y-8">
               <p className="text-xl sm:text-2xl text-slate-600 font-medium leading-relaxed italic border-l-4 border-brand-primary pl-8">
@@ -228,8 +230,12 @@ export default function NewsDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {relatedArticles.map((news) => (
               <Link key={news.id} href={`/tin-tuc/${news.slug}`} className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-slate-100 flex flex-col">
-                <div className="relative aspect-16/10 overflow-hidden">
-                  <Image src={news.image} alt={news.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                <div className="relative aspect-16/10 overflow-hidden bg-slate-100">
+                  {news.image_url ? (
+                    <Image src={news.image_url} alt={news.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-slate-300"><CalendarDays size={32} /></div>
+                  )}
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[8px] font-black uppercase tracking-widest text-brand-primary rounded">
                     {news.category}
                   </div>
