@@ -102,12 +102,22 @@ export default function ProductArchive() {
   return (
     <div className="flex flex-col min-h-screen bg-white pt-24">
       {/* Page Header */}
-      <section className="bg-slate-50 py-16 border-b border-slate-100">
-        <div className="container mx-auto px-4 lg:px-8">
-           <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
-              <div className="space-y-4">
-                 <div className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">Sản phẩm & Giải pháp</div>
-                 <h1 className="text-5xl font-bold text-slate-900 tracking-tighter uppercase leading-none">THIẾT BỊ <br /> <span className="text-brand-primary">CHUYÊN DỤNG</span></h1>
+      <section className="relative py-20 bg-slate-950 overflow-hidden">
+        <div className="absolute inset-0 bg-carbon opacity-30"></div>
+        <div className="container relative z-10 mx-auto px-4 lg:px-8">
+           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
+              <div className="space-y-6 max-w-2xl">
+                 <div className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-brand-accent">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-accent"></span>
+                    Sản phẩm & Giải pháp
+                 </div>
+                 <h1 className="text-5xl sm:text-6xl font-black text-white tracking-tighter uppercase leading-none">
+                   THIẾT BỊ <br /> 
+                   <span className="text-brand-accent">CHUYÊN DỤNG</span>
+                 </h1>
+                 <p className="text-slate-400 font-medium text-lg max-w-xl">
+                   Van công nghiệp, thiết bị đo lường và giải pháp IoT tiêu chuẩn Nhật Bản & Hàn Quốc cho ngành nước và hạ tầng kỹ thuật.
+                 </p>
               </div>
               
               <div className="relative w-full max-w-md">
@@ -116,9 +126,9 @@ export default function ProductArchive() {
                    placeholder="Tìm kiếm sản phẩm..."
                    value={searchQuery}
                    onChange={(e) => handleSearchChange(e.target.value)}
-                   className="w-full bg-white px-6 py-5 pl-14 text-sm font-bold border-2 border-slate-100 focus:outline-none focus:border-brand-primary transition-all"
+                   className="w-full bg-white/5 backdrop-blur-md px-6 py-5 pl-14 text-sm font-bold border border-white/10 focus:outline-none focus:border-brand-accent text-white placeholder:text-white/30 transition-all"
                  />
-                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
+                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/30" size={20} />
               </div>
            </div>
         </div>
