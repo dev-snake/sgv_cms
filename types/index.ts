@@ -39,3 +39,15 @@ export interface Project {
   image: string;
   status: "ongoing" | "completed";
 }
+
+export interface Contact {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+  status: "new" | "read" | "replied" | "archived";
+  created_at: string;
+}
+

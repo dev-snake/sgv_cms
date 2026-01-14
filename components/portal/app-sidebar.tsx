@@ -10,6 +10,7 @@ import {
   User,
   LogOut,
   Lock,
+  Mail,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -66,6 +67,11 @@ const data = {
       title: "Cài đặt hệ thống",
       url: PORTAL_ROUTES.settings,
       icon: Settings,
+    },
+    {
+       title: "Quản lý Liên hệ",
+       url: PORTAL_ROUTES.contacts,
+       icon: Mail,
     },
   ],
   user: {
