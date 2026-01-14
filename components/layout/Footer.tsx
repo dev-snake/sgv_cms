@@ -99,7 +99,7 @@ export default function Footer() {
         <div className="pt-12 flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
           <div className="space-y-2">
              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
-               © 2025 SAI GON VALVE. ALL RIGHTS RESERVED.
+               © 2025 SÀI GÒN VALVE. BẢO LƯU TẤT CẢ QUYỀN.
              </p>
              <div className="flex items-center gap-2 justify-center md:justify-start text-[9px] font-bold text-slate-600 uppercase tracking-widest">
                 <ShieldCheck size={12} className="text-brand-primary" /> Bảo mật thông tin dự án tuyệt đối
@@ -108,7 +108,7 @@ export default function Footer() {
           <div className="flex flex-wrap justify-center gap-8">
             <Link href="#" className="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">Điều khoản</Link>
             <Link href="#" className="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">Bảo mật</Link>
-            <Link href="#" className="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">Sitemap</Link>
+            <Link href="#" className="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">Sơ đồ trang</Link>
           </div>
         </div>
       </div>

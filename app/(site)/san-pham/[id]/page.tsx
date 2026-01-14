@@ -32,7 +32,7 @@ export default function ProductDetailPage() {
   const product = PRODUCTS.find(p => p.id === params.id) || PRODUCTS[0];
 
   return (
-    <div className="flex flex-col min-h-screen bg-white pt-24">
+    <div className="flex flex-col min-h-screen bg-white pt-40">
       {/* Breadcrumbs */}
       <div className="bg-slate-50 border-b border-slate-100 py-4">
         <div className="container mx-auto px-4 lg:px-8">

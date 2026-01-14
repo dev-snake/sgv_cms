@@ -17,18 +17,16 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-const NAV_LINKS = [
+interface NavLink {
+  label: string;
+  href: string;
+  submenu?: { title: string; href: string }[];
+  featured?: { title: string; desc: string; href: string }[];
+}
+
+const NAV_LINKS: NavLink[] = [
   { label: "TRANG CHỦ", href: "/" },
-  { 
-    label: "GIỚI THIỆU", 
-    href: "/gioi-thieu",
-    submenu: [
-      { title: "Về Sài Gòn Valve", href: "/gioi-thieu" },
-      { title: "Tầm nhìn & Sứ mệnh", href: "/gioi-thieu#vision" },
-      { title: "Đội ngũ lãnh đạo", href: "/gioi-thieu#team" },
-      { title: "Năng lực thiết bị", href: "/gioi-thieu#equipment" },
-    ]
-  },
+  { label: "GIỚI THIỆU", href: "/gioi-thieu" },
   { 
     label: "SẢN PHẨM", 
     href: "/san-pham",
@@ -86,7 +84,7 @@ export default function Header() {
               <NavigationMenuList className="gap-2">
                 {NAV_LINKS.map((link) => (
                   <NavigationMenuItem key={link.label}>
-                    {link.submenu || link.featured ? (
+                    {"submenu" in link || "featured" in link ? (
                       <>
                         <NavigationMenuTrigger 
                           className={cn(
@@ -101,7 +99,7 @@ export default function Header() {
                             "grid gap-4 p-8",
                             link.featured ? "w-[700px] grid-cols-2" : "w-[280px] grid-cols-1"
                           )}>
-                            {(link.submenu || link.featured)?.map((item) => (
+                            {(link.submenu || link.featured)?.map((item: any) => (
                               <li key={item.title}>
                                 <NavigationMenuLink asChild>
                                   <Link
@@ -178,9 +176,9 @@ export default function Header() {
                   >
                     {link.label}
                   </Link>
-                  {(link.submenu || link.featured) && (
+                  {("submenu" in link || "featured" in link) && (
                     <div className="pl-6 grid grid-cols-1 gap-6 border-l-2 border-brand-primary/20">
-                      {(link.submenu || link.featured)?.map((item) => (
+                      {(link.submenu || link.featured)?.map((item: any) => (
                         <Link
                           key={item.title}
                           href={item.href}

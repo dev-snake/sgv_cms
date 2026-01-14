@@ -14,29 +14,29 @@ import { motion } from "motion/react";
 const PRODUCTS = [
   {
     id: 1,
-    name: "CG336 PORTABLE CUT GROOVING TOOL",
-    desc: "Precision grooving for industrial piping systems.",
+    name: "MÁY TẠO RÃNH DI ĐỘNG CG336",
+    desc: "Tạo rãnh chính xác cho hệ thống đường ống công nghiệp.",
     image: "https://www.victaulic.com/wp-content/uploads/2021/03/CG336_Portable_Cut_Grooving_Tool_Hero.png", // Example URL, should be replaced with real assets
     link: "/san-pham/cg336",
   },
   {
     id: 2,
-    name: "FIRELOCK™ INSTALLATION-READY™ STYLE 009V RIGID COUPLING",
-    desc: "Speed and reliability for fire protection systems.",
+    name: "KHỚP NỐI CỨNG FIRELOCK™ STYLE 009V",
+    desc: "Tốc độ và độ tin cậy tối ưu cho hệ thống PCCC.",
     image: "https://www.victaulic.com/wp-content/uploads/2016/09/Style-009H-Installation-Ready-Coupling.png",
     link: "/san-pham/firelock-009v",
   },
   {
     id: 3,
-    name: "SERIES 725T DIVERTER VALVE",
-    desc: "Efficient flow control for diverse industrial applications.",
+    name: "VAN CHUYỂN HƯỚNG SERIES 725T",
+    desc: "Kiểm soát dòng chảy hiệu quả cho các ứng dụng công nghiệp.",
     image: "https://www.victaulic.com/wp-content/uploads/2016/09/Series-725T-Diverter-Valve.png",
     link: "/san-pham/series-725t",
   },
   {
     id: 4,
-    name: "VIC-300 MASTERSEAL™ BUTTERFLY VALVE",
-    desc: "High-performance sealing for general service piping.",
+    name: "VAN BƯỚM VIC-300 MASTERSEAL™",
+    desc: "Làm kín hiệu suất cao cho hệ thống đường ống tổng quát.",
     image: "https://www.victaulic.com/wp-content/uploads/2016/09/Series-761-Vic-300-MasterSeal-Butterfly-Valve.png",
     link: "/san-pham/vic-300",
   },
@@ -52,7 +52,7 @@ export default function ProductSpotlight() {
           viewport={{ once: true }}
           className="text-3xl font-black text-brand-secondary uppercase tracking-wider mb-16"
         >
-          PRODUCT SPOTLIGHT
+          SẢN PHẨM NỔI BẬT
         </motion.h2>
 
         <Carousel
@@ -79,7 +79,7 @@ export default function ProductSpotlight() {
                       {product.name}
                     </h3>
                     <p className="text-[10px] font-bold text-brand-primary uppercase tracking-widest hidden group-hover:block animate-in fade-in slide-in-from-top-1">
-                      VIEW PRODUCT
+                      XEM CHI TIẾT
                     </p>
                   </div>
                 </div>

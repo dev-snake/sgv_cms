@@ -80,7 +80,7 @@ export default function ProjectDetailPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Top Header & Breadcrumbs */}
-      <section className="bg-slate-50 pt-32 pb-8 border-b border-slate-200">
+      <section className="bg-slate-50 pt-44 pb-8 border-b border-slate-200">
         <div className="container mx-auto px-4 lg:px-8">
           <nav className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8">
             <Link href="/" className="hover:text-brand-primary transition-colors">TRANG CHỦ</Link>

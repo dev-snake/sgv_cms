@@ -39,7 +39,7 @@ export default function NewsDetailPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Top Navigation & Breadcrumbs - Fixed pt-32 to avoid header overlap */}
-      <section className="pt-32 pb-6 border-b border-slate-100">
+      <section className="pt-44 pb-6 border-b border-slate-100">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <Breadcrumb>
@@ -74,7 +74,7 @@ export default function NewsDetailPage() {
 
       {/* Article Header */}
       <section className="py-12 sm:py-16">
-        <div className="container mx-auto px-4 lg:px-8 max-w-4xl">
+        <div className="container mx-auto px-4 lg:px-8">
           <div className="space-y-6">
             <div className="inline-flex items-center rounded-full bg-brand-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-primary">
               {article.category}

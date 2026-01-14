@@ -6,18 +6,18 @@ import { motion } from "motion/react";
 
 const BANNERS = [
   {
-    tag: "FEATURED SYSTEM",
-    title: "THE QUICKVIC™ SYSTEM",
-    desc: "Featuring the first and only coupling designed for high-performance impact guns.",
-    btnText: "Discover More",
+    tag: "HỆ THỐNG NỔI BẬT",
+    title: "HỆ THỐNG QUICKVIC™",
+    desc: "Hệ thống khớp nối đầu tiên và duy nhất được thiết kế cho súng bắn bulong hiệu suất cao.",
+    btnText: "Khám phá ngay",
     image: "https://images.unsplash.com/photo-1581093458791-9f3c3250bb8b?auto=format&fit=crop&q=80&w=2000",
     url: "/he-thong-quickvic",
   },
   {
-    tag: "FEATURED PLAYLIST",
-    title: "INSTALLATION INSTRUCTIONS",
-    desc: "Learn how to install Victaulic products or set up and operate Victaulic tools with easy to follow installation instructions videos.",
-    btnText: "View Playlist",
+    tag: "VIDEO HƯỚNG DẪN",
+    title: "HƯỚNG DẪN LẮP ĐẶT",
+    desc: "Tìm hiểu cách lắp đặt sản phẩm và vận hành thiết bị Victaulic thông qua các video hướng dẫn chi tiết.",
+    btnText: "Xem danh sách",
     image: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&q=80&w=2000",
     url: "/huong-dan-lap-dat",
   },

@@ -15,7 +15,7 @@ const SLIDES = [
     highlight: "HẠ TẦNG NƯỚC",
     titleSuffix: "THÔNG MINH",
     desc: "Sài Gòn Valve đồng hành cùng doanh nghiệp Việt trong việc tối ưu hóa mạng lưới cấp thoát nước bằng công nghệ IoT và van công nghiệp chất lượng cao.",
-    accent: "Leading Industrial Solutions"
+    accent: "Giải pháp Công nghiệp Hàng đầu"
   },
   {
     image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=2000",
@@ -24,7 +24,7 @@ const SLIDES = [
     highlight: "CÔNG NGHỆ IOT",
     titleSuffix: "TIÊN PHONG",
     desc: "Số hóa hạ tầng kỹ thuật với hệ thống Datalogger và phần mềm giám sát thông minh, giúp quản lý dữ liệu thời gian thực và vận hành hiệu quả.",
-    accent: "Smart Water Management"
+    accent: "Quản lý Nước Thông minh"
   },
   {
     image: "https://images.unsplash.com/photo-1534938665420-4193effeabb4?auto=format&fit=crop&q=80&w=2000",
@@ -33,7 +33,7 @@ const SLIDES = [
     highlight: "CHUẨN QUỐC TẾ",
     titleSuffix: "CHÍNH HÃNG",
     desc: "Phân phối độc quyền các thương hiệu van và thiết bị điều khiển hàng đầu từ Nhật Bản, Hàn Quốc và EU, đảm bảo bền bỉ trong mọi điều kiện.",
-    accent: "Global Quality Standards"
+    accent: "Tiêu chuẩn Chất lượng Toàn cầu"
   }
 ];
 
@@ -77,7 +77,7 @@ export default function Hero() {
       </AnimatePresence>
 
       <div className="container relative z-10 mx-auto h-full px-4 lg:px-8">
-        <div className="flex h-full flex-col justify-center">
+        <div className="flex h-full flex-col justify-center pt-24">
           
           <div className="max-w-5xl space-y-12">
             <AnimatePresence mode="wait">
@@ -94,7 +94,7 @@ export default function Hero() {
                   {SLIDES[current].accent}
                 </div>
 
-                <h1 className="text-6xl sm:text-7xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] uppercase">
+                <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-tight uppercase">
                   {SLIDES[current].title} <br />
                   <span className="text-brand-cyan drop-shadow-[0_0_30px_rgba(6,182,212,0.3)]">{SLIDES[current].highlight}</span> <br />
                   <span className="text-white/90">{SLIDES[current].titleSuffix}</span>
@@ -156,7 +156,7 @@ export default function Hero() {
             className="w-1 bg-white/40 rounded-full"
           />
         </div>
-        <span className="text-[9px] font-black uppercase tracking-[0.5em]">SCROLL</span>
+        <span className="text-[9px] font-black uppercase tracking-[0.5em]">CUỘN XUỐNG</span>
       </motion.div>
     </section>
   );
