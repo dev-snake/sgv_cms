@@ -151,7 +151,7 @@ export default function ProjectsManagementPage() {
       </div>
 
       <div className="bg-white rounded-none border border-slate-100 overflow-hidden min-h-[500px]">
-        {/* Table Filters */}
+        {/* Table Filters  */}
         <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row gap-6 items-center justify-between bg-white">
           <div className="relative w-full md:w-1/2 group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-300 group-focus-within:text-brand-primary transition-colors" />
