@@ -7,28 +7,70 @@ import { motion } from "motion/react";
 import { MapPin, ExternalLink, MoveRight } from "lucide-react";
 import { SITE_ROUTES } from "@/constants/routes";
 import api from "@/services/axios";
+import { cn } from "@/lib/utils";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+interface Project {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  image_url: string | null;
+  start_date: string | null;
+  client_name: string | null;
+  status: string;
+}
+
+const ITEMS_PER_PAGE = 8;
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = React.useState<any[]>([]);
+  const [projects, setProjects] = React.useState<Project[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [totalPages, setTotalPages] = React.useState(1);
+  const [total, setTotal] = React.useState(0);
+
+  const fetchProjects = async (page: number = 1) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(ITEMS_PER_PAGE),
+      });
+      
+      const response = await api.get(`/api/projects?${params.toString()}`);
+      if (response.data.success) {
+        setProjects(response.data.data || []);
+        
+        if (response.data.meta) {
+          setTotalPages(response.data.meta.totalPages || 1);
+          setTotal(response.data.meta.total || 0);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   React.useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await api.get("/api/projects");
-        if (response.data.success) {
-          setProjects(response.data.data || []);
-        }
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProjects();
-  }, []);
+    fetchProjects(currentPage);
+  }, [currentPage]);
 
-  if (loading) {
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (loading && projects.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
@@ -59,6 +101,9 @@ export default function ProjectsPage() {
               KHẲNG ĐỊNH <br />
               <span className="text-brand-cyan">NĂNG LỰC DỰ ÁN</span>
             </motion.h1>
+            <p className="text-slate-400 font-medium text-lg max-w-xl">
+              Hơn {total > 0 ? total : 50}+ dự án đã triển khai thành công trên toàn quốc trong lĩnh vực cấp thoát nước và tự động hóa.
+            </p>
           </div>
         </div>
       </section>
@@ -90,14 +135,14 @@ export default function ProjectsPage() {
                       <div className="space-y-3">
                          <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-brand-primary">
                             <span>{project.category || "CÔNG TRÌNH"}</span>
-                            <span className="text-muted-foreground">{project.start_date ? new Date(project.start_date).toLocaleDateString() : ""}</span>
+                            <span className="text-muted-foreground">{project.start_date ? new Date(project.start_date).toLocaleDateString('vi-VN') : ""}</span>
                          </div>
                          <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight leading-snug line-clamp-2 group-hover:text-brand-cyan transition-colors">
                             {project.name}
                          </h3>
                          <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
                             <MapPin size={12} className="text-brand-cyan" />
-                            {project.location || "Việt Nam"}
+                            {project.client_name || "Việt Nam"}
                          </div>
                       </div>
 
@@ -111,6 +156,53 @@ export default function ProjectsPage() {
                 </motion.div>
              ))}
            </div>
+
+           {/* Pagination */}
+           {totalPages > 1 && (
+             <div className="pt-12">
+               <Pagination>
+                 <PaginationContent>
+                   <PaginationItem>
+                     <PaginationPrevious 
+                       href="#" 
+                       onClick={(e) => {
+                         e.preventDefault();
+                         if (currentPage > 1) handlePageChange(currentPage - 1);
+                       }}
+                       className={cn("text-[9px] font-black uppercase tracking-widest", currentPage === 1 && "pointer-events-none opacity-50")}
+                     />
+                   </PaginationItem>
+                   
+                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                     <PaginationItem key={page}>
+                       <PaginationLink 
+                         href="#" 
+                         onClick={(e) => {
+                           e.preventDefault();
+                           handlePageChange(page);
+                         }}
+                         isActive={currentPage === page}
+                         className="text-[11px] font-black"
+                       >
+                         {page}
+                       </PaginationLink>
+                     </PaginationItem>
+                   ))}
+
+                   <PaginationItem>
+                     <PaginationNext 
+                       href="#" 
+                       onClick={(e) => {
+                         e.preventDefault();
+                         if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                       }}
+                       className={cn("text-[9px] font-black uppercase tracking-widest", currentPage === totalPages && "pointer-events-none opacity-50")}
+                     />
+                   </PaginationItem>
+                 </PaginationContent>
+               </Pagination>
+             </div>
+           )}
         </div>
       </section>
 

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Save, ImagePlus, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,34 +16,108 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PROJECTS } from "@/data/projects";
 import { PORTAL_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
+import api from "@/services/axios";
+import { toast } from "sonner";
+
+interface Project {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  client_name: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  category_id: string;
+  status: string;
+  image_url: string | null;
+}
 
 export default function EditProjectPage() {
   const params = useParams();
+  const router = useRouter();
   const projectId = params.id as string;
 
-  const existingProject = PROJECTS.find((p) => p.id === projectId);
+  const [loading, setLoading] = React.useState(true);
+  const [saving, setSaving] = React.useState(false);
+  const [project, setProject] = React.useState<Project | null>(null);
+  const [categories, setCategories] = React.useState<any[]>([]);
 
   const [formData, setFormData] = React.useState({
-    name: existingProject?.name || "",
-    slug: existingProject?.name?.toLowerCase().replace(/\s+/g, "-") || "",
+    name: "",
+    slug: "",
     description: "",
-    client_name: existingProject?.client_name || "",
-    start_date: existingProject?.start_date || "",
-    end_date: existingProject?.end_date || "",
-    category_id: existingProject?.category_id || "1",
-    status: existingProject?.status || "ongoing",
-    image: existingProject?.image || "",
+    client_name: "",
+    start_date: "",
+    end_date: "",
+    category_id: "",
+    status: "ongoing",
+    image_url: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch project by ID
+        const projectRes = await api.get(`/api/projects/${projectId}`);
+        if (projectRes.data.success) {
+          const p = projectRes.data.data;
+          setProject(p);
+          setFormData({
+            name: p.name || "",
+            slug: p.slug || "",
+            description: p.description || "",
+            client_name: p.client_name || "",
+            start_date: p.start_date ? p.start_date.split('T')[0] : "",
+            end_date: p.end_date ? p.end_date.split('T')[0] : "",
+            category_id: p.category_id || "",
+            status: p.status || "ongoing",
+            image_url: p.image_url || "",
+          });
+        }
+
+        // Fetch categories
+        const catRes = await api.get("/api/categories?type=project");
+        if (catRes.data.success) {
+          setCategories(catRes.data.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching project:", error);
+        toast.error("Không thể tải thông tin dự án");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [projectId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Updating:", formData);
+    setSaving(true);
+    try {
+      const response = await api.patch(`/api/projects/${projectId}`, formData);
+      if (response.data.success) {
+        toast.success("Cập nhật dự án thành công!");
+        router.push(PORTAL_ROUTES.cms.projects.list);
+      }
+    } catch (error) {
+      console.error("Error updating project:", error);
+      toast.error("Không thể cập nhật dự án");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  if (!existingProject) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+      </div>
+    );
+  }
+
+  if (!project) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <p className="text-slate-500 font-medium">Không tìm thấy dự án.</p>
@@ -53,6 +127,7 @@ export default function EditProjectPage() {
       </div>
     );
   }
+
 
   return (
     <div className="space-y-10">
@@ -133,8 +208,9 @@ export default function EditProjectPage() {
               <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
                 <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold shadow-none focus:ring-1 focus:ring-brand-primary/20"><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
                 <SelectContent className="rounded-none border-slate-100">
-                  <SelectItem value="1" className="text-sm font-bold rounded-none">Hệ Thống Cấp Nước</SelectItem>
-                  <SelectItem value="2" className="text-sm font-bold rounded-none">Xử Lý Nước Thải</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id} className="text-sm font-bold rounded-none">{cat.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -143,8 +219,8 @@ export default function EditProjectPage() {
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">Hình ảnh</h3>
             <div className="space-y-3">
-              <Label htmlFor="image" className="text-[10px] font-black uppercase tracking-widest text-slate-500">URL hình ảnh</Label>
-              <Input id="image" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300" value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} />
+              <Label htmlFor="image_url" className="text-[10px] font-black uppercase tracking-widest text-slate-500">URL hình ảnh</Label>
+              <Input id="image_url" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300" value={formData.image_url} onChange={(e) => setFormData({ ...formData, image_url: e.target.value })} />
             </div>
           </div>
 
