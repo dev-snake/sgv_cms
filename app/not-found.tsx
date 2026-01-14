@@ -44,12 +44,12 @@ export default function NotFound() {
           <Button 
             variant="ghost" 
             onClick={() => window.history.back()}
-            className="w-full sm:w-auto text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-all rounded-xl"
+            className="w-full sm:w-auto text-[10px] font-black uppercase tracking-widest px-8 py-4 h-auto bg-slate-100 hover:cursor-pointer text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-all "
           >
             <ArrowLeft className="mr-2 size-4" /> Quay lại
           </Button>
           <Link href="/portal" className="w-full sm:w-auto">
-            <Button className="w-full bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-xl border-none shadow-none">
+            <Button className="w-full bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 hover:cursor-pointer h-auto transition-all  border-none shadow-none">
               <Home className="mr-2 size-4" /> Về Dashboard
             </Button>
           </Link>
