@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PORTAL_ROUTES } from "@/constants/routes";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { CategoryForm, CategoryFormData } from "@/components/portal/category-form";
 import api from "@/services/axios";
 import { toast } from "sonner";
@@ -23,7 +23,7 @@ export default function EditProductCategoryPage() {
     const fetchCategory = async () => {
       setIsLoading(true);
       try {
-        const res = await api.get(`/api/categories/${categoryId}`);
+        const res = await api.get(`${API_ROUTES.CATEGORIES}/${categoryId}`);
         setCategory(res.data.data);
       } catch (err: any) {
         console.error("Failed to fetch category", err);
@@ -41,7 +41,7 @@ export default function EditProductCategoryPage() {
   const handleFormSubmit = async (data: CategoryFormData) => {
     setIsSubmitting(true);
     try {
-      await api.patch(`/api/categories/${categoryId}`, data);
+      await api.patch(`${API_ROUTES.CATEGORIES}/${categoryId}`, data);
       toast.success("Cập nhật danh mục thành công");
       router.push(PORTAL_ROUTES.cms.products.categories.list);
     } catch (err: any) {

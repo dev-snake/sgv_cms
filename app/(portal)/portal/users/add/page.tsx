@@ -23,6 +23,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 
 export default function AddUserPage() {
@@ -44,9 +45,9 @@ export default function AddUserPage() {
 
     setIsSubmitting(true);
     try {
-      await api.post("/api/users", formData);
+      await api.post(API_ROUTES.USERS, formData);
       toast.success("Tạo tài khoản thành công");
-      router.push("/portal/users");
+      router.push(PORTAL_ROUTES.users.list);
       router.refresh();
     } catch (error: any) {
       console.error(error);
@@ -60,7 +61,7 @@ export default function AddUserPage() {
   return (
     <div className="space-y-12 pb-20">
       <div className="flex items-center gap-6">
-        <Link href="/portal/users">
+        <Link href={PORTAL_ROUTES.users.list}>
           <Button variant="outline" className="h-14 w-14 p-0 border-slate-100 rounded-none hover:bg-slate-50 transition-all active:scale-95">
             <ArrowLeft size={20} />
           </Button>

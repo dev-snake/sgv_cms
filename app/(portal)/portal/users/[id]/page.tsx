@@ -16,6 +16,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +37,7 @@ export default function EditUserPage() {
   React.useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await api.get(`/api/users/${userId}`);
+        const res = await api.get(`${API_ROUTES.USERS}/${userId}`);
         const user = res.data.data;
         setFormData({
           username: user.username,
@@ -47,7 +48,7 @@ export default function EditUserPage() {
       } catch (error) {
         console.error(error);
         toast.error("Không thể tải thông tin tài khoản");
-        router.push("/portal/users");
+        router.push(PORTAL_ROUTES.users.list);
       } finally {
         setIsLoading(false);
       }
@@ -68,9 +69,9 @@ export default function EditUserPage() {
       const updatePayload: any = { ...formData };
       if (!updatePayload.password) delete updatePayload.password;
 
-      await api.patch(`/api/users/${userId}`, updatePayload);
+      await api.patch(`${API_ROUTES.USERS}/${userId}`, updatePayload);
       toast.success("Cập nhật tài khoản thành công");
-      router.push("/portal/users");
+      router.push(PORTAL_ROUTES.users.list);
       router.refresh();
     } catch (error: any) {
       console.error(error);
@@ -93,7 +94,7 @@ export default function EditUserPage() {
   return (
     <div className="space-y-12 pb-20">
       <div className="flex items-center gap-6">
-        <Link href="/portal/users">
+        <Link href={PORTAL_ROUTES.users.list}>
           <Button variant="outline" className="h-14 w-14 p-0 border-slate-100 rounded-none hover:bg-slate-50 transition-all active:scale-95">
             <ArrowLeft size={20} />
           </Button>

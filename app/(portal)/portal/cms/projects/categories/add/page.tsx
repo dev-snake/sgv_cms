@@ -4,13 +4,31 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PORTAL_ROUTES } from "@/constants/routes";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { CategoryForm, CategoryFormData } from "@/components/portal/category-form";
+import api from "@/services/axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function AddProjectCategoryPage() {
-  const handleFormSubmit = (data: CategoryFormData) => {
-    console.log("Creating Project Category:", data);
-    // TODO: Connect to actual backend API
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const handleFormSubmit = async (data: CategoryFormData) => {
+    setIsSubmitting(true);
+    try {
+      await api.post(API_ROUTES.CATEGORIES, {
+        ...data,
+        type: "project"
+      });
+      toast.success("Thêm danh mục dự án thành công");
+      router.push(PORTAL_ROUTES.cms.projects.categories.list);
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi khi thêm danh mục");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

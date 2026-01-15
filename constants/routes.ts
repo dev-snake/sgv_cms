@@ -51,6 +51,13 @@ export const PORTAL_ROUTES = {
     },
   },
 
+  // Users
+  users: {
+    list: "/portal/users",
+    add: "/portal/users/add",
+    edit: (id: string) => `/portal/users/${id}`,
+  },
+
   // Contacts
   contacts: "/portal/contacts",
 
@@ -74,7 +81,9 @@ export const API_ROUTES = {
   PROJECTS: "/api/projects",
   CONTACTS: "/api/contacts",
   CATEGORIES: "/api/categories",
+  USERS: "/api/users",
   MEDIA: "/api/media",
+  STATS: "/api/stats",
 } as const;
 
 export type PortalRoute = typeof PORTAL_ROUTES;

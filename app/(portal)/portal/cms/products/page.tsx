@@ -14,7 +14,9 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
-  Package
+  Package,
+  Calendar as CalendarIcon,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -31,13 +33,23 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
 import { TablePagination } from "@/components/portal/table-pagination";
-import { PORTAL_ROUTES } from "@/constants/routes";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function ProductsManagementPage() {
   const [productsList, setProductsList] = React.useState<Product[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [debouncedSearch, setDebouncedSearch] = React.useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [itemToDelete, setItemToDelete] = React.useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -47,14 +59,31 @@ export default function ProductsManagementPage() {
   const [pageSize, setPageSize] = React.useState(10);
   const [totalItems, setTotalItems] = React.useState(0);
 
-  const fetchProducts = async (page: number = 1, limit: number = 10) => {
+  // Date Filter state
+  const [date, setDate] = React.useState<DateRange | undefined>();
+
+  // Debounce search term
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const fetchProducts = async (page: number, limit: number, search: string, dateRange?: DateRange) => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams({
         page: String(page),
         limit: String(limit),
       });
-      const res = await api.get(`/api/products?${params.toString()}`);
+
+      if (search) params.append("search", search);
+      if (dateRange?.from) params.append("startDate", dateRange.from.toISOString());
+      if (dateRange?.to) params.append("endDate", dateRange.to.toISOString());
+
+      const res = await api.get(`${API_ROUTES.PRODUCTS}?${params.toString()}`);
       setProductsList(res.data.data || []);
       if (res.data.meta) {
         setTotalItems(res.data.meta.total || 0);
@@ -68,14 +97,8 @@ export default function ProductsManagementPage() {
   };
 
   React.useEffect(() => {
-    fetchProducts(currentPage, pageSize);
-  }, [currentPage, pageSize]);
-
-  const filteredProducts = productsList.filter(product => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.category?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
-  );
+    fetchProducts(currentPage, pageSize, debouncedSearch, date);
+  }, [currentPage, pageSize, debouncedSearch, date]);
 
   const handleDeleteClick = (product: Product) => {
     setItemToDelete(product);
@@ -87,9 +110,9 @@ export default function ProductsManagementPage() {
     
     setIsDeleting(true);
     try {
-      await api.delete(`/api/products/${itemToDelete.id}`);
+      await api.delete(`${API_ROUTES.PRODUCTS}/${itemToDelete.id}`);
       toast.success("Đã xóa sản phẩm thành công");
-      fetchProducts(currentPage, pageSize);
+      fetchProducts(currentPage, pageSize, debouncedSearch, date);
     } catch (error) {
       console.error(error);
       toast.error("Lỗi khi xóa sản phẩm");
@@ -145,8 +168,8 @@ export default function ProductsManagementPage() {
 
       <div className="bg-white rounded-none border border-slate-100 overflow-hidden min-h-[500px]">
         {/* Table Filters */}
-        <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row gap-6 items-center justify-between bg-white">
-          <div className="relative w-full md:w-1/2 group">
+        <div className="p-8 border-b border-slate-50 flex flex-col xl:flex-row gap-6 items-center justify-between bg-white">
+          <div className="relative w-full xl:w-1/2 group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-300 group-focus-within:text-brand-primary transition-colors" />
             <input 
               placeholder="TÌM KIẾM THEO TÊN, SKU HOẶC DANH MỤC..." 
@@ -155,11 +178,61 @@ export default function ProductsManagementPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-3 w-full md:w-auto">
-             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 h-14 border-slate-100 rounded-none hover:bg-slate-50">
-                <Filter className="mr-2 size-4 text-slate-400" /> Bộ lọc
-             </Button>
-             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 h-14 border-slate-100 rounded-none hover:bg-slate-50">
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+             {/* Date Range Picker */}
+             <div className="grid gap-2 w-full sm:w-[300px]">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="date"
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-bold text-[10px] uppercase tracking-widest h-14 border-slate-100 rounded-none bg-slate-50/50",
+                        !date && "text-slate-400"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date?.from ? (
+                        date.to ? (
+                          <>
+                            {format(date.from, "dd/MM/yy")} -{" "}
+                            {format(date.to, "dd/MM/yy")}
+                          </>
+                        ) : (
+                          format(date.from, "dd/MM/yy")
+                        )
+                      ) : (
+                        <span>Lọc theo ngày</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-none border border-slate-100 shadow-xl" align="start">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={date?.from}
+                      selected={date}
+                      onSelect={setDate}
+                      numberOfMonths={2}
+                      className="rounded-none bg-white"
+                    />
+                    {date && (
+                      <div className="p-4 border-t border-slate-50 bg-slate-50/50 flex justify-end">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50"
+                          onClick={() => setDate(undefined)}
+                        >
+                          <X className="mr-2 size-3" /> Xóa lọc
+                        </Button>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+             </div>
+
+             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 h-14 border-slate-100 rounded-none hover:bg-slate-50 w-full sm:w-auto">
                 <ArrowUpDown className="mr-2 size-4 text-slate-400" /> Sắp xếp
              </Button>
           </div>
@@ -170,7 +243,7 @@ export default function ProductsManagementPage() {
           <div className="flex items-center justify-center h-[400px]">
             <Loader2 size={40} className="animate-spin text-brand-primary opacity-20" />
           </div>
-        ) : filteredProducts.length > 0 ? (
+        ) : productsList.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -184,7 +257,7 @@ export default function ProductsManagementPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filteredProducts.map((product) => (
+                {productsList.map((product) => (
                   <tr key={product.id} className="hover:bg-slate-50/30 transition-colors group">
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-6">
@@ -257,7 +330,7 @@ export default function ProductsManagementPage() {
         ) : (
           <div className="p-24 text-center h-[500px] flex items-center justify-center flex-col">
             <Package size={64} className="text-slate-100 mb-6" />
-            <p className="text-slate-400 font-medium tracking-tight uppercase text-[10px] tracking-[0.2em]">Không tìm thấy sản phẩm nào phù hợp.</p>
+            <p className="text-slate-400 font-medium uppercase text-[10px] tracking-[0.2em]">Không tìm thấy sản phẩm nào phù hợp.</p>
           </div>
         )}
 

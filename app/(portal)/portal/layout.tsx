@@ -14,6 +14,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Search, Bell, HelpCircle } from "lucide-react";
+import { PORTAL_ROUTES } from "@/constants/routes";
 
 export default function PortalLayout({
   children,
@@ -31,7 +32,7 @@ export default function PortalLayout({
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/portal" className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary transition-colors">
+                  <BreadcrumbLink href={PORTAL_ROUTES.dashboard} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary transition-colors">
                     Hệ thống
                   </BreadcrumbLink>
                 </BreadcrumbItem>

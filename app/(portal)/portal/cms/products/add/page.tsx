@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PORTAL_ROUTES } from "@/constants/routes";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
 import { toast } from "sonner";
 
@@ -45,7 +45,7 @@ export default function AddProductPage() {
   React.useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await api.get("/api/categories?type=product");
+        const res = await api.get(`${API_ROUTES.CATEGORIES}?type=product`);
         setCategories(res.data.data || []);
       } catch (error) {
         console.error("Failed to fetch categories", error);
@@ -83,7 +83,7 @@ export default function AddProductPage() {
 
     setIsSubmitting(true);
     try {
-      await api.post("/api/products", formData);
+      await api.post(API_ROUTES.PRODUCTS, formData);
 
       toast.success("Đã tạo sản phẩm thành công");
       router.push(PORTAL_ROUTES.cms.products.list);

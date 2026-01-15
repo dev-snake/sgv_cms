@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { projects, categories } from "@/db/schema";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike, gte, lte } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 
@@ -10,6 +10,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const categoryId = searchParams.get("categoryId");
     const status = searchParams.get("status") as "ongoing" | "completed" | null;
+    const search = searchParams.get("search");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
 
     // Parse pagination params
     const { page, limit } = parsePaginationParams(searchParams, { limit: 12 });
@@ -22,6 +25,20 @@ export async function GET(request: Request) {
     }
     if (status) {
       conditions.push(eq(projects.status, status));
+    }
+    if (search) {
+      conditions.push(or(
+        ilike(projects.name, `%${search}%`),
+        ilike(projects.client_name, `%${search}%`)
+      ));
+    }
+    if (startDate) {
+      conditions.push(gte(projects.created_at, new Date(startDate)));
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      conditions.push(lte(projects.created_at, end));
     }
 
     // Count total items

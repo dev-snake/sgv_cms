@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PORTAL_ROUTES } from "@/constants/routes";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
 import { toast } from "sonner";
 
@@ -46,7 +46,7 @@ export default function AddProjectPage() {
   React.useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await api.get("/api/categories?type=project");
+        const res = await api.get(`${API_ROUTES.CATEGORIES}?type=project`);
         setCategories(res.data.data || []);
       } catch (error) {
         console.error("Failed to fetch categories", error);
@@ -84,7 +84,7 @@ export default function AddProjectPage() {
 
     setIsSubmitting(true);
     try {
-      await api.post("/api/projects", formData);
+      await api.post(API_ROUTES.PROJECTS, formData);
 
       toast.success("Đã tạo dự án thành công");
       router.push(PORTAL_ROUTES.cms.projects.list);

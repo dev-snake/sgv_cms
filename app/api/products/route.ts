@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { products, categories } from "@/db/schema";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike, gte, lte } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 
@@ -12,6 +12,8 @@ export async function GET(request: Request) {
     const status = searchParams.get("status") as "active" | "inactive" | null;
     const isFeatured = searchParams.get("isFeatured") === "true";
     const search = searchParams.get("search");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
     
     // Parse pagination params
     const { page, limit } = parsePaginationParams(searchParams, { limit: 12 });
@@ -27,6 +29,20 @@ export async function GET(request: Request) {
     }
     if (isFeatured) {
       conditions.push(eq(products.is_featured, true));
+    }
+    if (search) {
+      conditions.push(or(
+        ilike(products.name, `%${search}%`),
+        ilike(products.sku, `%${search}%`)
+      ));
+    }
+    if (startDate) {
+      conditions.push(gte(products.created_at, new Date(startDate)));
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      conditions.push(lte(products.created_at, end));
     }
 
     // Count total items

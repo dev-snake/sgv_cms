@@ -28,6 +28,7 @@ import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmatio
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 
 export default function UsersManagementPage() {
   const [users, setUsers] = React.useState<User[]>([]);
@@ -39,7 +40,7 @@ export default function UsersManagementPage() {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const res = await api.get("/api/users");
+      const res = await api.get(API_ROUTES.USERS);
       setUsers(res.data.data || []);
     } catch (error) {
       console.error(error);
@@ -61,7 +62,7 @@ export default function UsersManagementPage() {
   const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
     try {
-      await api.delete(`/api/users/${itemToDelete.id}`);
+      await api.delete(`${API_ROUTES.USERS}/${itemToDelete.id}`);
       toast.success("Đã xóa tài khoản thành công");
       setUsers(users.filter(u => u.id !== itemToDelete.id));
     } catch (error) {
@@ -85,7 +86,7 @@ export default function UsersManagementPage() {
           <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Quản lý tài khoản</h1>
           <p className="text-slate-500 font-medium italic mt-2 text-sm">Quản lý danh sách quản trị viên và phân quyền truy cập hệ thống.</p>
         </div>
-        <Link href="/portal/users/add">
+        <Link href={PORTAL_ROUTES.users.add}>
           <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
             <Plus className="mr-2 size-4" /> Tạo tài khoản mới
           </Button>
@@ -156,7 +157,7 @@ export default function UsersManagementPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-64 p-2 rounded-none border border-slate-100 bg-white">
                           <DropdownMenuItem asChild className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
-                             <Link href={`/portal/users/${user.id}`} className="flex items-center gap-3 w-full">
+                             <Link href={PORTAL_ROUTES.users.edit(user.id)} className="flex items-center gap-3 w-full">
                                <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
                                <span className="text-xs font-bold uppercase tracking-tight">Sửa thông tin</span>
                              </Link>
@@ -180,7 +181,7 @@ export default function UsersManagementPage() {
         ) : (
           <div className="p-24 text-center h-[500px] flex items-center justify-center flex-col">
             <UserIcon size={64} className="text-slate-100 mb-6" />
-            <p className="text-slate-400 font-medium tracking-tight uppercase text-[10px] tracking-[0.2em]">Không tìm thấy tài khoản nào.</p>
+            <p className="text-slate-400 font-medium uppercase text-[10px] tracking-[0.2em]">Không tìm thấy thành viên nào phù hợp.</p>
           </div>
         )}
       </div>

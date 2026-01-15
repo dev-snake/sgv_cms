@@ -33,6 +33,7 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { TablePagination } from "@/components/portal/table-pagination";
 import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
+import { API_ROUTES } from "@/constants/routes";
 import {
   Sheet,
   SheetContent,
@@ -93,7 +94,7 @@ export default function ContactsManagementPage() {
       if (dateRange?.from) params.append("startDate", dateRange.from.toISOString());
       if (dateRange?.to) params.append("endDate", dateRange.to.toISOString());
 
-      const res = await api.get(`/api/contacts?${params.toString()}`);
+      const res = await api.get(`${API_ROUTES.CONTACTS}?${params.toString()}`);
       setContacts(res.data.data || []);
       if (res.data.meta) {
         setTotalItems(res.data.meta.total || 0);
@@ -117,7 +118,7 @@ export default function ContactsManagementPage() {
     // Mark as read if status is "new"
     if (contact.status === "new") {
       try {
-        await api.patch(`/api/contacts/${contact.id}`, { status: "read" });
+        await api.patch(`${API_ROUTES.CONTACTS}/${contact.id}`, { status: "read" });
         // Update local state
         setContacts(prev => prev.map(c => c.id === contact.id ? { ...c, status: "read" } : c));
       } catch (error) {
@@ -135,7 +136,7 @@ export default function ContactsManagementPage() {
     if (!itemToDelete) return;
     setIsDeleting(true);
     try {
-      await api.delete(`/api/contacts/${itemToDelete.id}`);
+      await api.delete(`${API_ROUTES.CONTACTS}/${itemToDelete.id}`);
       toast.success("Đã xóa liên hệ thành công");
       fetchContacts(currentPage, pageSize, debouncedSearch, date);
     } catch (error) {

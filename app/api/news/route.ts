@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { newsArticles, categories, authors } from "@/db/schema";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike, gte, lte } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 
@@ -10,6 +10,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status") as "draft" | "published" | null;
     const categoryId = searchParams.get("categoryId");
+    const search = searchParams.get("search");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
 
     // Parse pagination params
     const { page, limit } = parsePaginationParams(searchParams, { limit: 10 });
@@ -22,6 +25,20 @@ export async function GET(request: Request) {
     }
     if (categoryId) {
       conditions.push(eq(newsArticles.category_id, categoryId));
+    }
+    if (search) {
+      conditions.push(or(
+        ilike(newsArticles.title, `%${search}%`),
+        ilike(newsArticles.summary, `%${search}%`)
+      ));
+    }
+    if (startDate) {
+      conditions.push(gte(newsArticles.created_at, new Date(startDate)));
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      conditions.push(lte(newsArticles.created_at, end));
     }
 
     // Count total items

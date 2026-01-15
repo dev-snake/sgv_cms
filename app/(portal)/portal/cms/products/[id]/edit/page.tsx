@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import api from "@/services/axios";
-import { PORTAL_ROUTES } from "@/constants/routes";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
 import { toast } from "sonner";
 
@@ -52,8 +52,8 @@ export default function EditProductPage() {
       try {
         // Fetch categories and product in parallel
         const [categoriesRes, productRes] = await Promise.all([
-          api.get("/api/categories?type=product"),
-          api.get(`/api/products/${productId}`)
+          api.get(`${API_ROUTES.CATEGORIES}?type=product`),
+          api.get(`${API_ROUTES.PRODUCTS}/${productId}`)
         ]);
 
         setCategories(categoriesRes.data.data || []);
@@ -95,7 +95,7 @@ export default function EditProductPage() {
         image_url: formData.image
       };
       
-      await api.patch(`/api/products/${productId}`, submissionData);
+      await api.patch(`${API_ROUTES.PRODUCTS}/${productId}`, submissionData);
 
       toast.success("Cập nhật sản phẩm thành công");
       router.push(PORTAL_ROUTES.cms.products.list);

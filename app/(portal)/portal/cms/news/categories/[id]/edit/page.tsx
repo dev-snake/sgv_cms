@@ -5,30 +5,64 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PORTAL_ROUTES } from "@/constants/routes";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { CategoryForm, CategoryFormData } from "@/components/portal/category-form";
+import api from "@/services/axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
-// Mock data - replace with API call
-const NEWS_CATEGORIES = [
-  { id: "cat-1", name: "Tin tức", slug: "tin-tuc", description: "Các tin tức mới nhất", parentId: "none", isActive: true, orderIndex: 0, metaTitle: "Tin tức Sài Gòn Valve", metaDescription: "Tin tức mới nhất từ công ty", imageUrl: "" },
-  { id: "cat-2", name: "Sự kiện", slug: "su-kien", description: "Các sự kiện nổi bật", parentId: "none", isActive: true, orderIndex: 1, metaTitle: "Sự kiện Sài Gòn Valve", metaDescription: "Sự kiện sắp diễn ra", imageUrl: "" },
-  { id: "cat-3", name: "Kiến thức kỹ thuật", slug: "kien-thuc-ky-thuat", description: "Kiến thức chuyên môn về van vòi", parentId: "none", isActive: true, orderIndex: 2, metaTitle: "Kiến thức kỹ thuật", metaDescription: "Chuyên mục chia sẻ kinh nghiệm kỹ thuật", imageUrl: "" },
-  { id: "cat-4", name: "Thông báo", slug: "thong-bao", description: "Các thông báo quan trọng", parentId: "none", isActive: true, orderIndex: 3, metaTitle: "Thông báo quan trọng", metaDescription: "Thông báo từ ban quản trị", imageUrl: "" },
-  { id: "cat-5", name: "Khuyến mãi", slug: "khuyen-mai", description: "Chương trình khuyến mãi hấp dẫn", parentId: "none", isActive: true, orderIndex: 4, metaTitle: "Khuyến mãi đặc biệt", metaDescription: "Tổng hợp các chương trình ưu đãi", imageUrl: "" },
-];
 
 export default function EditNewsCategoryPage() {
   const params = useParams();
+  const router = useRouter();
   const categoryId = params.id as string;
 
-  const existingCategory = NEWS_CATEGORIES.find(c => c.id === categoryId);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [category, setCategory] = React.useState<any>(null);
 
-  const handleFormSubmit = (data: CategoryFormData) => {
-    console.log("Updating News Category:", categoryId, data);
-    // TODO: Connect to actual backend API
+  React.useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const res = await api.get(`${API_ROUTES.CATEGORIES}/${categoryId}`);
+        setCategory(res.data.data);
+      } catch (error) {
+        console.error(error);
+        toast.error("Không tìm thấy danh mục");
+        router.push(PORTAL_ROUTES.cms.news.categories.list);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCategory();
+  }, [categoryId, router]);
+
+  const handleFormSubmit = async (data: CategoryFormData) => {
+    setIsSubmitting(true);
+    try {
+      await api.patch(`${API_ROUTES.CATEGORIES}/${categoryId}`, {
+        ...data,
+        type: "news"
+      });
+      toast.success("Cập nhật danh mục thành công");
+      router.push(PORTAL_ROUTES.cms.news.categories.list);
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi khi cập nhật danh mục");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  if (!existingCategory) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-10 w-10 animate-spin text-brand-primary opacity-20" />
+      </div>
+    );
+  }
+  if (!category && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <p className="text-slate-500 font-medium">Không tìm thấy danh mục.</p>
@@ -59,7 +93,7 @@ export default function EditNewsCategoryPage() {
         <CategoryForm 
           type="news" 
           isEditing={true}
-          initialData={existingCategory}
+          initialData={category}
           onSubmit={handleFormSubmit} 
           backUrl={PORTAL_ROUTES.cms.news.categories.list} 
         />

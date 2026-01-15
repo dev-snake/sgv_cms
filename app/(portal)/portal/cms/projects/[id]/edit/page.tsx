@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PORTAL_ROUTES } from "@/constants/routes";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
 import api from "@/services/axios";
 import { toast } from "sonner";
@@ -60,7 +60,7 @@ export default function EditProjectPage() {
     const fetchData = async () => {
       try {
         // Fetch project by ID
-        const projectRes = await api.get(`/api/projects/${projectId}`);
+        const projectRes = await api.get(`${API_ROUTES.PROJECTS}/${projectId}`);
         if (projectRes.data.success) {
           const p = projectRes.data.data;
           setProject(p);
@@ -78,7 +78,7 @@ export default function EditProjectPage() {
         }
 
         // Fetch categories
-        const catRes = await api.get("/api/categories?type=project");
+        const catRes = await api.get(`${API_ROUTES.CATEGORIES}?type=project`);
         if (catRes.data.success) {
           setCategories(catRes.data.data || []);
         }
@@ -96,7 +96,7 @@ export default function EditProjectPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const response = await api.patch(`/api/projects/${projectId}`, formData);
+      const response = await api.patch(`${API_ROUTES.PROJECTS}/${projectId}`, formData);
       if (response.data.success) {
         toast.success("Cập nhật dự án thành công!");
         router.push(PORTAL_ROUTES.cms.projects.list);
@@ -133,7 +133,7 @@ export default function EditProjectPage() {
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-6">
-          <Link href="/portal/cms/projects">
+          <Link href={PORTAL_ROUTES.cms.projects.list}>
             <Button variant="outline" className="h-14 w-14 p-0 border-slate-100 rounded-none hover:bg-slate-50">
               <ArrowLeft size={20} />
             </Button>

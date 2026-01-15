@@ -7,7 +7,7 @@ import { Plus, Edit2, Trash2, FolderOpen, ArrowLeft, Loader2 } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
-import { PORTAL_ROUTES } from "@/constants/routes";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 
 interface Category {
@@ -26,7 +26,7 @@ export default function ProductCategoriesPage() {
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      const res = await api.get("/api/categories?type=product");
+      const res = await api.get(`${API_ROUTES.CATEGORIES}?type=product`);
       setCategories(res.data.data || []);
     } catch (error) {
       console.error(error);
@@ -49,7 +49,7 @@ export default function ProductCategoriesPage() {
     if (!itemToDelete) return;
     
     try {
-      await api.delete(`/api/categories/${itemToDelete.id}`);
+      await api.delete(`${API_ROUTES.CATEGORIES}/${itemToDelete.id}`);
       
       toast.success("Đã xóa danh mục thành công");
       setCategories(categories.filter(cat => cat.id !== itemToDelete.id));
