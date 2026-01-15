@@ -13,6 +13,7 @@ import {
   Lock,
   Mail,
   Users,
+  Images,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -68,7 +69,7 @@ const data = {
     {
        title: "Thư viện Media",
        url: PORTAL_ROUTES.cms.media,
-       icon: LayoutDashboard, // Will replace with a more suitable icon if needed
+       icon: Images,
     },
     {
       title: "Cài đặt hệ thống",
