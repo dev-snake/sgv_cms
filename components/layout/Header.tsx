@@ -29,15 +29,7 @@ interface NavLink {
 const NAV_LINKS: NavLink[] = [
   { label: "TRANG CHỦ", href: SITE_ROUTES.HOME },
   { label: "GIỚI THIỆU", href: SITE_ROUTES.ABOUT },
-  { 
-    label: "SẢN PHẨM", 
-    href: SITE_ROUTES.PRODUCTS,
-    featured: [
-      { title: "Van OKM Japan", desc: "Dòng van bướm, van bi cao cấp đạt chuẩn quốc tế.", href: SITE_ROUTES.PRODUCTS },
-      { title: "Actuator Noah Korea", desc: "Bộ điều khiển điện, khí nén chính xác cao.", href: SITE_ROUTES.PRODUCTS },
-      { title: "IoT Ngành Nước", desc: "Cảm biến, Datalogger và phần mềm giám sát mạng lưới.", href: SITE_ROUTES.PRODUCTS },
-    ]
-  },
+  { label: "SẢN PHẨM", href: SITE_ROUTES.PRODUCTS },
   { label: "DỰ ÁN", href: SITE_ROUTES.PROJECTS },
   { label: "TIN TỨC", href: SITE_ROUTES.NEWS },
   { label: "LIÊN HỆ", href: SITE_ROUTES.CONTACT },

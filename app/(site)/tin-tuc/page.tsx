@@ -139,49 +139,50 @@ export default function NewsPage() {
           <div className="flex flex-col lg:flex-row gap-20">
             
             <div className="w-full space-y-16">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <AnimatePresence mode="popLayout">
                   {otherNews.map((article) => (
-                    <motion.article 
+                    <motion.div
                       key={article.id}
                       layout
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex flex-col space-y-6 group"
+                      className="group relative bg-white overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-500 border border-slate-100"
                     >
-                      <div className="relative aspect-4/3 overflow-hidden shadow-lg border border-slate-100">
+                      <div className="relative aspect-4/3 w-full overflow-hidden">
                         <Image
                           src={article.image}
                           alt={article.title}
                           fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-700"
+                          className="object-cover transition-transform duration-1000 group-hover:scale-110"
                         />
-                        <div className="absolute top-4 left-4">
-                          <span className="bg-white/95 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-brand-primary shadow-sm">
-                            {article.category}
-                          </span>
-                        </div>
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       </div>
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                          <span className="flex items-center gap-1.5"><CalendarDays size={12} className="text-brand-primary" /> {formatDate(article.published_at)}</span>
-                          <span className="flex items-center gap-1.5"><Clock size={12} className="text-brand-primary" /> {article.readTime}</span>
+                      
+                      <div className="p-6 grow flex flex-col justify-between space-y-4">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-brand-primary">
+                            <span>{article.category || "TIN TỨC"}</span>
+                            <span className="text-muted-foreground">{formatDate(article.published_at)}</span>
+                          </div>
+                          <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight leading-snug line-clamp-2 group-hover:text-brand-primary transition-colors">
+                            <Link href={`/tin-tuc/${article.slug}`}>{article.title}</Link>
+                          </h3>
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
+                            <User size={12} className="text-brand-primary" />
+                            {article.author || "SGV Admin"}
+                          </div>
                         </div>
-                        <h3 className="text-xl font-black text-slate-900 group-hover:text-brand-primary transition-colors tracking-tight uppercase leading-tight min-h-12">
-                          <Link href={`/tin-tuc/${article.slug}`}>{article.title}</Link>
-                        </h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 font-medium">
-                          {article.summary}
-                        </p>
+
                         <Link 
                           href={`/tin-tuc/${article.slug}`}
-                          className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-brand-secondary border-b border-brand-secondary/20 pb-1 hover:text-brand-primary hover:border-brand-primary transition-all"
+                          className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-brand-primary transition-colors pt-2 border-t border-slate-50"
                         >
-                          XEM THÊM <ChevronRight size={14} />
+                          XEM CHI TIẾT <ChevronRight size={14} />
                         </Link>
                       </div>
-                    </motion.article>
+                    </motion.div>
                   ))}
                 </AnimatePresence>
               </div>
