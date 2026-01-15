@@ -10,6 +10,7 @@ export const SITE_ROUTES = {
   PROJECTS: "/du-an",
   NEWS: "/tin-tuc",
   CONTACT: "/lien-he",
+  RECRUITMENT: "/tuyen-dung",
   LOGIN: "/login",
 } as const;
 
@@ -49,6 +50,11 @@ export const PORTAL_ROUTES = {
         edit: (id: string) => `/portal/cms/products/categories/${id}/edit`,
       }
     },
+    jobs: {
+      list: "/portal/cms/jobs",
+      add: "/portal/cms/jobs/add",
+      edit: (id: string) => `/portal/cms/jobs/${id}/edit`,
+    },
   },
 
   // Users
@@ -84,6 +90,7 @@ export const API_ROUTES = {
   USERS: "/api/users",
   MEDIA: "/api/media",
   STATS: "/api/stats",
+  JOBS: "/api/jobs",
 } as const;
 
 export type PortalRoute = typeof PORTAL_ROUTES;

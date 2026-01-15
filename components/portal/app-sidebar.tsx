@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import {
   LayoutDashboard,
   Settings,
@@ -90,6 +91,12 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  // Prevent hydration mismatch with Radix UI DropdownMenu
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -181,8 +188,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter className="p-0 bg-[#002d6b] gap-0 border-t border-white/5 shrink-0 overflow-hidden flex flex-col group-data-[collapsible=icon]:items-center">
-        <DropdownMenu>
-           <DropdownMenuTrigger asChild>
+        {isMounted ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
                 className="w-full h-14 items-center gap-3 px-4 bg-[#001d4a] hover:bg-[#001d4a] text-white rounded-none group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer"
@@ -196,12 +204,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <ChevronRight className="ml-auto size-3 text-white/20 group-data-[collapsible=icon]:hidden" />
               </SidebarMenuButton>
-           </DropdownMenuTrigger>
-           <DropdownMenuContent
-             side="right"
-             align="end"
-             className="w-52 p-0 rounded-none border-none bg-[#011c42] text-white shadow-2xl ml-2"
-           >
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              side="right"
+              align="end"
+              className="w-52 p-0 rounded-none border-none bg-[#011c42] text-white shadow-2xl ml-2"
+            >
               <DropdownMenuLabel className="px-5 py-3 bg-[#001d4a]/80">
                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Tài khoản</p>
               </DropdownMenuLabel>
@@ -218,8 +226,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <LogOut className="size-4 mr-3" />
                 <span className="text-[10px] font-black uppercase tracking-widest">Đăng xuất</span>
               </DropdownMenuItem>
-           </DropdownMenuContent>
-        </DropdownMenu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="w-full h-14 flex items-center gap-3 px-4 bg-[#001d4a] text-white group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+            <div className="flex h-8 w-8 items-center justify-center rounded-none bg-[#fbbf24] text-[10px] font-black text-[#002d6b] shrink-0">
+              {data.user.avatar}
+            </div>
+            <div className="flex flex-col items-start leading-none group-data-[collapsible=icon]:hidden overflow-hidden ms-1">
+              <span className="text-[10px] font-black uppercase tracking-tight truncate w-full">{data.user.name}</span>
+              <span className="text-[8px] font-medium text-white/30 lowercase mt-0.5 truncate w-full">{data.user.email}</span>
+            </div>
+          </div>
+        )}
       </SidebarFooter>
 
     </Sidebar>

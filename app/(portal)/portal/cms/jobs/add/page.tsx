@@ -1,0 +1,212 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import api from "@/services/axios";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RichTextEditor } from "@/components/portal/rich-text-editor";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
+import { StatusFormSection } from "@/components/portal/status-form-section";
+import { toast } from "sonner";
+
+export default function AddJobPage() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  
+  const [formData, setFormData] = React.useState({
+    title: "",
+    slug: "",
+    description: "",
+    requirements: "",
+    benefits: "",
+    location: "",
+    employment_type: "full_time",
+    salary_range: "",
+    experience_level: "",
+    department: "",
+    status: "open" as "open" | "closed",
+    deadline: "",
+  });
+
+  const handleTitleChange = (title: string) => {
+    const slug = title
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[đĐ]/g, "d")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+    
+    setFormData((prev) => ({ 
+      ...prev, 
+      title, 
+      slug: prev.slug === "" || prev.slug === prev.title.toLowerCase().replace(/\s+/g, "-") ? slug : prev.slug,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title || !formData.slug || !formData.description) {
+      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await api.post(API_ROUTES.JOBS, formData);
+      toast.success("Đã tạo tin tuyển dụng thành công");
+      router.push(PORTAL_ROUTES.cms.jobs.list);
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.error || error.message || "Lỗi khi tạo tin tuyển dụng";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-6">
+          <Link href={PORTAL_ROUTES.cms.jobs.list}>
+            <Button variant="outline" className="h-14 w-14 p-0 border-slate-100 rounded-none hover:bg-slate-50">
+              <ArrowLeft size={20} />
+            </Button>
+          </Link>
+          <div className="space-y-1">
+            <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900">Thêm tin tuyển dụng</h1>
+            <p className="text-xs text-muted-foreground font-medium">Tạo tin tuyển dụng mới cho công ty.</p>
+          </div>
+        </div>
+        <Button 
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="h-14 px-8 bg-brand-primary hover:bg-brand-secondary text-white rounded-none text-[10px] font-black uppercase tracking-widest shadow-lg"
+        >
+          {isSubmitting ? <Loader2 size={18} className="mr-3 animate-spin" /> : <Save size={18} className="mr-3" />}
+          Lưu tin tuyển dụng
+        </Button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">
+              Thông tin cơ bản
+            </h3>
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tiêu đề *</Label>
+                <Input
+                  id="title"
+                  placeholder="VD: Kỹ sư Tự động hóa"
+                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none"
+                  value={formData.title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="slug" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Đường dẫn (Slug) *</Label>
+                <Input
+                  id="slug"
+                  placeholder="ky-su-tu-dong-hoa"
+                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none"
+                  value={formData.slug}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Mô tả công việc *</Label>
+                <RichTextEditor 
+                  content={formData.description} 
+                  onChange={(val) => setFormData({ ...formData, description: val })} 
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="requirements" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Yêu cầu ứng viên</Label>
+                <RichTextEditor 
+                  content={formData.requirements} 
+                  onChange={(val) => setFormData({ ...formData, requirements: val })} 
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="benefits" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Quyền lợi</Label>
+                <RichTextEditor 
+                  content={formData.benefits} 
+                  onChange={(val) => setFormData({ ...formData, benefits: val })} 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-8">
+          <StatusFormSection 
+            isActive={formData.status === "open"}
+            onActiveChange={(isActive) => setFormData({ ...formData, status: isActive ? "open" : "closed" })}
+            label="Trạng thái tuyển dụng"
+            description="Tin tuyển dụng đang tuyển sẽ hiển thị trên website."
+          />
+
+          <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">
+              Chi tiết vị trí
+            </h3>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <Label htmlFor="department" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Phòng ban</Label>
+                <Input id="department" placeholder="VD: Kỹ thuật" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="location" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Địa điểm</Label>
+                <Input id="location" placeholder="VD: TP. Hồ Chí Minh" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="employment_type" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Loại hình</Label>
+                <Select value={formData.employment_type} onValueChange={(value) => setFormData({ ...formData, employment_type: value })}>
+                  <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold">
+                    <SelectValue placeholder="Chọn loại hình" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-none">
+                    <SelectItem value="full_time">Toàn thời gian</SelectItem>
+                    <SelectItem value="part_time">Bán thời gian</SelectItem>
+                    <SelectItem value="contract">Hợp đồng</SelectItem>
+                    <SelectItem value="internship">Thực tập</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="salary_range" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Mức lương</Label>
+                <Input id="salary_range" placeholder="VD: 15-25 triệu VND" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.salary_range} onChange={(e) => setFormData({ ...formData, salary_range: e.target.value })} />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="experience_level" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Kinh nghiệm</Label>
+                <Input id="experience_level" placeholder="VD: 2-3 năm" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.experience_level} onChange={(e) => setFormData({ ...formData, experience_level: e.target.value })} />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="deadline" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Hạn nộp hồ sơ</Label>
+                <Input id="deadline" type="date" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.deadline} onChange={(e) => setFormData({ ...formData, deadline: e.target.value })} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}

@@ -32,6 +32,7 @@ const NAV_LINKS: NavLink[] = [
   { label: "SẢN PHẨM", href: SITE_ROUTES.PRODUCTS },
   { label: "DỰ ÁN", href: SITE_ROUTES.PROJECTS },
   { label: "TIN TỨC", href: SITE_ROUTES.NEWS },
+  { label: "TUYỂN DỤNG", href: SITE_ROUTES.RECRUITMENT },
   { label: "LIÊN HỆ", href: SITE_ROUTES.CONTACT },
 ];
 

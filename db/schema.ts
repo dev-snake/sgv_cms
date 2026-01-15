@@ -3,6 +3,8 @@ import { pgTable, varchar, text, timestamp, decimal, integer, pgEnum, bigint, uu
 export const statusEnum = pgEnum('status', ['draft', 'published']);
 export const productStatusEnum = pgEnum('product_status', ['active', 'inactive']);
 export const projectStatusEnum = pgEnum('project_status', ['ongoing', 'completed']);
+export const jobStatusEnum = pgEnum('job_status', ['open', 'closed']);
+export const employmentTypeEnum = pgEnum('employment_type', ['full_time', 'part_time', 'contract', 'internship']);
 
 export const categoryTypes = pgTable('category_types', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -110,4 +112,21 @@ export const contacts = pgTable('contacts', {
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 });
 
-
+// Job Postings for Recruitment
+export const jobPostings = pgTable('job_postings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).notNull().unique(),
+  description: text('description').notNull(),
+  requirements: text('requirements'), // Can be HTML or plain text
+  benefits: text('benefits'), // Can be HTML or plain text
+  location: varchar('location', { length: 255 }),
+  employment_type: employmentTypeEnum('employment_type').default('full_time').notNull(),
+  salary_range: varchar('salary_range', { length: 100 }), // e.g., "15-25 triệu VND"
+  experience_level: varchar('experience_level', { length: 100 }), // e.g., "2-3 năm"
+  department: varchar('department', { length: 255 }), // e.g., "Kỹ thuật", "Kinh doanh"
+  status: jobStatusEnum('status').default('open').notNull(),
+  deadline: timestamp('deadline'),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull(),
+});
