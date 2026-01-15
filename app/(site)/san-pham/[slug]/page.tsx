@@ -16,17 +16,12 @@ import {
   FileText,
   Warehouse,
   Truck,
-  Headphones
+  Headphones,
+  Maximize2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SITE_ROUTES } from "@/constants/routes";
-
-const PRODUCTS = [
-  { id: "1", name: "VAN BƯỚM OKM SERIES 612X", category: "Van OKM Japan", image: "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png", desc: "Sử dụng cho hệ thống nước sạch và xử lý nước thải." },
-  { id: "2", name: "ACTUATOR NOAH SERIES NA", category: "Thiết bị Noah Korea", image: "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png", desc: "Bộ điều khiển điện tiêu chuẩn IP67/IP68." },
-  { id: "3", name: "THIẾT BỊ ĐO ĐỘ ĐỤC SGVT420", category: "IoT Ngành Nước", image: "https://saigonvalve.vn/uploads/files/2024/11/14/-c.png", desc: "Cảm biến đo độ đục trực tuyến độ chính xác cao." },
-  { id: "4", name: "DATALOGGER SV1-DAQ", category: "IoT Ngành Nước", image: "https://saigonvalve.vn/uploads/files/2024/11/14/DATALOGGER.png", desc: "Truyền dữ liệu qua mạng 4G/LTE/NBIoT." },
-];
+import Lightbox from "@/components/shared/Lightbox";
 
 import api from "@/services/axios";
 
@@ -34,6 +29,8 @@ export default function ProductDetailPage() {
   const params = useParams();
   const [product, setProduct] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
+  const [lightboxOpen, setLightboxOpen] = React.useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
 
   React.useEffect(() => {
     const fetchProduct = async () => {
@@ -50,6 +47,18 @@ export default function ProductDetailPage() {
     };
     fetchProduct();
   }, [params.slug]);
+
+  const allImages = React.useMemo(() => {
+    if (!product) return [];
+    const main = product.image_url || "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png";
+    const gallery = Array.isArray(product.gallery) ? product.gallery : [];
+    return [main, ...gallery];
+  }, [product]);
+
+  const openLightbox = (index: number) => {
+    setCurrentImageIndex(index);
+    setLightboxOpen(true);
+  };
 
   if (loading) {
     return (
@@ -142,9 +151,12 @@ export default function ProductDetailPage() {
               
               {/* Product Visual */}
               <div className="space-y-8">
-                 <div className="relative aspect-square bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center p-12 group">
+                 <div 
+                   className="relative aspect-square bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center p-12 group cursor-zoom-in"
+                   onClick={() => openLightbox(0)}
+                 >
                     <Image
-                      src={product.image_url || "https://via.placeholder.com/600?text=SGV"}
+                      src={product.image_url || "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png"}
                       alt={product.name}
                       fill
                       className="object-contain p-20 transition-transform duration-1000 group-hover:scale-110"
@@ -152,17 +164,36 @@ export default function ProductDetailPage() {
                     <div className="absolute top-8 left-8">
                        <span className="bg-brand-primary px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-xl">CHÍNH HÃNG</span>
                     </div>
+
+                    {/* Zoom Hint */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="bg-white/90 backdrop-blur-sm p-4 rounded-full text-slate-900 shadow-2xl">
+                        <Maximize2 size={24} />
+                      </div>
+                    </div>
                  </div>
                   <div className="grid grid-cols-4 gap-4">
-                    {Array.isArray(product.gallery) && product.gallery.length > 0 ? (
-                      product.gallery.map((img: string, i: number) => (
-                        <div key={i} className="aspect-square bg-slate-50 border border-slate-100 p-4 opacity-70 hover:opacity-100 transition-all cursor-pointer">
-                           <Image src={img} alt="Thumb" width={100} height={100} className="object-contain border-0" />
+                    {allImages.length > 1 ? (
+                      allImages.map((img: string, i: number) => (
+                        <div 
+                          key={i} 
+                          className={cn(
+                            "relative aspect-square bg-slate-50 border border-slate-100 p-2 transition-all cursor-zoom-in overflow-hidden group",
+                            currentImageIndex === i ? "border-brand-primary opacity-100 shadow-md" : "opacity-60 hover:opacity-100"
+                          )}
+                          onClick={() => openLightbox(i)}
+                        >
+                           <Image 
+                             src={img} 
+                             alt={`Thumbnail ${i}`} 
+                             fill 
+                             className="object-contain p-2 group-hover:scale-110 transition-transform" 
+                           />
                         </div>
                       ))
                     ) : (
                       <div className="aspect-square bg-slate-50 border border-slate-100 p-4 opacity-100 shadow-inner">
-                        <Image src={product.image_url} alt="Thumb" width={100} height={100} className="object-contain" />
+                        <Image src={product.image_url || "https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png"} alt="Thumb" width={100} height={100} className="object-contain" />
                       </div>
                     )}
                   </div>
@@ -271,6 +302,14 @@ export default function ProductDetailPage() {
            </div>
         </div>
       </section>
+
+      <Lightbox
+        images={allImages}
+        currentIndex={currentImageIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        onNavigate={(index) => setCurrentImageIndex(index)}
+      />
     </div>
   );
 }

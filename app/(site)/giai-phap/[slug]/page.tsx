@@ -18,10 +18,12 @@ import {
   CheckCircle2,
   Clock,
   Layers,
-  Zap
+  Zap,
+  Maximize2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SITE_ROUTES } from "@/constants/routes";
+import Lightbox from "@/components/shared/Lightbox";
 
 const SOLUTIONS_DATA: Record<string, any> = {
   "quan-ly-nuoc-thong-minh": {
@@ -30,6 +32,12 @@ const SOLUTIONS_DATA: Record<string, any> = {
     banner: "https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?auto=format&fit=crop&q=80&w=2000",
     icon: <Waves className="size-6" />,
     description: "Hệ thống quản lý nước thông minh của Sài Gòn Valve kết hợp công nghệ IoT tiên tiến với các thiết bị đo lường chính xác cao, giúp các đơn vị vận hành quản lý mạng lưới cấp nước một cách toàn diện, giảm thiểu thất thoát và tối ưu hóa chi phí vận hành.",
+    gallery: [
+      "https://images.unsplash.com/photo-1542013936693-884638332954?auto=format&fit=crop&q=80&w=1200",
+      "https://images.unsplash.com/photo-1584433144859-1ff3ab9d3558?auto=format&fit=crop&q=80&w=1200",
+      "https://images.unsplash.com/photo-1581093458391-9f42e5539c0c?auto=format&fit=crop&q=80&w=1200",
+      "https://images.unsplash.com/photo-1617155093730-a8bf47be7921?auto=format&fit=crop&q=80&w=1200"
+    ],
     features: [
       {
         title: "Giám sát thời gian thực",
@@ -72,6 +80,12 @@ const SOLUTIONS_DATA: Record<string, any> = {
     banner: "https://images.unsplash.com/photo-1558444479-c8f010b91939?auto=format&fit=crop&q=80&w=2000",
     icon: <Sprout className="size-6" />,
     description: "Giải pháp nông nghiệp chính xác giúp người nông dân và các trang trại quy mô lớn tự động hóa quy trình chăm sóc cây trồng dựa trên dữ liệu thực tế từ đất và môi trường, đảm bảo cây trồng phát triển tối ưu với mức tiêu thụ tài nguyên thấp nhất.",
+    gallery: [
+      "https://images.unsplash.com/photo-1523348830342-d31bbfa81395?auto=format&fit=crop&q=80&w=1200",
+      "https://images.unsplash.com/photo-1622383563227-04401ab4e5ea?auto=format&fit=crop&q=80&w=1200",
+      "https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&q=80&w=1200",
+      "https://images.unsplash.com/photo-1586771107445-d3ca888129ee?auto=format&fit=crop&q=80&w=1200"
+    ],
     features: [
       {
         title: "Quan trắc độ ẩm đất",
@@ -114,6 +128,12 @@ const SOLUTIONS_DATA: Record<string, any> = {
     banner: "https://images.unsplash.com/photo-1544526226-d4568090ffb8?auto=format&fit=crop&q=80&w=2000",
     icon: <Fish className="size-6" />,
     description: "Trong nuôi trồng thủy sản, chất lượng nước là yếu tố sống còn. Giải pháp quan trắc của chúng tôi cung cấp hệ thống giám sát liên tục các chỉ số quan trọng, tự động kích hoạt thiết bị hỗ trợ để đảm bảo môi trường sống tốt nhất cho vật nuôi.",
+    gallery: [
+      "https://images.unsplash.com/photo-1516466723877-e4ec1d736c8a?auto=format&fit=crop&q=80&w=1200",
+      "https://images.unsplash.com/photo-1520116468409-94ee2953a99e?auto=format&fit=crop&q=80&w=1200",
+      "https://images.unsplash.com/photo-1524311583144-d2393d9bb331?auto=format&fit=crop&q=80&w=1200",
+      "https://images.unsplash.com/photo-1516466380602-53fde93a2e3f?auto=format&fit=crop&q=80&w=1200"
+    ],
     features: [
       {
         title: "Giám sát Oxy hòa tan (DO)",
@@ -157,27 +177,47 @@ export default function SolutionDetailPage() {
   const slug = params.slug as string;
   const data = SOLUTIONS_DATA[slug];
 
+  const [lightboxOpen, setLightboxOpen] = React.useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+
   if (!data) {
     notFound();
   }
+
+  const allImages = [data.banner, ...(data.gallery || [])];
+
+  const openLightbox = (index: number) => {
+    setCurrentImageIndex(index);
+    setLightboxOpen(true);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden bg-slate-950">
-        <div className="absolute inset-0 z-0 opacity-40">
+        <div 
+          className="absolute inset-0 z-0 opacity-40 cursor-zoom-in group"
+          onClick={() => openLightbox(0)}
+        >
           <Image
             src={data.banner}
             alt={data.title}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
             priority
           />
           <div className="absolute inset-0 bg-linear-to-b from-slate-950/80 via-slate-950/40 to-slate-950/80"></div>
+          
+          {/* Zoom Hint */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="bg-white/10 backdrop-blur-md p-4 rounded-full border border-white/20">
+              <Maximize2 className="text-white size-8" />
+            </div>
+          </div>
         </div>
 
         <div className="container relative z-10 mx-auto px-4 lg:px-8">
-          <div className="max-w-4xl">
+          <div className="max-w-4xl pt-20">
             <motion.nav 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -282,6 +322,50 @@ export default function SolutionDetailPage() {
         </div>
       </section>
 
+      {/* Gallery Section */}
+      {data.gallery && data.gallery.length > 0 && (
+        <section className="py-24 bg-slate-50 border-y border-slate-100">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="flex items-end justify-between mb-16 px-4">
+              <div className="space-y-4">
+                <h2 className="text-sm font-black text-brand-primary uppercase tracking-[0.4em]">Bộ sưu tập giải pháp</h2>
+                <h3 className="text-3xl font-black text-slate-900 uppercase tracking-tight">HÌNH ẢNH THỰC TẾ</h3>
+              </div>
+              <div className="hidden sm:block text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                Technical Insights & Deployment
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-4">
+              {data.gallery.map((img: string, idx: number) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="relative aspect-square cursor-zoom-in group overflow-hidden"
+                  onClick={() => openLightbox(idx + 1)}
+                >
+                  <Image
+                    src={img}
+                    alt={`${data.title} gallery ${idx + 1}`}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-brand-primary/20 transition-colors" />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="bg-white/90 backdrop-blur-sm p-3 rounded-full text-slate-900 shadow-xl">
+                      <Maximize2 size={20} />
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* CTA Section */}
       <section className="bg-slate-950 py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-brand-primary/5"></div>
@@ -315,6 +399,15 @@ export default function SolutionDetailPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Lightbox Integration */}
+      <Lightbox
+        images={allImages}
+        currentIndex={currentImageIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        onNavigate={(index) => setCurrentImageIndex(index)}
+      />
     </div>
   );
 }
