@@ -29,6 +29,16 @@ export interface Product {
   image: string;
   image_url?: string;
   sku: string;
+  is_featured?: boolean;
+  tech_specs?: any;
+  features?: any;
+  gallery?: string[];
+  tech_summary?: string;
+  catalog_url?: string;
+  warranty?: string;
+  origin?: string;
+  availability?: string;
+  delivery_info?: string;
 }
 
 export interface Project {

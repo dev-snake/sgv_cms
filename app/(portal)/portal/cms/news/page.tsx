@@ -6,15 +6,15 @@ import {
   Plus, 
   Search, 
   MoreHorizontal, 
-  Eye, 
   Edit2, 
   Trash2, 
-  Filter,
   ArrowUpDown,
   Loader2,
   Newspaper,
   Calendar as CalendarIcon,
-  X
+  X,
+  CheckCircle,
+  Clock
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -41,6 +41,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
+import { vi } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
 export default function NewsManagementPage() {
@@ -118,6 +119,34 @@ export default function NewsManagementPage() {
       setIsDeleting(false);
       setDeleteDialogOpen(false);
       setItemToDelete(null);
+    }
+  };
+
+  const getStatusBadge = (status: NewsArticle["status"]) => {
+    switch (status) {
+      case "published":
+        return (
+          <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-none flex items-center gap-2">
+            <CheckCircle size={10} /> Công khai
+          </Badge>
+        );
+      case "draft":
+        return (
+          <Badge className="bg-slate-50 text-slate-500 border-slate-100 text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-none flex items-center gap-2">
+            <Clock size={10} /> Bản nháp
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "Chưa đăng";
+    try {
+      return format(new Date(dateStr), "dd/MM/yyyy", { locale: vi });
+    } catch {
+      return dateStr;
     }
   };
 
@@ -225,9 +254,9 @@ export default function NewsManagementPage() {
               <thead>
                 <tr className="bg-slate-50/30">
                   <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Bài viết</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Danh mục</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Ngày đăng</th>
                   <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Tác giả</th>
+                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Ngày đăng</th>
+                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Trạng thái</th>
                   <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50 text-right">Thao tác</th>
                 </tr>
               </thead>
@@ -247,25 +276,26 @@ export default function NewsManagementPage() {
                         </div>
                         <div className="max-w-[450px]">
                            <div className="text-sm font-black text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-1 uppercase tracking-tight mb-1">{news.title}</div>
-                           <div className="text-[10px] text-slate-400 font-medium line-clamp-1 italic">{news.summary}</div>
+                           <Badge variant="outline" className="text-[9px] font-bold text-slate-400 border-slate-200 uppercase tracking-widest px-2 py-0 rounded-none">
+                              {news.category || "Chưa phân loại"}
+                           </Badge>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <Badge variant="secondary" className="bg-brand-primary/5 text-brand-primary border-brand-primary/10 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-none">
-                         {news.category || "General"}
-                      </Badge>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">
-                        {news.published_at ? new Date(news.published_at).toLocaleDateString("vi-VN") : "Chưa đăng"}
-                      </span>
                     </td>
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-2">
                          <div className="h-6 w-6 rounded-none bg-slate-100 flex items-center justify-center text-[8px] font-black text-slate-500">{news.author?.substring(0,2).toUpperCase() || "AD"}</div>
                          <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">{news.author || "Admin"}</span>
                       </div>
+                    </td>
+                    <td className="px-8 py-6">
+                       <div className="flex items-center gap-2 text-[11px] font-black text-slate-600 uppercase tracking-tight">
+                          <CalendarIcon size={14} className="text-brand-primary/40" />
+                          <span>{formatDate(news.published_at)}</span>
+                       </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      {getStatusBadge(news.status)}
                     </td>
                     <td className="px-8 py-6 text-right">
                       <DropdownMenu>

@@ -108,6 +108,30 @@ async function main() {
           "Điều khiển": "Tay gạt, Vô lăng, Điện, Khí nén"
         },
         tech_summary: 'Sài Gòn Valve cung cấp đầy đủ chứng chỉ CO/CQ và hỗ trợ kỹ thuật tận nơi cho các dự án trọng điểm.'
+      }).onConflictDoUpdate({
+        target: products.slug,
+        set: {
+          description: 'Sử dụng cho hệ thống nước sạch và xử lý nước thải.',
+          warranty: '24 tháng',
+          origin: 'OKM Japan / NOAH Korea',
+          availability: 'Sẵn hàng tại kho HCM',
+          features: [
+            'Tiêu chuẩn Nhật Bản / Hàn Quốc',
+            'Vật liệu chịu lực cao (Inox/Thép)',
+            'Độ bền vận hành vượt trội',
+            'Tương thích hệ thống SCADA/IoT',
+            'Bảo trì dễ dàng, linh kiện sẵn có'
+          ],
+          tech_specs: {
+            "Thương hiệu": "OKM Japan / NOAH Korea",
+            "Kích thước (Size)": "DN50 - DN1200",
+            "Áp lực làm việc": "PN10, PN16, PN25",
+            "Nhiệt độ": "-10°C đến 250°C",
+            "Kết nối": "Wafer / Flange (JIS, ANSI, DIN)",
+            "Thân van": "Cast Iron, Ductile Iron, SS304/316",
+            "Điều khiển": "Tay gạt, Vô lăng, Điện, Khí nén"
+          },
+        }
       });
       console.log('Added detailed product: VAN BƯỚM OKM SERIES 612X');
     }
@@ -134,15 +158,50 @@ async function main() {
         ],
         tech_specs: [
           { "Thông số": "Sản phẩm", "Model SGVT410": "Cảm biến độ đục sợi quang", "Model SGVT420": "Cảm biến độ đục tự làm sạch" },
+          { "Thông số": "Model", "Model SGVT410": "SGVT410", "Model SGVT420": "SGVT420" },
           { "Thông số": "Phương pháp đo", "Model SGVT410": "Tán xạ ánh sáng 90°", "Model SGVT420": "Tán xạ ánh sáng 90°" },
           { "Thông số": "Phạm vi đo", "Model SGVT410": "0〜1000 NTU", "Model SGVT420": "0〜1000 NTU" },
           { "Thông số": "Độ chính xác", "Model SGVT410": "3%-5%", "Model SGVT420": "3%-5%" },
+          { "Thông số": "Độ phân giải", "Model SGVT410": "0.01", "Model SGVT420": "0.01" },
           { "Thông số": "Cấp độ bảo vệ", "Model SGVT410": "IP68", "Model SGVT420": "IP68" },
-          { "Thông số": "Nguồn điện", "Model SGVT410": "DC 6〜12V", "Model SGVT420": "DC 6〜12V" },
+          { "Thông số": "Giao diện", "Model SGVT410": "RS485, Modbus", "Model SGVT420": "RS485, Modbus" },
+          { "Thông số": "Lắp đặt", "Model SGVT410": "Gắn và trong", "Model SGVT420": "Gắn và trong" },
+          { "Thông số": "Nguồn điện", "Model SGVT410": "DC 6〜12V, <50mA", "Model SGVT420": "DC 6〜12V, <50mA" },
           { "Thông số": "Kích cỡ", "Model SGVT410": "Φ32*152.5mm", "Model SGVT420": "Φ32*169.5mm" },
+          { "Thông số": "Chiều dài cáp", "Model SGVT410": "5m (tùy chỉnh)", "Model SGVT420": "5m (tùy chỉnh)" },
+          { "Thông số": "Chất liệu vỏ", "Model SGVT410": "POM", "Model SGVT420": "POM" },
+          { "Thông số": "Đầu dò quang", "Model SGVT410": "Sợi quang", "Model SGVT420": "Sợi quang" },
           { "Thông số": "Bàn chải tự làm sạch", "Model SGVT410": "Không", "Model SGVT420": "Có" }
         ],
-        tech_summary: 'Cảm biến có thời gian bảo lâu và độ ổn định được duy trì tốt để có thể sử dụng trực tuyến lâu dài.'
+        tech_summary: 'Cảm biến kỹ thuật số thế hệ mới, tích hợp RS485 và bàn chải tự làm sạch giúp duy trì độ chính xác cao trong môi trường nước khắc nghiệt.'
+      }).onConflictDoUpdate({
+        target: products.slug,
+        set: {
+          features: [
+            'Cảm biến kỹ thuật số, đầu ra RS485, hỗ trợ MODBUS',
+            'Với bàn chải làm sạch tự động để ngăn ngừa bẩn cảm biến và loại bỏ bọt khí',
+            'Khả năng chống nhiễu mạnh, không bị ảnh hưởng bởi ánh sáng xung quanh',
+            'Nguyên lý đo tán xạ ánh sáng 90°, và dùng sợi quang để phát hiện tốt hơn'
+          ],
+          tech_specs: [
+            { "Thông số": "Sản phẩm", "Model SGVT410": "Cảm biến độ đục sợi quang", "Model SGVT420": "Cảm biến độ đục tự làm sạch" },
+            { "Thông số": "Model", "Model SGVT410": "SGVT410", "Model SGVT420": "SGVT420" },
+            { "Thông số": "Phương pháp đo", "Model SGVT410": "Tán xạ ánh sáng 90°", "Model SGVT420": "Tán xạ ánh sáng 90°" },
+            { "Thông số": "Phạm vi đo", "Model SGVT410": "0〜1000 NTU", "Model SGVT420": "0〜1000 NTU" },
+            { "Thông số": "Độ chính xác", "Model SGVT410": "3%-5%", "Model SGVT420": "3%-5%" },
+            { "Thông số": "Độ phân giải", "Model SGVT410": "0.01", "Model SGVT420": "0.01" },
+            { "Thông số": "Cấp độ bảo vệ", "Model SGVT410": "IP68", "Model SGVT420": "IP68" },
+            { "Thông số": "Giao diện", "Model SGVT410": "RS485, Modbus", "Model SGVT420": "RS485, Modbus" },
+            { "Thông số": "Lắp đặt", "Model SGVT410": "Gắn và trong", "Model SGVT420": "Gắn và trong" },
+            { "Thông số": "Nguồn điện", "Model SGVT410": "DC 6〜12V, <50mA", "Model SGVT420": "DC 6〜12V, <50mA" },
+            { "Thông số": "Kích cỡ", "Model SGVT410": "Φ32*152.5mm", "Model SGVT420": "Φ32*169.5mm" },
+            { "Thông số": "Chiều dài cáp", "Model SGVT410": "5m (tùy chỉnh)", "Model SGVT420": "5m (tùy chỉnh)" },
+            { "Thông số": "Chất liệu vỏ", "Model SGVT410": "POM", "Model SGVT420": "POM" },
+            { "Thông số": "Đầu dò quang", "Model SGVT410": "Sợi quang", "Model SGVT420": "Sợi quang" },
+            { "Thông số": "Bàn chải tự làm sạch", "Model SGVT410": "Không", "Model SGVT420": "Có" }
+          ],
+          tech_summary: 'Cảm biến kỹ thuật số thế hệ mới, tích hợp RS485 và bàn chải tự làm sạch giúp duy trì độ chính xác cao trong môi trường nước khắc nghiệt.'
+        }
       });
       console.log('Added detailed product: CẢM BIẾN ĐỘ ĐỤC SGVT410/420');
     }
