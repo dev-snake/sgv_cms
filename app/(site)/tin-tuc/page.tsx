@@ -107,20 +107,22 @@ export default function NewsPage() {
     <div className="flex flex-col min-h-screen bg-white">
       {/* Page Header */}
       <section className="relative pt-40 pb-20 bg-slate-900 overflow-hidden">
-        <div className="absolute inset-0 z-0 opacity-20">
+        <div className="absolute inset-0 z-0 opacity-40">
           <Image
-            src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=2000"
+            src="/images/banners/news-banner.png"
             alt="News Background"
             fill
             className="object-cover"
+            priority
           />
+          <div className="absolute inset-0 bg-linear-to-b from-slate-950/80 via-slate-950/40 to-white/0"></div>
         </div>
         <div className="container relative z-10 mx-auto px-4 lg:px-8">
            <div className="max-w-3xl space-y-6">
               <div className="inline-flex items-center gap-3 bg-brand-primary/20 border border-brand-primary/30 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary backdrop-blur-md">
                  Truyền thông & Tin tức
               </div>
-              <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tight uppercase leading-[0.9]">
+              <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight uppercase leading-[1.1]">
                 TRUNG TÂM <br /> 
                 <span className="text-brand-accent">TIÊU ĐIỂM</span>
               </h1>

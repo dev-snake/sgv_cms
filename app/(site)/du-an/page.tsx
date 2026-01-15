@@ -82,7 +82,17 @@ export default function ProjectsPage() {
     <div className="flex flex-col min-h-screen bg-white pt-24">
       {/* Hero Section */}
       <section className="bg-slate-950 py-24 sm:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-carbon opacity-30"></div>
+        <div className="absolute inset-0 z-0 opacity-40">
+          <Image
+            src="https://images.unsplash.com/photo-1541888941259-712398670bc7?auto=format&fit=crop&q=80&w=2000"
+            alt="Projects Background"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-linear-to-b from-slate-950/80 via-slate-950/40 to-slate-50/0"></div>
+        </div>
+        <div className="absolute inset-0 bg-carbon opacity-20 z-0"></div>
         <div className="container relative z-10 mx-auto px-4 lg:px-8">
           <div className="max-w-4xl space-y-6">
             <motion.div
@@ -90,13 +100,13 @@ export default function ProjectsPage() {
               animate={{ opacity: 1, x: 0 }}
               className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-brand-primary"
             >
-               <span className="h-1.5 w-1.5 rounded-full bg-brand-cyan"></span>
+               <span className="h-1.5 w-1.5 rounded-full bg-brand-primary"></span>
                DỰ ÁN TIÊU BIỂU
             </motion.div>
             <motion.h1 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase leading-none"
+              className="text-4xl sm:text-6xl font-black text-white tracking-tighter uppercase leading-[1.1]"
             >
               KHẲNG ĐỊNH <br />
               <span className="text-brand-primary">NĂNG LỰC DỰ ÁN</span>
@@ -215,7 +225,7 @@ export default function ProjectsPage() {
                  <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tight">HỢP TÁC CÙNG SGV</h2>
                  <p className="text-slate-400 font-medium leading-relaxed">Bạn có dự án mới cần tư vấn về thiết bị và giải pháp công nghệ? Liên hệ ngay với đội ngũ chuyên gia của chúng tôi để được hỗ trợ tối ưu nhất.</p>
               </div>
-              <Link href={SITE_ROUTES.CONTACT} className="shrink-0 inline-flex items-center gap-4 px-12 py-5 bg-brand-cyan text-slate-950 font-black uppercase tracking-[0.2em] hover:bg-white transition-all transform hover:-translate-y-1">
+              <Link href={SITE_ROUTES.CONTACT} className="shrink-0 inline-flex items-center gap-4 px-12 py-5 bg-white text-slate-950 font-black uppercase tracking-[0.2em] hover:bg-brand-primary hover:text-white transition-all transform hover:-translate-y-1">
                 LIÊN HỆ CHUYÊN GIA <MoveRight size={20} />
               </Link>
            </div>

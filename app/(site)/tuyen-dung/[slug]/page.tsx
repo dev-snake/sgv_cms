@@ -191,7 +191,7 @@ export default function JobDetailPage() {
                 </p>
                 <a 
                   href="mailto:hr@saigonvalve.vn?subject=Ứng tuyển: ${job.title}"
-                  className="block w-full text-center px-8 py-4 bg-brand-cyan text-slate-950 font-black uppercase tracking-widest text-xs hover:bg-white transition-all"
+                  className="block w-full text-center px-8 py-4 bg-brand-primary text-white font-black uppercase tracking-widest text-xs hover:bg-brand-secondary transition-all"
                 >
                   <Send size={16} className="inline mr-2" />
                   Gửi hồ sơ

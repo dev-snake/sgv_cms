@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion } from "motion/react";
 import { Phone, Mail, MapPin, Send, ShieldCheck, Facebook, Linkedin, Youtube, Headset, Clock, Search, Info, Loader2 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -69,6 +70,16 @@ export default function ContactPage() {
     <div className="flex flex-col min-h-screen bg-white pt-24">
       {/* Page Header */}
       <section className="bg-slate-900 py-24 sm:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 z-0 opacity-40">
+          <Image
+            src="https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?auto=format&fit=crop&q=80&w=2000"
+            alt="Contact Background"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-linear-to-b from-slate-950/80 via-slate-950/40 to-white/0"></div>
+        </div>
         <div className="container relative z-10 mx-auto px-4 lg:px-8 text-center sm:text-left">
           <div className="max-w-4xl space-y-6">
             <motion.div
@@ -81,7 +92,7 @@ export default function ContactPage() {
             <motion.h1 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-5xl sm:text-7xl font-bold text-white tracking-tighter uppercase leading-none"
+              className="text-4xl sm:text-6xl font-bold text-white tracking-tighter uppercase leading-[1.1]"
             >
               KẾT NỐI VỚI <br />
               <span className="text-brand-primary">SÀI GÒN VALVE</span>

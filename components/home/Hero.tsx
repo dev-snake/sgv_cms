@@ -134,7 +134,7 @@ export default function Hero() {
                   >
                     <span className="relative z-10">KHÁM PHÁ NGAY</span>
                     <MoveRight size={16} className="relative z-10 transition-transform group-hover:translate-x-1.5" />
-                    <div className="absolute inset-0 bg-brand-cyan scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                    <div className="absolute inset-0 bg-brand-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                   </Link>
                   <Link 
                     href="/gioi-thieu" 
@@ -157,7 +157,7 @@ export default function Hero() {
                   }}
                   className={cn(
                     "h-1 rounded-full transition-all duration-500",
-                    current === i ? "w-16 bg-brand-cyan shadow-[0_0_10px_rgba(6,182,212,0.8)]" : "w-8 bg-white/20 hover:bg-white/40"
+                    current === i ? "w-16 bg-brand-primary shadow-[0_0_10px_rgba(0,29,74,0.4)]" : "w-8 bg-white/20 hover:bg-white/40"
                   )}
                 />
               ))}
@@ -177,7 +177,7 @@ export default function Hero() {
           <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">0{current + 1} / 0{SLIDES.length}</span>
           <div className="w-20 h-px bg-white/20">
             <motion.div 
-              className="h-full bg-brand-cyan"
+              className="h-full bg-brand-primary"
               initial={{ width: 0 }}
               animate={{ width: `${((current + 1) / SLIDES.length) * 100}%` }}
               transition={{ duration: 0.5 }}
