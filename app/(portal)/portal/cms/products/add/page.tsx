@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
+import { ImageUploader } from "@/components/portal/ImageUploader";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
@@ -50,6 +51,7 @@ export default function AddProductPage() {
     tech_summary: "",
     features: [""] as string[],
     tech_specs: [{ key: "", value: "" }] as { key: string; value: string }[],
+    gallery: [] as string[],
   });
 
   React.useEffect(() => {
@@ -103,7 +105,8 @@ export default function AddProductPage() {
         ...formData,
         tech_specs: specsObject,
         features: formData.features.filter(f => f.trim() !== ""),
-        image_url: formData.image
+        image_url: formData.image,
+        gallery: formData.gallery,
       };
 
       await api.post(API_ROUTES.PRODUCTS, submissionData);
@@ -406,21 +409,12 @@ export default function AddProductPage() {
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">
               Hình ảnh sản phẩm
             </h3>
-            <div className="space-y-3">
-              <Label htmlFor="image" className="text-[10px] font-black uppercase tracking-widest text-slate-500">URL hình ảnh đại diện</Label>
-              <Input
-                id="image"
-                placeholder="https://example.com/product.jpg"
-                className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300"
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-              />
-              {formData.image && (
-                <div className="mt-4 aspect-square bg-slate-50 flex items-center justify-center p-4 border border-slate-100">
-                  <img src={formData.image} alt="Preview" className="max-h-full max-w-full object-contain" />
-                </div>
-              )}
-            </div>
+            <ImageUploader
+              value={formData.image}
+              onChange={(url) => setFormData({ ...formData, image: url })}
+              gallery={formData.gallery}
+              onGalleryChange={(urls) => setFormData({ ...formData, gallery: urls })}
+            />
           </div>
 
           <div className="p-6 bg-brand-primary/5 border border-brand-primary/10">

@@ -301,10 +301,7 @@ export default function ProductsManagementPage() {
                         <DropdownMenuContent align="end" className="w-64 p-2 rounded-none border border-slate-100 bg-white">
                           <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-4 py-3">Tùy chọn sản phẩm</DropdownMenuLabel>
                           <DropdownMenuSeparator className="bg-slate-50" />
-                          <DropdownMenuItem className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
-                             <Eye size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
-                             <span className="text-xs font-bold uppercase tracking-tight">Chi tiết sản phẩm</span>
-                          </DropdownMenuItem>
+
                           <DropdownMenuItem asChild>
                              <Link href={PORTAL_ROUTES.cms.products.edit(product.id)} className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
                                 <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
