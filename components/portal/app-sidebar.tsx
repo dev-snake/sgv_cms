@@ -66,6 +66,11 @@ const data = {
        icon: Box,
     },
     {
+       title: "Thư viện Media",
+       url: PORTAL_ROUTES.cms.media,
+       icon: LayoutDashboard, // Will replace with a more suitable icon if needed
+    },
+    {
       title: "Cài đặt hệ thống",
       url: PORTAL_ROUTES.settings,
       icon: Settings,

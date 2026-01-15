@@ -60,7 +60,7 @@ export default function Lightbox({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/95 backdrop-blur-xl p-4 sm:p-10"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-slate-950/95 backdrop-blur-xl p-4 sm:p-10"
           onClick={onClose}
         >
           {/* Close Button */}

@@ -60,6 +60,7 @@ export const PORTAL_ROUTES = {
       add: "/portal/cms/jobs/add",
       edit: (id: string) => `/portal/cms/jobs/${id}/edit`,
     },
+    media: "/portal/cms/media",
   },
 
   // Users
