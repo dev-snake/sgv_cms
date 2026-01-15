@@ -27,7 +27,7 @@ const SLIDES = [
     accent: "Quản lý Nước Thông minh"
   },
   {
-    image: "https://images.unsplash.com/photo-1534938665420-4193effeabb4?auto=format&fit=crop&q=80&w=2000",
+    image: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&q=80&w=2000",
     fallback: "https://images.unsplash.com/photo-1516937941184-75140537280d?auto=format&fit=crop&q=80&w=2000",
     title: "THIẾT BỊ",
     highlight: "CHUẨN QUỐC TẾ",

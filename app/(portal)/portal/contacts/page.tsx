@@ -55,7 +55,7 @@ export default function ContactsManagementPage() {
   const filteredContacts = contacts.filter(contact => 
     contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (contact.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
+    contact.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusBadge = (status: Contact["status"]) => {
@@ -104,7 +104,7 @@ export default function ContactsManagementPage() {
           <div className="relative w-full md:w-1/2 group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-300 group-focus-within:text-brand-primary transition-colors" />
             <input 
-              placeholder="TÌM KIẾM THEO TÊN, EMAIL HOẶC TIÊU ĐỀ..." 
+              placeholder="TÌM KIẾM THEO TÊN, EMAIL HOẶC ĐỊA CHỈ..." 
               className="w-full pl-12 bg-slate-50 border-none text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20 h-14 rounded-none outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -131,7 +131,7 @@ export default function ContactsManagementPage() {
               <thead>
                 <tr className="bg-slate-50/30">
                   <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Khách hàng</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Ghi chú / Tiêu đề</th>
+                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Địa chỉ / Yêu cầu</th>
                   <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Trạng thái</th>
                   <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Ngày gửi</th>
                   <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50 text-right">Thao tác</th>
@@ -149,7 +149,7 @@ export default function ContactsManagementPage() {
                     </td>
                     <td className="px-8 py-6">
                       <div className="max-w-[350px]">
-                        <div className="text-[11px] font-black text-slate-700 uppercase tracking-tight line-clamp-1">{contact.subject || "Không có tiêu đề"}</div>
+                        <div className="text-[11px] font-black text-slate-700 uppercase tracking-tight line-clamp-1">{contact.address}</div>
                         <div className="text-[10px] text-slate-400 font-medium line-clamp-1 italic">{contact.message}</div>
                       </div>
                     </td>

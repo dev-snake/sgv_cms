@@ -1,12 +1,14 @@
 import nodemailer from "nodemailer";
+import { getThankYouTemplate } from "./mail/templates/thank-you";
+import { getAdminNotificationTemplate } from "./mail/templates/admin-notification";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+  host: process.env.MAIL_HOST,
+  port: parseInt(process.env.MAIL_PORT || "587"),
+  secure: process.env.MAIL_PORT === "465",
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASSWORD,
   },
 });
 
@@ -22,7 +24,7 @@ export async function sendEmail({
   html?: string;
 }) {
   const mailOptions = {
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    from: `"Sài Gòn Valve" <${process.env.MAIL_FROM || process.env.MAIL_USER}>`,
     to,
     subject,
     text,
@@ -40,22 +42,28 @@ export async function sendEmail({
 }
 
 export async function sendThankYouEmail(email: string, name: string) {
-  const subject = "Cảm ơn bạn đã liên hệ với chúng tôi";
-  const html = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-      <h2>Chào ${name},</h2>
-      <p>Cảm ơn bạn đã gửi tin nhắn cho chúng tôi qua website. Chúng tôi đã nhận được thông tin liên hệ của bạn và sẽ phản hồi trong thời gian sớm nhất.</p>
-      <p>Thông tin của bạn:</p>
-      <ul>
-        <li>Họ tên: ${name}</li>
-        <li>Email: ${email}</li>
-      </ul>
-      <p>Trân trọng,<br>Đội ngũ hỗ trợ khách hàng</p>
-    </div>
-  `;
+  const subject = "Cảm ơn bạn đã liên hệ với Sài Gòn Valve";
+  const html = getThankYouTemplate(name, email);
 
   return sendEmail({
     to: email,
+    subject,
+    html,
+  });
+}
+
+export async function sendAdminNotificationEmail(contactData: {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  message: string;
+}) {
+  const subject = `[YÊU CẦU MỚI] Từ khách hàng: ${contactData.name}`;
+  const html = getAdminNotificationTemplate(contactData);
+
+  return sendEmail({
+    to: process.env.MAIL_FROM || process.env.MAIL_USER || "info@saigonvalve.vn",
     subject,
     html,
   });

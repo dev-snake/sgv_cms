@@ -102,6 +102,7 @@ export const contacts = pgTable('contacts', {
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull(),
   phone: varchar('phone', { length: 20 }),
+  address: text('address'),
   subject: varchar('subject', { length: 255 }),
   message: text('message').notNull(),
   status: varchar('status', { length: 50 }).default('new').notNull(), // new, read, replied, archived

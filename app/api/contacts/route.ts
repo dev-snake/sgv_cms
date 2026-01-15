@@ -6,10 +6,10 @@ import { desc } from "drizzle-orm";
 
 export async function POST(request: Request) {
   try {
-    const { name, email, phone, subject, message } = await request.json();
+    const { name, email, phone, address, message } = await request.json();
 
-    if (!name || !email || !message) {
-      return apiError("Name, email, and message are required", 400);
+    if (!name || !email || !phone || !address || !message) {
+      return apiError("Họ tên, email, số điện thoại, địa chỉ và yêu cầu là bắt buộc", 400);
     }
 
     const [newContact] = await db
@@ -18,15 +18,18 @@ export async function POST(request: Request) {
         name,
         email,
         phone,
-        subject,
+        address,
         message,
         status: "new",
       })
       .returning();
 
-    // Send thank you email asynchronously (don't block the response)
-    sendThankYouEmail(email, name).catch((error) => {
-      console.error("Failed to send thank you email:", error);
+    // Send emails asynchronously (don't block the response)
+    Promise.all([
+      sendThankYouEmail(email, name),
+      import("@/services/mail").then(m => m.sendAdminNotificationEmail({ name, email, phone, address, message }))
+    ]).catch((error) => {
+      console.error("Failed to send emails:", error);
     });
 
     return apiResponse({ contact: newContact }, { status: 201 });
