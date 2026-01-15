@@ -18,6 +18,7 @@ import {
 import api from "@/services/axios";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 interface Category {
@@ -404,12 +405,11 @@ export default function EditProductPage() {
 
           <div className="p-6 bg-brand-primary/5 border border-brand-primary/10">
             <div className="flex items-center gap-3 mb-2">
-              <input 
-                type="checkbox" 
+              <Checkbox 
                 id="is_featured" 
-                className="w-4 h-4 accent-brand-primary" 
+                className="w-4 h-4 rounded-none border-slate-400 bg-white data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary" 
                 checked={formData.is_featured}
-                onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_featured: !!checked })}
               />
               <Label htmlFor="is_featured" className="text-[10px] font-black uppercase tracking-widest text-slate-900 cursor-pointer">Sản phẩm nổi bật</Label>
             </div>
