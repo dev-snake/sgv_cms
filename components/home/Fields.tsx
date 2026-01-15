@@ -10,19 +10,19 @@ const HIGHLIGHTS = [
     icon: ShieldCheck,
     title: "Chính hãng 100%",
     desc: "Đại diện độc quyền các thương hiệu OKM Japan, Noah Korea, Niigata Nhật Bản tại Việt Nam.",
-    color: "bg-blue-600",
+    color: "bg-brand-primary",
   },
   {
     icon: Zap,
     title: "Phản hồi nhanh",
     desc: "Đội ngũ kỹ thuật phản hồi báo giá và xử lý sự cố trong vòng 2-4 giờ làm việc.",
-    color: "bg-amber-500",
+    color: "bg-brand-secondary",
   },
   {
     icon: Activity,
     title: "Giải pháp số hóa",
     desc: "Tiên phong trong việc tích hợp công nghệ IoT vào mạng lưới cấp thoát nước đô thị.",
-    color: "bg-emerald-600",
+    color: "bg-slate-700",
   },
 ];
 

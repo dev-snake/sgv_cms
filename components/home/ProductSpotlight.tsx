@@ -92,8 +92,8 @@ export default function ProductSpotlight() {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="hidden sm:flex -left-4 size-14 border-none bg-transparent hover:bg-transparent text-brand-cyan [&_svg]:size-10" />
-          <CarouselNext className="hidden sm:flex -right-4 size-14 border-none bg-transparent hover:bg-transparent text-brand-cyan [&_svg]:size-10" />
+          <CarouselPrevious className="hidden sm:flex -left-4 size-14 border-none bg-transparent hover:bg-transparent text-brand-primary [&_svg]:size-10 opacity-50 hover:opacity-100 transition-opacity" />
+          <CarouselNext className="hidden sm:flex -right-4 size-14 border-none bg-transparent hover:bg-transparent text-brand-primary [&_svg]:size-10 opacity-50 hover:opacity-100 transition-opacity" />
         </Carousel>
       </div>
     </section>

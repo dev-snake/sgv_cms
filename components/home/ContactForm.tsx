@@ -60,8 +60,7 @@ export default function ContactForm() {
           <div className="flex flex-col justify-center space-y-12">
             <div className="space-y-6">
               <h2 className="text-5xl sm:text-6xl font-bold text-white tracking-tighter uppercase leading-none">
-                Kết nối với <br />
-                <span className="text-brand-accent">Chuyên gia</span>
+                LIÊN HỆ VỚI CHUYÊN GIA <span className="text-white">SÀI GÒN VALVE</span>
               </h2>
               <p className="text-lg text-slate-400 font-medium leading-relaxed max-w-lg">
                 Đội ngũ kỹ thuật của Sài Gòn Valve luôn sẵn sàng hỗ trợ tư vấn và 

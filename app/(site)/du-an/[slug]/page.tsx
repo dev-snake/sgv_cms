@@ -102,7 +102,7 @@ export default function ProjectDetailPage() {
             <h3 className="text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2">
               <Info size={14} /> SƠ LƯỢC DỰ ÁN
             </h3>
-            <button className="text-[10px] font-black uppercase tracking-widest hover:text-brand-cyan transition-colors flex items-center gap-2">
+            <button className="text-[10px] font-black uppercase tracking-widest hover:text-brand-primary transition-colors flex items-center gap-2">
               XEM TẤT CẢ <ExternalLink size={12} />
             </button>
           </div>

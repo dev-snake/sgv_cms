@@ -84,16 +84,16 @@ export default function JobDetailPage() {
         <div className="container relative z-10 mx-auto px-4 lg:px-8">
           <Link 
             href={SITE_ROUTES.RECRUITMENT}
-            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-cyan transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary transition-colors mb-8"
           >
             <ArrowLeft size={14} /> Quay lại danh sách
           </Link>
           <div className="max-w-4xl space-y-6">
             <div className="flex flex-wrap items-center gap-4">
-              <span className="text-[9px] font-black uppercase tracking-widest text-brand-cyan bg-brand-cyan/10 px-3 py-1.5">
+              <span className="text-[9px] font-black uppercase tracking-widest text-white bg-brand-primary px-3 py-1.5 shadow-lg shadow-brand-primary/20">
                 {job.department || "Tổng hợp"}
               </span>
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+              <span className="text-[9px] font-black uppercase tracking-widest text-brand-primary border border-brand-primary/20 px-3 py-1.5">
                 {EMPLOYMENT_TYPE_LABELS[job.employment_type]}
               </span>
               {job.status === "closed" && (
@@ -111,24 +111,24 @@ export default function JobDetailPage() {
             </motion.h1>
             <div className="flex flex-wrap items-center gap-6 text-sm font-bold text-slate-400">
               <span className="flex items-center gap-2">
-                <MapPin size={16} className="text-brand-cyan" />
+                <MapPin size={16} className="text-brand-primary" />
                 {job.location || "Việt Nam"}
               </span>
               {job.salary_range && (
                 <span className="flex items-center gap-2">
-                  <DollarSign size={16} className="text-brand-cyan" />
+                  <DollarSign size={16} className="text-brand-primary" />
                   {job.salary_range}
                 </span>
               )}
               {job.experience_level && (
                 <span className="flex items-center gap-2">
-                  <Briefcase size={16} className="text-brand-cyan" />
+                  <Briefcase size={16} className="text-brand-primary" />
                   {job.experience_level}
                 </span>
               )}
               {job.deadline && (
                 <span className="flex items-center gap-2">
-                  <Clock size={16} className="text-brand-cyan" />
+                  <Clock size={16} className="text-brand-primary" />
                   Hạn: {format(new Date(job.deadline), "dd/MM/yyyy", { locale: vi })}
                 </span>
               )}

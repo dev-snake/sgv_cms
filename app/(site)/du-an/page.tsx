@@ -88,7 +88,7 @@ export default function ProjectsPage() {
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-brand-cyan"
+              className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-brand-primary"
             >
                <span className="h-1.5 w-1.5 rounded-full bg-brand-cyan"></span>
                DỰ ÁN TIÊU BIỂU
@@ -99,7 +99,7 @@ export default function ProjectsPage() {
               className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase leading-none"
             >
               KHẲNG ĐỊNH <br />
-              <span className="text-brand-cyan">NĂNG LỰC DỰ ÁN</span>
+              <span className="text-brand-primary">NĂNG LỰC DỰ ÁN</span>
             </motion.h1>
             <p className="text-slate-400 font-medium text-lg max-w-xl">
               Hơn {total > 0 ? total : 50}+ dự án đã triển khai thành công trên toàn quốc trong lĩnh vực cấp thoát nước và tự động hóa.
@@ -137,18 +137,18 @@ export default function ProjectsPage() {
                             <span>{project.category || "CÔNG TRÌNH"}</span>
                             <span className="text-muted-foreground">{project.start_date ? new Date(project.start_date).toLocaleDateString('vi-VN') : ""}</span>
                          </div>
-                         <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight leading-snug line-clamp-2 group-hover:text-brand-cyan transition-colors">
+                         <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight leading-snug line-clamp-2 group-hover:text-brand-primary transition-colors">
                             {project.name}
                          </h3>
                          <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
-                            <MapPin size={12} className="text-brand-cyan" />
+                            <MapPin size={12} className="text-brand-primary" />
                             {project.client_name || "Việt Nam"}
                          </div>
                       </div>
 
                       <Link 
                         href={`/du-an/${project.slug}`}
-                        className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-brand-cyan transition-colors pt-2 border-t border-slate-50"
+                        className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-brand-primary transition-colors pt-2 border-t border-slate-50"
                       >
                          XEM CHI TIẾT <ExternalLink size={12} />
                       </Link>

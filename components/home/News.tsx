@@ -96,12 +96,12 @@ export default function News() {
                 <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
                 
                 <div className="absolute bottom-6 left-6 right-6 space-y-3">
-                  <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-widest text-brand-accent">
+                  <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-widest text-brand-primary">
                      {item.category || "Tin tức"}
-                     <span className="h-1 w-1 rounded-full bg-white/40"></span>
+                     <span className="h-1 w-1 rounded-full bg-brand-primary/20"></span>
                      {formatDate(item.published_at || item.created_at)}
                   </div>
-                  <h3 className="text-[15px] font-bold text-white leading-tight transition-colors group-hover:text-brand-accent line-clamp-2 uppercase">
+                  <h3 className="text-[15px] font-bold text-white leading-tight transition-colors group-hover:text-white line-clamp-2 uppercase">
                      {item.title}
                   </h3>
                 </div>

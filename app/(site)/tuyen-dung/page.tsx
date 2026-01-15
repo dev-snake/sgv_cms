@@ -70,7 +70,7 @@ export default function RecruitmentPage() {
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-brand-cyan"
+              className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-brand-primary"
             >
                <span className="h-1.5 w-1.5 rounded-full bg-brand-cyan"></span>
                CƠ HỘI NGHỀ NGHIỆP
@@ -81,7 +81,7 @@ export default function RecruitmentPage() {
               className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase leading-none"
             >
               GIA NHẬP <br />
-              <span className="text-brand-cyan">ĐỘI NGŨ SGV</span>
+              <span className="text-brand-primary">ĐỘI NGŨ SGV</span>
             </motion.h1>
             <p className="text-slate-400 font-medium text-lg max-w-xl">
               Khám phá cơ hội nghề nghiệp tại Sài Gòn Valve - Nơi bạn có thể phát triển sự nghiệp cùng đội ngũ chuyên gia hàng đầu trong lĩnh vực công nghệ ngành nước.

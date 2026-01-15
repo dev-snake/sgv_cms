@@ -47,16 +47,16 @@
 }
 
 :root {
-  /* Brand hex colors */
-  --brand-primary: #00429a;
-  --brand-secondary: #001d4a;
+  /* Brand hex colors - Unified with TopBar */
+  --brand-primary: #001d4a; 
+  --brand-secondary: #00112b; /* Slightly darker for depth */
   --brand-accent: #fbbf24;
-  --brand-cyan: #06b6d4;
+  --brand-cyan: #00b2e3; /* Refined professional cyan */
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.12 0 0);
 
-  --primary: oklch(0.35 0.15 250);
+  --primary: oklch(0.25 0.05 250); /* Darker professional primary */
   --primary-foreground: oklch(1 0 0);
 
   --secondary: oklch(0.98 0 0);

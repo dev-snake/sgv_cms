@@ -94,7 +94,7 @@ export default function FeaturedGrid() {
                 </p>
                 <Link 
                   href={item.url}
-                  className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-[#00b2e3] hover:text-white transition-colors"
+                  className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-brand-primary hover:text-white transition-colors border-b border-brand-primary/20 hover:border-brand-primary"
                 >
                   {item.linkText}
                 </Link>

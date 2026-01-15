@@ -6,10 +6,10 @@ import { Facebook, Linkedin, Youtube, Mail, Phone, MapPin, ArrowRight, Download,
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-900 pt-24 pb-12 text-white relative overflow-hidden">
+    <footer className="bg-brand-secondary pt-24 pb-12 text-white relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-brand-primary"></div>
-      <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-primary/5 rounded-full blur-3xl -translate-y-20 translate-x-20"></div>
+      <div className="absolute top-0 left-0 w-full h-px bg-white/10"></div>
+      <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-primary/10 rounded-full blur-3xl -translate-y-20 translate-x-20"></div>
 
       <div className="container mx-auto px-4 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 pb-20 border-b border-white/5">

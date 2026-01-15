@@ -9,31 +9,31 @@ import { cn } from "@/lib/utils";
 
 const SLIDES = [
   {
-    image: "https://saigonvalve.vn/uploads/files/2024/07/23/NH-PH-N-PH-I-C-QUY-N-22-.png",
+    image: "/images/hero/hero-iot-1.png",
     fallback: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=2000",
-    title: "KIẾN TẠO",
-    highlight: "HẠ TẦNG NƯỚC",
-    titleSuffix: "THÔNG MINH",
-    desc: "Sài Gòn Valve đồng hành cùng doanh nghiệp Việt trong việc tối ưu hóa mạng lưới cấp thoát nước bằng công nghệ IoT và van công nghiệp chất lượng cao.",
-    accent: "Giải pháp Công nghiệp Hàng đầu"
+    title: "GIÁM SÁT",
+    highlight: "QUY TRÌNH THÔNG MINH",
+    titleSuffix: "CÔNG NGHỆ IOT",
+    desc: "Sài Gòn Valve mang đến giải pháp giám sát lưu lượng và áp suất nước theo thời gian thực, giúp tối ưu hóa vận hành và ngăn ngừa thất thoát tài nguyên.",
+    accent: "Công nghệ Quản lý Nước 4.0"
   },
   {
-    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=2000",
+    image: "/images/hero/hero-iot-2.png",
     fallback: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&q=80&w=2000",
-    title: "GIẢI PHÁP",
-    highlight: "CÔNG NGHỆ IOT",
-    titleSuffix: "TIÊN PHONG",
-    desc: "Số hóa hạ tầng kỹ thuật với hệ thống Datalogger và phần mềm giám sát thông minh, giúp quản lý dữ liệu thời gian thực và vận hành hiệu quả.",
-    accent: "Quản lý Nước Thông minh"
+    title: "KẾT NỐI",
+    highlight: "HẠ TẦNG KỸ THUẬT SỐ",
+    titleSuffix: "TOÀN DIỆN",
+    desc: "Xây dựng mạng lưới hạ tầng nước thông minh với hệ thống Datalogger và cảm biến tiên tiến, kết nối dữ liệu trực tiếp lên nền tảng Cloud.",
+    accent: "Giải pháp Số hóa Hạ tầng"
   },
   {
-    image: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&q=80&w=2000",
+    image: "/images/hero/hero-iot-3.png",
     fallback: "https://images.unsplash.com/photo-1516937941184-75140537280d?auto=format&fit=crop&q=80&w=2000",
-    title: "THIẾT BỊ",
-    highlight: "CHUẨN QUỐC TẾ",
-    titleSuffix: "CHÍNH HÃNG",
-    desc: "Phân phối độc quyền các thương hiệu van và thiết bị điều khiển hàng đầu từ Nhật Bản, Hàn Quốc và EU, đảm bảo bền bỉ trong mọi điều kiện.",
-    accent: "Tiêu chuẩn Chất lượng Toàn cầu"
+    title: "VAN THÔNG MINH",
+    highlight: "ĐIỀU KHIỂN CHÍNH XÁC",
+    titleSuffix: "HIỆU SUẤT CAO",
+    desc: "Phân phối độc quyền các loại van điều khiển điện và khí nén tích hợp IoT, đảm bảo độ chính xác tuyệt đối trong mọi quy trình công nghiệp.",
+    accent: "Thiết bị Điều khiển Hiện đại"
   }
 ];
 
@@ -65,13 +65,34 @@ export default function Hero() {
             src={SLIDES[current].image}
             alt="Sài Gòn Valve Industry"
             fill
-            className="object-cover opacity-50"
+            className="object-cover opacity-50 contrast-[1.1] saturate-[0.8]"
             priority
             onError={(e: any) => {
               e.target.src = SLIDES[current].fallback;
             }}
           />
-          <div className="absolute inset-0 bg-carbon mix-blend-overlay"></div>
+          
+          {/* Digital Grid Overlay */}
+          <div 
+            className="absolute inset-0 opacity-[0.1]"
+            style={{
+              backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)`,
+              backgroundSize: '32px 32px'
+            }}
+          />
+          
+          {/* Animated Wave Lines */}
+          <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none">
+            <motion.path
+              d="M 0 400 Q 250 350, 500 400 T 1000 400"
+              stroke="rgba(6,182,212,0.3)"
+              strokeWidth="1"
+              fill="none"
+              animate={{ d: ["M 0 400 Q 250 380, 500 400 T 1000 400", "M 0 400 Q 250 420, 500 400 T 1000 400", "M 0 400 Q 250 380, 500 400 T 1000 400"] }}
+              transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
+            />
+          </svg>
+
           <div className="absolute inset-0 bg-linear-to-b from-slate-950/90 via-transparent to-slate-950/95"></div>
         </motion.div>
       </AnimatePresence>
@@ -79,52 +100,54 @@ export default function Hero() {
       <div className="container relative z-10 mx-auto h-full px-4 lg:px-8">
         <div className="flex h-full flex-col justify-center pt-24">
           
-          <div className="max-w-5xl space-y-12">
+          <div className="max-w-5xl space-y-10">
             <AnimatePresence mode="wait">
               <motion.div
                 key={current}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="space-y-8"
               >
-                <div className="inline-flex items-center gap-4 bg-white/5 border border-white/10 px-6 py-3 text-[10px] font-black uppercase tracking-[0.4em] text-brand-cyan backdrop-blur-sm">
-                  <span className="h-1.5 w-1.5 rounded-full bg-brand-cyan animate-pulse"></span>
+                <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-5 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.4em] text-white backdrop-blur-md">
+                  <span className="h-1 w-1 rounded-full bg-brand-primary shadow-[0_0_8px_rgba(0,29,74,0.8)]"></span>
                   {SLIDES[current].accent}
                 </div>
 
-                <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-tight uppercase">
+                <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.05] uppercase">
                   {SLIDES[current].title} <br />
-                  <span className="text-brand-cyan drop-shadow-[0_0_30px_rgba(6,182,212,0.3)]">{SLIDES[current].highlight}</span> <br />
-                  <span className="text-white/90">{SLIDES[current].titleSuffix}</span>
+                  <span className="text-white">
+                    {SLIDES[current].highlight}
+                  </span> <br />
+                  <span className="text-white/40">{SLIDES[current].titleSuffix}</span>
                 </h1>
 
-                <p className="max-w-2xl text-xl text-slate-300 font-medium leading-relaxed border-l-8 border-brand-cyan pl-10">
+                <p className="max-w-xl text-base sm:text-lg text-slate-400 font-medium leading-relaxed">
                   {SLIDES[current].desc}
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-8 pt-8">
+                <div className="flex flex-col sm:flex-row gap-5 pt-4">
                   <Link 
                     href="/san-pham" 
-                    className="relative group overflow-hidden inline-flex items-center justify-center gap-6 px-14 py-6 bg-brand-cyan text-slate-950 text-[10px] font-black uppercase tracking-[0.3em] transition-all"
+                    className="group relative overflow-hidden inline-flex items-center justify-center gap-4 px-10 py-5 bg-brand-primary text-white text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-sm"
                   >
-                    <span className="relative z-10">KHÁM PHÁ GIẢI PHÁP</span>
-                    <MoveRight size={20} className="relative z-10 transition-transform group-hover:translate-x-2" />
-                    <div className="absolute bottom-0 left-0 h-0 w-full bg-white transition-all duration-300 group-hover:h-full"></div>
+                    <span className="relative z-10">KHÁM PHÁ NGAY</span>
+                    <MoveRight size={16} className="relative z-10 transition-transform group-hover:translate-x-1.5" />
+                    <div className="absolute inset-0 bg-brand-cyan scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                   </Link>
                   <Link 
                     href="/gioi-thieu" 
-                    className="inline-flex items-center justify-center gap-6 px-14 py-6 bg-white/5 text-white text-[10px] font-black uppercase tracking-[0.3em] border border-white/20 hover:bg-white hover:text-slate-950 transition-all backdrop-blur-sm"
+                    className="inline-flex items-center justify-center gap-4 px-10 py-5 bg-white/5 text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 hover:bg-brand-primary transition-all backdrop-blur-sm rounded-sm"
                   >
-                    VỀ CHÚNG TÔI
+                    TƯ VẤN GIẢI PHÁP
                   </Link>
                 </div>
               </motion.div>
             </AnimatePresence>
 
             {/* Slide Indicators */}
-            <div className="flex items-center gap-6 pt-16">
+            <div className="flex items-center gap-4 pt-12">
               {SLIDES.map((_, i) => (
                 <button
                   key={i}
@@ -133,8 +156,8 @@ export default function Hero() {
                     setCurrent(i);
                   }}
                   className={cn(
-                    "h-1.5 transition-all duration-500 rounded-full",
-                    current === i ? "w-20 bg-brand-cyan" : "w-10 bg-white/20 hover:bg-white/40"
+                    "h-1 rounded-full transition-all duration-500",
+                    current === i ? "w-16 bg-brand-cyan shadow-[0_0_10px_rgba(6,182,212,0.8)]" : "w-8 bg-white/20 hover:bg-white/40"
                   )}
                 />
               ))}
@@ -143,20 +166,24 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Floating Scroll Indicator */}
+      {/* Modern Technical Scroll Indicator */}
       <motion.div 
-        animate={{ y: [0, 10, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-        className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4 text-white/40"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5 }}
+        className="absolute bottom-12 right-12 z-20 flex flex-col items-end gap-6"
       >
-        <div className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center p-1">
-          <motion.div 
-            animate={{ height: ["20%", "60%", "20%"] }}
-            transition={{ repeat: Infinity, duration: 1.5 }}
-            className="w-1 bg-white/40 rounded-full"
-          />
+        <div className="flex items-center gap-4">
+          <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">0{current + 1} / 0{SLIDES.length}</span>
+          <div className="w-20 h-px bg-white/20">
+            <motion.div 
+              className="h-full bg-brand-cyan"
+              initial={{ width: 0 }}
+              animate={{ width: `${((current + 1) / SLIDES.length) * 100}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
         </div>
-        <span className="text-[9px] font-black uppercase tracking-[0.5em]">CUỘN XUỐNG</span>
       </motion.div>
     </section>
   );
