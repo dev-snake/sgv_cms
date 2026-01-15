@@ -138,8 +138,8 @@ export default function NewsPage() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-20">
             
-            <div className="lg:w-2/3 space-y-16">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="w-full space-y-16">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                 <AnimatePresence mode="popLayout">
                   {otherNews.map((article) => (
                     <motion.article 
@@ -231,78 +231,6 @@ export default function NewsPage() {
               )}
             </div>
 
-            {/* Sidebar */}
-            <aside className="lg:w-1/3 space-y-16">
-              <div className="space-y-12 sticky top-32">
-                
-                {/* Search */}
-                <div className="relative group">
-                  <input 
-                    type="text" 
-                    placeholder="TÌM KIẾM TIN TỨC..." 
-                    className="w-full bg-slate-50 px-6 py-5 pr-14 text-[10px] font-black uppercase tracking-widest border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all"
-                  />
-                  <Search size={18} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-primary transition-colors" />
-                </div>
-
-                {/* Event Timeline */}
-                <div className="bg-white p-10 space-y-8 border shadow-sm rounded-sm overflow-hidden relative">
-                   <div className="absolute top-0 left-0 w-full h-1.5 bg-brand-primary"></div>
-                   <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-900 border-b border-slate-100 pb-5 mb-8 flex items-center gap-3">
-                     <TrendingUp size={16} className="text-brand-primary" /> DÒNG SỰ KIỆN
-                   </h4>
-                   <div className="space-y-10 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-100">
-                      {[
-                        { date: "THÁNG 06, 2025", title: "Hội thảo Tech-Water 2025: Giải pháp quản lý thông minh" },
-                        { date: "THÁNG 05, 2025", title: "SGV chính thức phân phối dòng van an toàn màng PTFE cao cấp" },
-                        { date: "THÁNG 04, 2025", title: "Triển khai dự án Scada cho mạng lưới cấp nước Thủ Đức" },
-                      ].map((item, i) => (
-                        <div key={i} className="relative pl-10 group">
-                           <div className="absolute left-0 top-1.5 h-[24px] w-[24px] rounded-full bg-white border-2 border-slate-200 flex items-center justify-center transition-all group-hover:border-brand-primary">
-                              <div className="h-2 w-2 rounded-full bg-slate-200 group-hover:bg-brand-primary transition-all"></div>
-                           </div>
-                           <div className="text-[8px] font-black text-brand-primary uppercase tracking-widest mb-1">{item.date}</div>
-                           <Link href="#" className="block font-black text-slate-900 group-hover:text-brand-primary transition-colors uppercase leading-[1.3] text-xs tracking-tight">{item.title}</Link>
-                        </div>
-                      ))}
-                   </div>
-                </div>
-
-                {/* Newsletter */}
-                <div className="bg-slate-900 p-12 text-white space-y-8 relative overflow-hidden group rounded-sm">
-                   <div className="absolute top-0 right-0 h-full w-2 bg-brand-accent transition-all group-hover:w-4"></div>
-                   <h4 className="text-2xl font-black uppercase leading-tight tracking-tighter">
-                     ĐĂNG KÝ BẢN TIN <br />
-                     <span className="text-brand-accent">KỸ THUẬT</span>
-                   </h4>
-                   <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                     Nhận ngay các tài liệu catalogue và hướng dẫn vận hành mới nhất.
-                   </p>
-                   <div className="space-y-4">
-                      <input 
-                        type="email" 
-                        placeholder="EMAIL@CUA-BAN.COM" 
-                        className="w-full bg-white/5 px-6 py-5 text-[10px] font-black uppercase tracking-widest placeholder:text-white/20 focus:outline-none focus:bg-white/10 transition-all border border-white/10" 
-                      />
-                      <button className="w-full bg-brand-accent py-5 text-[10px] font-black uppercase tracking-widest text-slate-900 hover:bg-white transition-all shadow-xl shadow-brand-accent/20">
-                        Đăng ký ngay
-                      </button>
-                   </div>
-                </div>
-
-                {/* Footer Social */}
-                <div className="pt-10 flex items-center justify-between">
-                   <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mr-4">FOLLOW SGV</span>
-                   <div className="flex gap-3">
-                      {[Facebook, Linkedin, Youtube].map((Icon, i) => (
-                         <a key={i} href="#" className="h-10 w-10 flex items-center justify-center border border-slate-100 text-slate-400 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all rounded-sm bg-white shadow-sm">
-                            <Icon size={16} />
-                         </a>
-                      ))}
-                   </div>
-                </div>
-              </div>
-            </aside>
 
           </div>
         </div>

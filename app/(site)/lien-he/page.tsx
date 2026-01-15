@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "motion/react";
-import { Phone, Mail, MapPin, Send, ShieldCheck, Facebook, Linkedin, Youtube, Headset, Clock, Search, Info } from "lucide-react";
+import { Phone, Mail, MapPin, Send, ShieldCheck, Facebook, Linkedin, Youtube, Headset, Clock, Search, Info, Loader2 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { toast } from "sonner";
+import api from "@/services/axios";
 
 const FAQS = [
   {
@@ -20,6 +23,48 @@ const FAQS = [
 ];
 
 export default function ContactPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    address: "",
+    message: ""
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.phone || !formData.email || !formData.address || !formData.message) {
+      toast.error("Vui lòng điền đầy đủ tất cả các trường thông tin");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await api.post("/api/contacts", formData);
+      toast.success("Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ lại sớm nhất.");
+      setFormData({
+        name: "",
+        phone: "",
+        email: "",
+        address: "",
+        message: ""
+      });
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau.";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white pt-24">
       {/* Page Header */}
@@ -98,29 +143,72 @@ export default function ContactPage() {
                    <div className="h-1 w-20 bg-brand-primary"></div>
                 </div>
                 
-                <form className="space-y-10">
+                <form className="space-y-10" onSubmit={handleSubmit}>
                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                       <div className="space-y-3">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Họ tên của bạn</label>
-                         <input type="text" placeholder="NGUYỄN VĂN A" className="w-full bg-transparent border-b-2 border-slate-200 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-primary transition-colors placeholder:text-slate-200" />
+                         <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Họ tên của bạn *</label>
+                         <input 
+                          type="text" 
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          required
+                          placeholder="NGUYỄN VĂN A" 
+                          className="w-full bg-transparent border-b-2 border-slate-200 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-primary transition-colors placeholder:text-slate-200" 
+                         />
                       </div>
                       <div className="space-y-3">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Số điện thoại</label>
-                         <input type="tel" placeholder="09XX XXX XXX" className="w-full bg-transparent border-b-2 border-slate-200 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-primary transition-colors placeholder:text-slate-200" />
+                         <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Số điện thoại *</label>
+                         <input 
+                          type="tel" 
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          required
+                          placeholder="09XX XXX XXX" 
+                          className="w-full bg-transparent border-b-2 border-slate-200 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-primary transition-colors placeholder:text-slate-200" 
+                         />
                       </div>
                    </div>
-                   <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Lĩnh vực hỗ trợ</label>
-                      <select className="w-full bg-transparent border-b-2 border-slate-200 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-primary transition-colors">
-                         <option>Hệ thống Van OKM Japan</option>
-                         <option>Thiết bị Actuator Noah Korea</option>
-                         <option>Giải pháp IoT Ngành Nước</option>
-                         <option>Yêu cầu hỗ trợ kỹ thuật khác</option>
-                      </select>
+
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                      <div className="space-y-3">
+                         <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Email *</label>
+                         <input 
+                          type="email" 
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          required
+                          placeholder="EXAMPLE@GMAIL.COM" 
+                          className="w-full bg-transparent border-b-2 border-slate-200 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-primary transition-colors placeholder:text-slate-200" 
+                         />
+                      </div>
+                      <div className="space-y-3">
+                         <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Địa chỉ *</label>
+                         <input 
+                          type="text" 
+                          name="address"
+                          value={formData.address}
+                          onChange={handleChange}
+                          required
+                          placeholder="SỐ NHÀ, TÊN ĐƯỜNG, ..." 
+                          className="w-full bg-transparent border-b-2 border-slate-200 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-primary transition-colors placeholder:text-slate-200" 
+                         />
+                      </div>
                    </div>
+
                    <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Nội dung chi tiết</label>
-                      <textarea rows={2} placeholder="MÔ TẢ YÊU CẦU CỦA BẠN..." className="w-full bg-transparent border-b-2 border-slate-200 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-primary transition-colors resize-none placeholder:text-slate-200"></textarea>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Nội dung chi tiết *</label>
+                      <textarea 
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        required
+                        rows={2} 
+                        placeholder="MÔ TẢ YÊU CẦU CỦA BẠN..." 
+                        className="w-full bg-transparent border-b-2 border-slate-200 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-primary transition-colors resize-none placeholder:text-slate-200"
+                      ></textarea>
                    </div>
                    
                    <div className="space-y-8">
@@ -128,8 +216,16 @@ export default function ContactPage() {
                         <ShieldCheck size={14} className="text-brand-primary" />
                         Cam kết bảo mật thông tin dự án tuyệt đối.
                      </div>
-                     <button className="flex w-full items-center justify-center gap-4 bg-brand-primary py-6 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-xl hover:bg-brand-secondary transition-all">
-                        XÁC NHẬN GỬI YÊU CẦU <Send size={18} />
+                     <button 
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="flex w-full items-center justify-center gap-4 bg-brand-primary py-6 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-xl hover:bg-brand-secondary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                     >
+                        {isSubmitting ? (
+                          <>ĐANG XỬ LÝ... <Loader2 size={18} className="animate-spin" /></>
+                        ) : (
+                          <>XÁC NHẬN GỬI YÊU CẦU <Send size={18} /></>
+                        )}
                      </button>
                    </div>
                 </form>
