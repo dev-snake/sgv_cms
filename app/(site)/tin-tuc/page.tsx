@@ -122,7 +122,7 @@ export default function NewsPage() {
               <div className="inline-flex items-center gap-3 bg-brand-primary/20 border border-brand-primary/30 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary backdrop-blur-md">
                  Truyền thông & Tin tức
               </div>
-              <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight uppercase leading-[1.1]">
+              <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight uppercase leading-[1.3]">
                 TRUNG TÂM <br /> 
                 <span className="text-brand-accent">TIÊU ĐIỂM</span>
               </h1>

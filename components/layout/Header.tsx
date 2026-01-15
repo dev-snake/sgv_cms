@@ -29,6 +29,27 @@ interface NavLink {
 const NAV_LINKS: NavLink[] = [
   { label: "TRANG CHỦ", href: SITE_ROUTES.HOME },
   { label: "GIỚI THIỆU", href: SITE_ROUTES.ABOUT },
+  { 
+    label: "GIẢI PHÁP", 
+    href: "#",
+    featured: [
+      { 
+        title: "Quản lý nước thông minh", 
+        desc: "Giải pháp giám sát và điều khiển mạng lưới cấp nước tự động, tối ưu hóa hiệu suất và giảm thất thoát.",
+        href: SITE_ROUTES.SOLUTIONS.WATER_MANAGEMENT 
+      },
+      { 
+        title: "Nông nghiệp chính xác", 
+        desc: "Ứng dụng IoT trong quản lý tưới tiêu và dinh dưỡng, giúp tăng năng suất và bảo vệ tài nguyên.",
+        href: SITE_ROUTES.SOLUTIONS.AGRICULTURE 
+      },
+      { 
+        title: "Quan trắc nuôi trồng thủy sản", 
+        desc: "Hệ thống cảnh báo sớm và kiểm soát chất lượng môi trường nước 24/7 cho trang trại.",
+        href: SITE_ROUTES.SOLUTIONS.AQUACULTURE 
+      },
+    ]
+  },
   { label: "SẢN PHẨM", href: SITE_ROUTES.PRODUCTS },
   { label: "DỰ ÁN", href: SITE_ROUTES.PROJECTS },
   { label: "TIN TỨC", href: SITE_ROUTES.NEWS },

@@ -92,7 +92,7 @@ export default function ContactPage() {
             <motion.h1 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl sm:text-6xl font-bold text-white tracking-tighter uppercase leading-[1.1]"
+              className="text-4xl sm:text-6xl font-bold text-white tracking-tighter uppercase leading-[1.3]"
             >
               KẾT NỐI VỚI <br />
               <span className="text-brand-primary">SÀI GÒN VALVE</span>

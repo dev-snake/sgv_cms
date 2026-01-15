@@ -11,6 +11,11 @@ export const SITE_ROUTES = {
   NEWS: "/tin-tuc",
   CONTACT: "/lien-he",
   RECRUITMENT: "/tuyen-dung",
+  SOLUTIONS: {
+    WATER_MANAGEMENT: "/giai-phap/quan-ly-nuoc-thong-minh",
+    AGRICULTURE: "/giai-phap/nong-nghiep-chinh-xac",
+    AQUACULTURE: "/giai-phap/quan-trac-nuoi-trong-thuy-san",
+  },
   LOGIN: "/login",
 } as const;
 

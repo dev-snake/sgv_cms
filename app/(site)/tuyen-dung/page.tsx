@@ -88,7 +88,7 @@ export default function RecruitmentPage() {
             <motion.h1 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl sm:text-6xl font-black text-white tracking-tighter uppercase leading-[1.1]"
+              className="text-4xl sm:text-6xl font-black text-white tracking-tighter uppercase leading-[1.3]"
             >
               GIA NHẬP <br />
               <span className="text-brand-primary">ĐỘI NGŨ SGV</span>
