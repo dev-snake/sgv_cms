@@ -4,11 +4,17 @@ import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/services/axios";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RichTextEditor } from "@/components/portal/rich-text-editor";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { generateSlug } from "@/utils/slug";
 import {
   Select,
   SelectContent,
@@ -40,7 +46,7 @@ export default function EditJobPage() {
     experience_level: "",
     department: "",
     status: "open" as "open" | "closed",
-    deadline: "",
+    deadline: undefined as Date | undefined,
   });
 
   React.useEffect(() => {
@@ -62,7 +68,7 @@ export default function EditJobPage() {
             experience_level: job.experience_level || "",
             department: job.department || "",
             status: job.status || "open",
-            deadline: job.deadline ? job.deadline.split("T")[0] : "",
+            deadline: job.deadline ? new Date(job.deadline) : undefined,
           });
         }
       } catch (error) {
@@ -78,6 +84,15 @@ export default function EditJobPage() {
     }
   }, [jobId]);
 
+  const handleTitleChange = (title: string) => {
+    const slug = generateSlug(title);
+    setFormData((prev) => ({ 
+      ...prev, 
+      title, 
+      slug: prev.slug === "" || prev.slug === generateSlug(prev.title) ? slug : prev.slug,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.slug || !formData.description) {
@@ -87,7 +102,11 @@ export default function EditJobPage() {
 
     setIsSubmitting(true);
     try {
-      await api.patch(`${API_ROUTES.JOBS}/${jobId}`, formData);
+      const submissionData = {
+        ...formData,
+        deadline: formData.deadline ? formData.deadline.toISOString() : null,
+      };
+      await api.patch(`${API_ROUTES.JOBS}/${jobId}`, submissionData);
       toast.success("Cập nhật tin tuyển dụng thành công");
       router.push(PORTAL_ROUTES.cms.jobs.list);
     } catch (error: any) {
@@ -146,7 +165,7 @@ export default function EditJobPage() {
                   placeholder="VD: Kỹ sư Tự động hóa"
                   className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) => handleTitleChange(e.target.value)}
                 />
               </div>
               <div className="space-y-3">
@@ -230,7 +249,29 @@ export default function EditJobPage() {
               </div>
               <div className="space-y-3">
                 <Label htmlFor="deadline" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Hạn nộp hồ sơ</Label>
-                <Input id="deadline" type="date" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none" value={formData.deadline} onChange={(e) => setFormData({ ...formData, deadline: e.target.value })} />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "h-14 w-full justify-start text-left font-bold bg-slate-50 border-none rounded-none shadow-none focus:ring-1 focus:ring-brand-primary/20",
+                        !formData.deadline && "text-slate-300"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.deadline ? format(formData.deadline, "PPP", { locale: vi }) : <span>Chọn ngày kết thúc</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-none border-slate-100" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.deadline}
+                      onSelect={(date) => setFormData({ ...formData, deadline: date })}
+                      initialFocus
+                      locale={vi}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>

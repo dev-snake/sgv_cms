@@ -137,3 +137,17 @@ export const jobPostings = pgTable('job_postings', {
   updated_at: timestamp('updated_at').defaultNow().notNull(),
   deleted_at: timestamp('deleted_at'), // Soft delete
 });
+
+// Job Applications for Candidates
+export const jobApplications = pgTable('job_applications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  job_id: uuid('job_id').references(() => jobPostings.id, { onDelete: 'cascade' }).notNull(),
+  full_name: varchar('full_name', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  phone: varchar('phone', { length: 50 }).notNull(),
+  cv_url: text('cv_url').notNull(), // URL to uploaded CV file
+  cover_letter: text('cover_letter'),
+  status: varchar('status', { length: 50 }).default('pending').notNull(), // pending, reviewed, interviewed, rejected, accepted
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull(),
+});

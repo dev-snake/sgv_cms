@@ -10,6 +10,12 @@ import api from "@/services/axios";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
+import { Loader2, Upload } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface JobPosting {
   id: string;
@@ -184,20 +190,16 @@ export default function JobDetailPage() {
             {/* Sidebar */}
             <div className="space-y-8">
               {/* Apply Card */}
-              <div className="bg-slate-950 p-8 text-white space-y-6 sticky top-32">
+              <div id="apply-form" className="bg-slate-950 p-8 text-white space-y-6 sticky top-32">
                 <h3 className="text-lg font-black uppercase tracking-tight">Ứng tuyển ngay</h3>
                 <p className="text-sm text-slate-400 font-medium leading-relaxed">
-                  Gửi CV và thư giới thiệu của bạn đến email tuyển dụng của chúng tôi.
+                  Để lại thông tin và hồ sơ (CV) của bạn, chúng tôi sẽ liên hệ sớm nhất.
                 </p>
-                <a 
-                  href="mailto:hr@saigonvalve.vn?subject=Ứng tuyển: ${job.title}"
-                  className="block w-full text-center px-8 py-4 bg-brand-primary text-white font-black uppercase tracking-widest text-xs hover:bg-brand-secondary transition-all"
-                >
-                  <Send size={16} className="inline mr-2" />
-                  Gửi hồ sơ
-                </a>
+                
+                <ApplyForm jobId={job.id} jobTitle={job.title} />
+                
                 <p className="text-[10px] text-slate-500 text-center">
-                  hoặc gửi trực tiếp đến: hr@saigonvalve.vn
+                  Cần hỗ trợ? Liên hệ hr@saigonvalve.vn
                 </p>
               </div>
 
@@ -225,4 +227,167 @@ export default function JobDetailPage() {
       </section>
     </div>
   );
+}
+
+function ApplyForm({ jobId, jobTitle }: { jobId: string, jobTitle: string }) {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    cv_url: "",
+    cover_letter: "",
+  });
+  const [cvFile, setCvFile] = React.useState<File | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File quá lớn. Tối đa 5MB");
+        return;
+      }
+      const allowed = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+      if (!allowed.includes(file.type)) {
+        toast.error("Chỉ chấp nhận file PDF, DOC, DOCX");
+        return;
+      }
+      setCvFile(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.full_name || !formData.email || !formData.phone || !cvFile) {
+      toast.error("Vui lòng điền đủ thông tin và đính kèm CV");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // 1. Upload CV
+      const uploadData = new FormData();
+      uploadData.append("file", cvFile);
+      
+      const uploadRes = await api.post("/api/upload", uploadData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (!uploadRes.data.success) throw new Error("Upload failed");
+      const cvUrl = uploadRes.data.data.url;
+
+      // 2. Submit Application
+      const applicationRes = await api.post("/api/applications", {
+        ...formData,
+        job_id: jobId,
+        cv_url: cvUrl,
+      });
+
+      if (applicationRes.data.success) {
+        toast.success("Nộp hồ sơ thành công! Chúng tôi sẽ liên hệ sớm.");
+        setFormData({ full_name: "", email: "", phone: "", cv_url: "", cover_letter: "" });
+        setCvFile(null);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Gặp lỗi khi nộp hồ sơ. Vui lòng thử lại.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-[10px] font-black uppercase text-slate-400">Họ và tên *</Label>
+        <Input 
+          required
+          value={formData.full_name}
+          onChange={e => setFormData({ ...formData, full_name: e.target.value })}
+          className="bg-white/5 border-white/10 text-white rounded-none h-12 focus:ring-brand-primary placeholder:text-slate-600"
+          placeholder="NGUYỄN VĂN A"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-2">
+          <Label className="text-[10px] font-black uppercase text-slate-400">Email *</Label>
+          <Input 
+            required
+            type="email"
+            value={formData.email}
+            onChange={e => setFormData({ ...formData, email: e.target.value })}
+            className="bg-white/5 border-white/10 text-white rounded-none h-12 focus:ring-brand-primary placeholder:text-slate-600"
+            placeholder="example@mail.com"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-[10px] font-black uppercase text-slate-400">Số điện thoại *</Label>
+          <Input 
+            required
+            value={formData.phone}
+            onChange={e => setFormData({ ...formData, phone: e.target.value })}
+            className="bg-white/5 border-white/10 text-white rounded-none h-12 focus:ring-brand-primary placeholder:text-slate-600"
+            placeholder="09xx xxx xxx"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-[10px] font-black uppercase text-slate-400">Lời nhắn</Label>
+        <Textarea 
+          value={formData.cover_letter}
+          onChange={e => setFormData({ ...formData, cover_letter: e.target.value })}
+          className="bg-white/5 border-white/10 text-white rounded-none min-h-[80px] focus:ring-brand-primary placeholder:text-slate-600"
+          placeholder="Tóm tắt ngắn gọn kinh nghiệm..."
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-[10px] font-black uppercase text-slate-400">Hồ sơ (CV) *</Label>
+        <div 
+          onClick={() => fileInputRef.current?.click()}
+          className={cn(
+            "border-2 border-dashed border-white/10 p-4 text-center cursor-pointer transition-colors group h-24 flex flex-col items-center justify-center",
+            cvFile ? "bg-brand-primary/10 border-brand-primary" : "hover:border-white/20 hover:bg-white/5"
+          )}
+        >
+          {cvFile ? (
+            <div className="flex items-center gap-2 text-[10px] font-bold text-brand-primary truncate max-w-full">
+              <CheckCircle size={14} /> {cvFile.name}
+            </div>
+          ) : (
+            <>
+              <Upload className="size-5 mb-2 text-slate-500 group-hover:text-brand-primary transition-colors" />
+              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-300">Tải lên CV (PDF, DOCX)</p>
+            </>
+          )}
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            className="hidden" 
+            onChange={handleFileChange}
+            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          />
+        </div>
+      </div>
+
+      <Button 
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full bg-brand-primary hover:bg-brand-secondary text-white h-14 rounded-none text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl disabled:opacity-50"
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 size-4 animate-spin" /> Đang gửi...
+          </>
+        ) : (
+          <>
+            Nộp hồ sơ ngay <Send size={16} className="ml-2" />
+          </>
+        )}
+      </Button>
+    </form>
+  )
 }

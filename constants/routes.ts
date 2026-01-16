@@ -60,6 +60,10 @@ export const PORTAL_ROUTES = {
       add: "/portal/cms/jobs/add",
       edit: (id: string) => `/portal/cms/jobs/${id}/edit`,
     },
+    applications: {
+      list: "/portal/cms/applications",
+      edit: (id: string) => `/portal/cms/applications/${id}`,
+    },
     media: "/portal/cms/media",
   },
 
@@ -98,6 +102,7 @@ export const API_ROUTES = {
   MEDIA: "/api/media",
   STATS: "/api/stats",
   JOBS: "/api/jobs",
+  APPLICATIONS: "/api/applications",
 } as const;
 
 export type PortalRoute = typeof PORTAL_ROUTES;

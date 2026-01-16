@@ -82,6 +82,16 @@ const data = {
        icon: Mail,
     },
     {
+       title: "Quản lý Tuyển dụng",
+       url: PORTAL_ROUTES.cms.jobs.list,
+       icon: Briefcase,
+    },
+    {
+       title: "Danh sách Ứng viên",
+       url: PORTAL_ROUTES.cms.applications.list,
+       icon: Users,
+    },
+    {
       title: "Tài khoản Admin",
       url: "/portal/users",
       icon: Users,

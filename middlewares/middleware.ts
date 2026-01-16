@@ -179,7 +179,7 @@ export async function getUserOrError(request: NextRequest): Promise<
  * Wrapper for API route handlers with auth and validation
  */
 export function withAuth(
-  handler: (request: NextRequest, session: UserSession) => Promise<Response>,
+  handler: (request: NextRequest, session: UserSession, context?: any) => Promise<Response>,
   options?: {
     allowedRoles?: string[];
   }
@@ -193,7 +193,7 @@ export function withAuth(
       return sessionOrError;
     }
     
-    return handler(request, sessionOrError);
+    return handler(request, sessionOrError, context);
   };
 }
 

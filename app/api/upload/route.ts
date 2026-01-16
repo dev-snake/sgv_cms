@@ -13,11 +13,11 @@ export async function GET(request: NextRequest) {
     
     const files = await readdir(uploadsDir);
     
-    // Filter for image files and get their info
-    const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+    // Filter for image and document files and get their info
+    const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".pdf", ".doc", ".docx"];
     const images = await Promise.all(
       files
-        .filter(file => imageExtensions.some(ext => file.toLowerCase().endsWith(ext)))
+        .filter(file => allowedExtensions.some(ext => file.toLowerCase().endsWith(ext)))
         .map(async (filename) => {
           const filepath = path.join(uploadsDir, filename);
           const fileStat = await stat(filepath);
@@ -50,9 +50,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    const allowedTypes = [
+      "image/jpeg", 
+      "image/png", 
+      "image/webp", 
+      "image/gif", 
+      "application/pdf", 
+      "application/msword", 
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ];
     if (!allowedTypes.includes(file.type)) {
-      return apiError("Invalid file type. Allowed: JPEG, PNG, WebP, GIF", 400);
+      return apiError("Định dạng file không hỗ trợ. Chỉ chấp nhận ảnh (JPG, PNG, WebP, GIF) và tài liệu (PDF, DOC, DOCX)", 400);
     }
 
     // Validate file size (max 5MB)
