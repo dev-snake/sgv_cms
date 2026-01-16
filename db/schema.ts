@@ -14,7 +14,7 @@ export const categoryTypes = pgTable('category_types', {
 export const categories = pgTable('categories', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name', { length: 255 }).notNull(),
-  category_type_id: uuid('category_type_id').references(() => categoryTypes.id).notNull(),
+  category_type_id: uuid('category_type_id').references(() => categoryTypes.id, { onDelete: 'restrict' }).notNull(),
 });
 
 export const authors = pgTable('authors', {
@@ -29,14 +29,15 @@ export const newsArticles = pgTable('news_articles', {
   slug: varchar('slug', { length: 255 }).notNull().unique(),
   summary: text('summary').notNull(),
   content: text('content').notNull(),
-  category_id: uuid('category_id').references(() => categories.id).notNull(),
-  author_id: uuid('author_id').references(() => authors.id).notNull(),
+  category_id: uuid('category_id').references(() => categories.id, { onDelete: 'restrict' }).notNull(),
+  author_id: uuid('author_id').references(() => authors.id, { onDelete: 'set null' }),
   status: statusEnum('status').default('draft').notNull(),
   image_url: varchar('image_url', { length: 255 }),
   gallery: jsonb('gallery'), // Array of image URLs
   published_at: timestamp('published_at'),
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
+  deleted_at: timestamp('deleted_at'), // Soft delete
 });
 
 export const products = pgTable('products', {
@@ -47,7 +48,7 @@ export const products = pgTable('products', {
   price: decimal('price', { precision: 12, scale: 2 }).notNull().default('0.00'),
   sku: varchar('sku', { length: 100 }).notNull().unique(),
   stock: integer('stock').notNull().default(0),
-  category_id: uuid('category_id').references(() => categories.id).notNull(),
+  category_id: uuid('category_id').references(() => categories.id, { onDelete: 'restrict' }).notNull(),
   status: productStatusEnum('status').default('active').notNull(),
   image_url: varchar('image_url', { length: 255 }),
   
@@ -65,6 +66,7 @@ export const products = pgTable('products', {
   
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
+  deleted_at: timestamp('deleted_at'), // Soft delete
 });
 
 export const projects = pgTable('projects', {
@@ -75,12 +77,13 @@ export const projects = pgTable('projects', {
   client_name: varchar('client_name', { length: 255 }),
   start_date: timestamp('start_date'),
   end_date: timestamp('end_date'),
-  category_id: uuid('category_id').references(() => categories.id).notNull(),
+  category_id: uuid('category_id').references(() => categories.id, { onDelete: 'restrict' }).notNull(),
   status: projectStatusEnum('status').default('ongoing').notNull(),
   image_url: varchar('image_url', { length: 255 }),
   gallery: jsonb('gallery'), // Array of image URLs
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
+  deleted_at: timestamp('deleted_at'), // Soft delete
 });
 
 export const media = pgTable('media', {
@@ -132,4 +135,5 @@ export const jobPostings = pgTable('job_postings', {
   deadline: timestamp('deadline'),
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
+  deleted_at: timestamp('deleted_at'), // Soft delete
 });

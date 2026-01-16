@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { products } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, isNull, and } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 
 // GET /api/products/[slug] - Get a single product by slug or ID
@@ -15,7 +15,10 @@ export async function GET(
     const isId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
     
     const [product] = await db.select().from(products).where(
-      isId ? eq(products.id, slug) : eq(products.slug, slug)
+      and(
+        isId ? eq(products.id, slug) : eq(products.slug, slug),
+        isNull(products.deleted_at) // Exclude soft deleted
+      )
     );
 
     if (!product) {
@@ -64,14 +67,20 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/products/[id] - Delete a product
+// DELETE /api/products/[id] - Soft delete a product
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ slug: string }> } // Named 'slug' because folder is [slug]
 ) {
   try {
     const { slug: id } = await params;
-    const [deletedProduct] = await db.delete(products)
+    
+    // Soft delete: set deleted_at timestamp
+    const [deletedProduct] = await db.update(products)
+      .set({ 
+        deleted_at: new Date(),
+        updated_at: new Date() 
+      })
       .where(eq(products.id, id))
       .returning();
 

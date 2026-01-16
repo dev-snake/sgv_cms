@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { projects, categories } from "@/db/schema";
-import { eq, desc, sql, and, or, ilike, gte, lte } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike, gte, lte, isNull } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 
@@ -13,6 +13,7 @@ export async function GET(request: Request) {
     const search = searchParams.get("search");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
+    const includeDeleted = searchParams.get("includeDeleted") === "true";
 
     // Parse pagination params
     const { page, limit } = parsePaginationParams(searchParams, { limit: 12 });
@@ -20,6 +21,11 @@ export async function GET(request: Request) {
 
     // Build where conditions
     const conditions = [];
+    
+    // Soft delete filter
+    if (!includeDeleted) {
+      conditions.push(isNull(projects.deleted_at));
+    }
     if (categoryId) {
       conditions.push(eq(projects.category_id, categoryId));
     }

@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { products, categories } from "@/db/schema";
-import { eq, desc, sql, and, or, ilike, gte, lte } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike, gte, lte, isNull } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 
@@ -14,6 +14,7 @@ export async function GET(request: Request) {
     const search = searchParams.get("search");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
+    const includeDeleted = searchParams.get("includeDeleted") === "true"; // For admin only
     
     // Parse pagination params
     const { page, limit } = parsePaginationParams(searchParams, { limit: 12 });
@@ -21,6 +22,11 @@ export async function GET(request: Request) {
 
     // Build where conditions
     const conditions = [];
+    
+    // Soft delete filter (exclude deleted by default)
+    if (!includeDeleted) {
+      conditions.push(isNull(products.deleted_at));
+    }
     if (categoryId) {
       conditions.push(eq(products.category_id, categoryId));
     }
@@ -45,7 +51,7 @@ export async function GET(request: Request) {
       conditions.push(lte(products.created_at, end));
     }
 
-    // Count total items
+    // Count total items (excluding soft deleted)
     const countQuery = db.select({ count: sql<number>`count(*)` }).from(products);
     if (conditions.length > 0) {
       countQuery.where(and(...conditions));

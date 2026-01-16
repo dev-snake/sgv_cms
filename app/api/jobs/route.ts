@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { jobPostings } from "@/db/schema";
-import { eq, desc, ilike, and, SQL } from "drizzle-orm";
+import { eq, desc, ilike, and, SQL, isNull } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 
 // GET /api/jobs - List all job postings
@@ -11,11 +11,17 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const status = searchParams.get("status");
     const search = searchParams.get("search");
+    const includeDeleted = searchParams.get("includeDeleted") === "true";
 
     const offset = (page - 1) * limit;
 
     // Build filter conditions
     const conditions: SQL[] = [];
+    
+    // Soft delete filter
+    if (!includeDeleted) {
+      conditions.push(isNull(jobPostings.deleted_at));
+    }
     if (status) {
       conditions.push(eq(jobPostings.status, status as "open" | "closed"));
     }
