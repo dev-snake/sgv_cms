@@ -133,7 +133,7 @@ export default function NewsDetailPage() {
               {article.category}
             </div>
             
-            <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
+            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-[1.1]">
               {article.title}
             </h1>
 
@@ -191,12 +191,12 @@ export default function NewsDetailPage() {
             {/* Main Content */}
             <div className="lg:col-span-8">
               <div className="space-y-8">
-                <p className="text-xl sm:text-2xl text-slate-600 font-medium leading-relaxed italic border-l-4 border-brand-primary pl-8">
+                <p className="text-lg sm:text-xl text-slate-600 font-medium leading-relaxed italic border-l-4 border-brand-primary pl-8">
                   {article.summary}
                 </p>
 
                 <div 
-                  className="prose prose-slate prose-lg max-w-none prose-headings:text-slate-900 prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-a:text-brand-primary hover:prose-a:text-brand-secondary prose-img:rounded-xl"
+                  className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-a:text-brand-primary hover:prose-a:text-brand-secondary prose-img:rounded-xl"
                   dangerouslySetInnerHTML={{ __html: article.content || `<p>Nội dung chi tiết đang được cập nhật...</p>` }}
                 />
 

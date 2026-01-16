@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Eye, X, User, CalendarDays, Clock, Share2, Printer, Facebook, Linkedin, Twitter, Bookmark, MoveRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +31,13 @@ import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import api from "@/services/axios";
 import { toast } from "sonner";
 import { Calendar as CalendarIcon } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import Image from "next/image";
 
 interface NewsArticle {
   id: string;
@@ -68,6 +75,8 @@ export default function EditNewsPage() {
     gallery: [] as string[],
     published_at: undefined as Date | undefined,
   });
+
+  const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -179,12 +188,155 @@ export default function EditNewsPage() {
           >
             Hủy thay đổi
           </Button>
+          <Button 
+            variant="outline"
+            className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-brand-primary/20 text-brand-primary hover:bg-brand-primary/5 rounded-none"
+            onClick={() => setIsPreviewOpen(true)}
+            disabled={saving}
+          >
+            <Eye size={16} className="mr-2" /> Xem trước
+          </Button>
           <Button onClick={handleSubmit} disabled={saving} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
             {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />} 
             Lưu thay đổi
           </Button>
         </div>
       </div>
+
+      {/* Preview Dialog */}
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="max-w-6xl w-[95vw] h-[90vh] overflow-y-auto p-0 rounded-none border-none">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Xem trước bài viết</DialogTitle>
+          </DialogHeader>
+          
+          <div className="relative bg-white min-h-full">
+            <button 
+              onClick={() => setIsPreviewOpen(false)}
+              className="fixed top-4 right-4 z-[60] h-10 w-10 bg-slate-900 text-white rounded-full flex items-center justify-center hover:bg-brand-primary transition-all shadow-xl"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Simulated News Detail UI */}
+            <div className="flex flex-col min-h-full">
+              {/* Article Header */}
+              <section className="pt-20 pb-12 border-b border-slate-100 px-8">
+                <div className="max-w-4xl mx-auto space-y-6">
+                  <div className="inline-flex items-center rounded-full bg-brand-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-primary">
+                    {categories.find(c => c.id === formData.category_id)?.name || "Danh mục"}
+                  </div>
+                  
+                  <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-[1.1]">
+                    {formData.title || "Tiêu đề bài viết"}
+                  </h1>
+
+                  <div className="flex flex-wrap items-center gap-y-4 gap-6 pt-4 border-t border-slate-100 text-slate-500">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                        <User size={20} />
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tác giả</div>
+                        <div className="text-xs font-bold text-slate-900">Quản trị viên</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                        <CalendarDays size={20} />
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ngày đăng</div>
+                        <div className="text-xs font-bold text-slate-900">
+                          {formData.published_at ? format(formData.published_at, "dd/MM/yyyy", { locale: vi }) : "Đang cập nhật"}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                        <Clock size={20} />
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Thời gian đọc</div>
+                        <div className="text-xs font-bold text-slate-900">3 phút đọc</div>
+                      </div>
+                    </div>
+
+                    <div className="ml-auto flex items-center gap-2">
+                      <button title="Chia sẻ" className="h-9 w-9 rounded-full border border-slate-200 flex items-center justify-center text-slate-400">
+                        <Share2 size={16} />
+                      </button>
+                      <button title="In" className="h-9 w-9 rounded-full border border-slate-200 flex items-center justify-center text-slate-400">
+                        <Printer size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Layout Grid */}
+              <section className="py-12 px-8 grow">
+                <div className="max-w-6xl mx-auto">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                    {/* Main Content */}
+                    <div className="lg:col-span-8 space-y-8">
+                      {formData.image_url && (
+                        <div className="relative aspect-video rounded-2xl overflow-hidden shadow-lg mb-8">
+                          <Image src={formData.image_url} alt="Featured" fill className="object-cover" />
+                        </div>
+                      )}
+
+                      <p className="text-lg sm:text-xl text-slate-600 font-medium leading-relaxed italic border-l-4 border-brand-primary pl-8">
+                        {formData.summary || "Bản tóm tắt bài viết sẽ hiển thị ở đây..."}
+                      </p>
+
+                      <div 
+                        className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-a:text-brand-primary hover:prose-a:text-brand-secondary prose-img:rounded-xl"
+                        dangerouslySetInnerHTML={{ __html: formData.content || `<p className="italic text-slate-400">Nội dung bài viết đang được soạn thảo...</p>` }}
+                      />
+
+                      {/* Share & Actions */}
+                      <div className="mt-16 pt-10 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-8">
+                        <div className="flex gap-4 items-center">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Chia sẻ:</span>
+                          <div className="flex gap-2">
+                            {[Facebook, Linkedin, Twitter].map((Icon, i) => (
+                              <button key={i} className="h-8 w-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-brand-primary hover:text-white transition-all">
+                                <Icon size={14} />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-3">
+                          <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600 bg-slate-50 px-5 py-2.5 rounded-full hover:bg-slate-200 transition-all cursor-default">
+                            <Bookmark size={14} /> Lưu bài viết
+                          </button>
+                          <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white bg-brand-primary px-5 py-2.5 rounded-full hover:bg-brand-secondary shadow-lg shadow-brand-primary/20 transition-all cursor-default">
+                            Liên hệ tư vấn <MoveRight size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Sidebar Placeholder */}
+                    <aside className="lg:col-span-4 space-y-10">
+                      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 h-40 flex items-center justify-center border-dashed">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Thanh bên tin tức</span>
+                      </div>
+                      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 h-80 flex items-center justify-center border-dashed">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Tin tức liên quan</span>
+                      </div>
+                    </aside>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
         <div className="lg:col-span-2 space-y-8">

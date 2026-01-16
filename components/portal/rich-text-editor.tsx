@@ -21,6 +21,7 @@ import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Placeholder from "@tiptap/extension-placeholder";
 import CharacterCount from "@tiptap/extension-character-count";
+import { Extension } from "@tiptap/core";
 
 import { 
   Bold, 
@@ -44,9 +45,10 @@ import {
   Table as TableIcon,
   Youtube as YoutubeIcon,
   CheckSquare,
-  Type,
   Eraser,
-  Palette
+  Palette,
+  BookType,
+  Type
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -57,6 +59,47 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MediaSelectorDialog } from "./media-selector-dialog";
+
+// Custom Font Size Extension
+const FontSize = Extension.create({
+  name: "fontSize",
+  addOptions() {
+    return {
+      types: ["textStyle"],
+    };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: (element) => element.style.fontSize.replace(/['"]+/g, ""),
+            renderHTML: (attributes) => {
+              if (!attributes.fontSize) {
+                return {};
+              }
+              return {
+                style: `font-size: ${attributes.fontSize}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+  addCommands() {
+    return {
+      setFontSize: (size: string) => ({ chain }) => {
+        return chain().setMark("textStyle", { fontSize: size }).run();
+      },
+      unsetFontSize: () => ({ chain }) => {
+        return chain().setMark("textStyle", { fontSize: null }).run();
+      },
+    };
+  },
+});
 
 interface RichTextEditorProps {
   content: string;
@@ -139,6 +182,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
         placeholder: placeholder || "Nhập nội dung bài viết...",
       }),
       CharacterCount,
+      FontSize,
     ],
     immediatelyRender: false,
     content,
@@ -216,6 +260,33 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
             <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className="text-2xl font-bold">Tiêu đề 1</DropdownMenuItem>
             <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className="text-xl font-bold">Tiêu đề 2</DropdownMenuItem>
             <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className="text-lg font-bold">Tiêu đề 3</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Separator />
+
+        {/* Font Size Group */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 px-2 gap-1 text-slate-600">
+              <BookType size={16} />
+              <span className="text-xs font-bold uppercase tracking-tighter">Cỡ chữ</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="min-w-[80px]">
+            {["12px", "14px", "16px", "18px", "20px", "24px", "30px", "36px", "48px"].map(size => (
+              <DropdownMenuItem 
+                key={size} 
+                onClick={() => (editor.commands as any).setFontSize(size)}
+                className={cn("text-xs font-bold", (editor.getAttributes("textStyle").fontSize === size) && "bg-slate-100 text-brand-primary")}
+              >
+                {size}
+              </DropdownMenuItem>
+            ))}
+            <Separator />
+            <DropdownMenuItem onClick={() => (editor.commands as any).unsetFontSize()} className="text-xs font-bold text-red-500">
+              Mặc định
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
