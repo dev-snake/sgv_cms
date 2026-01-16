@@ -151,15 +151,15 @@ export default function ProductsManagementPage() {
         </div>
         <div className="flex items-center gap-3">
            <Link href={PORTAL_ROUTES.cms.products.categories.list}>
-             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 bg-white rounded-none">
+             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-4 hover:cursor-pointer h-auto border-slate-100 bg-white rounded-none">
                Danh mục
              </Button>
            </Link>
-           <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 bg-white rounded-none">
+           <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-4 hover:cursor-pointer h-auto border-slate-100 bg-white rounded-none">
               Xuất dữ liệu
            </Button>
            <Link href={PORTAL_ROUTES.cms.products.add}>
-             <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+             <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 hover:cursor-pointer h-auto transition-all rounded-none">
                <Plus className="mr-2 size-4" /> Thêm sản phẩm
              </Button>
            </Link>
@@ -173,21 +173,21 @@ export default function ProductsManagementPage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-300 group-focus-within:text-brand-primary transition-colors" />
             <input 
               placeholder="TÌM KIẾM THEO TÊN, SKU HOẶC DANH MỤC..." 
-              className="w-full pl-12 bg-slate-50 border-none text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20 h-14 rounded-none outline-none"
+              className="w-full pl-12 bg-slate-50 border-none text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20 h-10 rounded-none outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
              {/* Date Range Picker */}
-             <div className="grid gap-2 w-full sm:w-[300px]">
+             <div className="grid gap-2 w-full sm:w-[300px] ">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       id="date"
                       variant={"outline"}
                       className={cn(
-                        "w-full justify-start text-left font-bold text-[10px] uppercase tracking-widest h-14 border-slate-100 rounded-none bg-slate-50/50",
+                        "w-full justify-start text-left font-bold text-[10px] uppercase hover:cursor-pointer tracking-widest h-10 border-slate-100 rounded-none bg-slate-50/50",
                         !date && "text-slate-400"
                       )}
                     >
@@ -232,9 +232,7 @@ export default function ProductsManagementPage() {
                 </Popover>
              </div>
 
-             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 h-14 border-slate-100 rounded-none hover:bg-slate-50 w-full sm:w-auto">
-                <ArrowUpDown className="mr-2 size-4 text-slate-400" /> Sắp xếp
-             </Button>
+
           </div>
         </div>
 

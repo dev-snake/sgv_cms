@@ -160,12 +160,12 @@ export default function ProjectsManagementPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link href={PORTAL_ROUTES.cms.projects.categories.list}>
-            <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 bg-white rounded-none">
+            <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-4 hover:cursor-pointer h-auto border-slate-100 bg-white rounded-none">
               Danh mục
             </Button>
           </Link>
           <Link href={PORTAL_ROUTES.cms.projects.add}>
-            <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+            <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 hover:cursor-pointer h-auto transition-all rounded-none">
               <Plus className="mr-2 size-4" /> Thêm dự án mới
             </Button>
           </Link>
@@ -179,7 +179,7 @@ export default function ProjectsManagementPage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-300 group-focus-within:text-brand-primary transition-colors" />
             <input 
               placeholder="TÌM KIẾM THEO TÊN DỰ ÁN, ĐỊA ĐIỂM HOẶC LOẠI HÌNH..." 
-              className="w-full pl-12 bg-slate-50 border-none text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20 h-14 rounded-none outline-none"
+              className="w-full pl-12 bg-slate-50 border-none text-[10px] font-bold  tracking-widest placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20 h-10 rounded-none outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -193,7 +193,7 @@ export default function ProjectsManagementPage() {
                       id="date"
                       variant={"outline"}
                       className={cn(
-                        "w-full justify-start text-left font-bold text-[10px] uppercase tracking-widest h-14 border-slate-100 rounded-none bg-slate-50/50",
+                        "w-full justify-start text-left font-bold text-[10px] hover:cursor-pointer uppercase tracking-widest h-10 border-slate-100 rounded-none bg-slate-50/50",
                         !date && "text-slate-400"
                       )}
                     >
@@ -238,7 +238,7 @@ export default function ProjectsManagementPage() {
                 </Popover>
              </div>
 
-             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 h-14 border-slate-100 rounded-none hover:bg-slate-50 w-full sm:w-auto">
+             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 h-10 border-slate-100 rounded-none hover:bg-slate-50 w-full sm:w-auto">
                 <ArrowUpDown className="mr-2 size-4 text-slate-400" /> Sắp xếp
              </Button>
           </div>
@@ -312,10 +312,7 @@ export default function ProjectsManagementPage() {
                         <DropdownMenuContent align="end" className="w-64 p-2 rounded-none border border-slate-100 bg-white">
                           <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-4 py-3">Tùy chọn dự án</DropdownMenuLabel>
                           <DropdownMenuSeparator className="bg-slate-50" />
-                          <DropdownMenuItem className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
-                             <Eye size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
-                             <span className="text-xs font-bold uppercase tracking-tight">Hồ sơ dự án</span>
-                          </DropdownMenuItem>
+
                           <DropdownMenuItem asChild>
                              <Link href={PORTAL_ROUTES.cms.projects.edit(project.id)} className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
                                 <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />

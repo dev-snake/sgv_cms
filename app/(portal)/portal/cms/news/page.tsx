@@ -159,12 +159,12 @@ export default function NewsManagementPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link href={PORTAL_ROUTES.cms.news.categories.list}>
-            <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 bg-white rounded-none">
+            <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-4 hover:cursor-pointer h-auto border-slate-100 bg-white rounded-none">
               Danh mục
             </Button>
           </Link>
           <Link href={PORTAL_ROUTES.cms.news.add}>
-            <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+            <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 hover:cursor-pointer h-auto transition-all rounded-none">
               <Plus className="mr-2 size-4" /> Viết bài mới
             </Button>
           </Link>
@@ -178,7 +178,7 @@ export default function NewsManagementPage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-300 group-focus-within:text-brand-primary transition-colors" />
             <input 
               placeholder="TÌM KIẾM BÀI VIẾT THEO TIÊU ĐỀ HOẶC DANH MỤC..." 
-              className="w-full pl-12 bg-slate-50 border-none text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20 h-14 rounded-none outline-none"
+              className="w-full pl-12 bg-slate-50 border-none text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20 h-10 rounded-none outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -192,7 +192,7 @@ export default function NewsManagementPage() {
                       id="date"
                       variant={"outline"}
                       className={cn(
-                        "w-full justify-start text-left font-bold text-[10px] uppercase tracking-widest h-14 border-slate-100 rounded-none bg-slate-50/50",
+                        "w-full justify-start text-left font-bold text-[10px] uppercase tracking-widest h-10 border-slate-100 rounded-none bg-slate-50/50",
                         !date && "text-slate-400"
                       )}
                     >
@@ -237,9 +237,7 @@ export default function NewsManagementPage() {
                 </Popover>
              </div>
 
-             <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 h-14 border-slate-100 rounded-none hover:bg-slate-50 w-full sm:w-auto">
-                <ArrowUpDown className="mr-2 size-4 text-slate-400" /> Sắp xếp
-             </Button>
+
           </div>
         </div>
 
