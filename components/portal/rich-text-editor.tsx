@@ -22,6 +22,8 @@ import TaskItem from "@tiptap/extension-task-item";
 import Placeholder from "@tiptap/extension-placeholder";
 import CharacterCount from "@tiptap/extension-character-count";
 import { Extension } from "@tiptap/core";
+import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
+import { MoveHorizontal, Maximize, AlignLeft as AlignLeftIcon, AlignCenter as AlignCenterIcon, AlignRight as AlignRightIcon, Trash2 } from "lucide-react";
 
 import { 
   Bold, 
@@ -101,6 +103,161 @@ const FontSize = Extension.create({
   },
 });
 
+// Custom Image with Resize and Alignment Extension
+const ImageResizeComponent = ({ node, updateAttributes, selected, editor }: any) => {
+  const [resizing, setResizing] = useState(false);
+  const [startWidth, setStartWidth] = useState(0);
+  const [startX, setStartX] = useState(0);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setResizing(true);
+    const img = (e.target as HTMLElement).closest('.image-container')?.querySelector('img');
+    if (img) {
+      setStartWidth(img.clientWidth);
+      setStartX(e.clientX);
+    }
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const newWidth = Math.max(50, startWidth + deltaX);
+      updateAttributes({ width: `${newWidth}px` });
+    };
+
+    const onMouseUp = () => {
+      setResizing(false);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
+  return (
+    <NodeViewWrapper className={cn(
+      "relative inline-block my-6 group transition-all",
+      node.attrs.align === 'center' && "flex flex-col items-center",
+      node.attrs.align === 'left' && "flex flex-col items-start",
+      node.attrs.align === 'right' && "flex flex-col items-end",
+      node.attrs.align === 'full' && "w-full"
+    )}>
+      <div className={cn(
+        "relative image-container group/container",
+        selected && "ring-2 ring-brand-primary ring-offset-2",
+        node.attrs.align === 'full' ? "w-full" : "w-fit"
+      )}>
+        <img
+          src={node.attrs.src}
+          alt={node.attrs.alt}
+          title={node.attrs.title}
+          style={{
+            width: node.attrs.width,
+            height: node.attrs.height,
+          }}
+          className={cn(
+            "block max-w-full h-auto rounded-none transition-all",
+            node.attrs.align === 'full' && "w-full"
+          )}
+        />
+        
+        {/* Resize Handle */}
+        <div 
+          className="absolute right-0 bottom-0 w-6 h-6 bg-brand-primary text-white cursor-nwse-resize opacity-0 group-hover/container:opacity-100 flex items-center justify-center z-10"
+          onMouseDown={onMouseDown}
+        >
+          <MoveHorizontal size={12} />
+        </div>
+
+        {/* Hover Toolbar */}
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm border border-slate-200 shadow-xl p-1 flex items-center gap-0.5 opacity-0 group-hover/container:opacity-100 transition-all z-20">
+          <button 
+            type="button"
+            onClick={() => updateAttributes({ align: 'left' })}
+            className={cn("p-1.5 hover:bg-slate-100", node.attrs.align === 'left' && "text-brand-primary")}
+            title="Căn trái"
+          >
+            <AlignLeftIcon size={14} />
+          </button>
+          <button 
+            type="button"
+            onClick={() => updateAttributes({ align: 'center' })}
+            className={cn("p-1.5 hover:bg-slate-100", node.attrs.align === 'center' && "text-brand-primary")}
+            title="Căn giữa"
+          >
+            <AlignCenterIcon size={14} />
+          </button>
+          <button 
+            type="button"
+            onClick={() => updateAttributes({ align: 'right' })}
+            className={cn("p-1.5 hover:bg-slate-100", node.attrs.align === 'right' && "text-brand-primary")}
+            title="Căn phải"
+          >
+            <AlignRightIcon size={14} />
+          </button>
+          <div className="w-px h-4 bg-slate-200 mx-1" />
+          <button 
+            type="button"
+            onClick={() => updateAttributes({ align: 'full', width: '100%', height: 'auto' })}
+            className={cn("p-1.5 hover:bg-slate-100", node.attrs.align === 'full' && "text-brand-primary")}
+            title="Toàn chiều rộng"
+          >
+            <Maximize size={14} />
+          </button>
+          <div className="w-px h-4 bg-slate-200 mx-1" />
+          <button 
+            type="button"
+            onClick={() => (editor as any).commands.deleteSelection()}
+            className="p-1.5 hover:bg-red-50 text-red-500"
+            title="Xóa ảnh"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </div>
+    </NodeViewWrapper>
+  );
+};
+
+const ImageResize = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: '100%',
+        parseHTML: element => element.style.width || '100%',
+        renderHTML: attributes => ({
+          style: `width: ${attributes.width};`,
+        }),
+      },
+      height: {
+        default: 'auto',
+        parseHTML: element => element.style.height || 'auto',
+        renderHTML: attributes => ({
+          style: `height: ${attributes.height};`,
+        }),
+      },
+      align: {
+        default: 'center',
+        parseHTML: element => element.getAttribute('data-align') || 'center',
+        renderHTML: attributes => ({
+          'data-align': attributes.align,
+          class: cn(
+            attributes.align === 'left' && "align-left",
+            attributes.align === 'center' && "align-center",
+            attributes.align === 'right' && "align-right",
+            attributes.align === 'full' && "align-full"
+          ),
+        }),
+      },
+    };
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(ImageResizeComponent);
+  },
+});
+
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
@@ -151,11 +308,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
           class: "text-brand-primary underline cursor-pointer",
         },
       }),
-      Image.configure({
-        HTMLAttributes: {
-          class: "max-w-full h-auto rounded-lg shadow-md my-4",
-        },
-      }),
+      ImageResize,
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),

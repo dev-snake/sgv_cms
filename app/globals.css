@@ -152,6 +152,27 @@
   .text-stroke-white {
     -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
   }
+
+  .align-left {
+    margin-right: auto !important;
+    margin-left: 0 !important;
+    display: block;
+  }
+  .align-center {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: block;
+  }
+  .align-right {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    display: block;
+  }
+  .align-full {
+    width: 100% !important;
+    max-width: none !important;
+    display: block;
+  }
 }
 
 .card-hover {
