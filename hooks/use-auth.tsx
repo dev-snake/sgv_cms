@@ -43,15 +43,18 @@ export function useAuth() {
 
   const hasPermission = (permission: string) => {
     if (!user) return false;
-    if (user.role === 'admin' || user.roles?.includes('admin')) return true;
+    // Only check RBAC roles array for admin, NOT the legacy 'role' field
+    if (user.roles?.includes('admin')) return true;
     return user.permissions?.includes(permission) || false;
   };
 
   const hasRole = (roleName: string) => {
     if (!user) return false;
-    if (user.role === roleName) return true;
     return user.roles?.includes(roleName) || false;
   };
+
+  // isAdmin only checks if user has 'admin' role in RBAC system
+  const isAdmin = user?.roles?.includes('admin') || false;
 
   return {
     user,
@@ -59,6 +62,7 @@ export function useAuth() {
     hasPermission,
     hasRole,
     refreshUser,
-    isAdmin: user?.role === 'admin' || user?.roles?.includes('admin'),
+    isAdmin,
   };
+
 }

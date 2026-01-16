@@ -56,10 +56,7 @@ export async function requireAuth(request: NextRequest): Promise<UserSession | R
 }
 
 export function hasRole(user: UserSession['user'], allowedRoles: string[]): boolean {
-  // Check legacy role first
-  if (allowedRoles.includes(user.role)) return true;
-  
-  // Check new multi-role structure
+  // Only check RBAC roles array, not legacy role field
   return user.roles?.some(r => allowedRoles.includes(r)) || false;
 }
 
@@ -67,8 +64,8 @@ export function hasRole(user: UserSession['user'], allowedRoles: string[]): bool
  * Check if user has specific permission
  */
 export function hasPermission(user: UserSession['user'], permission: string): boolean {
-  // Admins have all permissions
-  if (user.role === 'admin' || user.roles?.includes('admin')) return true;
+  // Only admins in RBAC roles array bypass permission checks
+  if (user.roles?.includes('admin')) return true;
   
   return user.permissions?.includes(permission) || false;
 }
@@ -183,7 +180,8 @@ export function sanitizeHtml(html: string): string {
 }
 
 export function isAdmin(user: UserSession['user']): boolean {
-  return user.role === 'admin' || user.roles?.includes('admin');
+  // Only check RBAC roles array
+  return user.roles?.includes('admin') || false;
 }
 
 /**
