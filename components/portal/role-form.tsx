@@ -183,60 +183,88 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
               <Loader2 className="animate-spin text-brand-primary opacity-20" size={32} />
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {Object.entries(permissionsByModule).map(([module, perms]) => {
-                const moduleIds = perms.map(p => p.id);
-                const allModuleSelected = moduleIds.every(id => selectedPermissionIds.includes(id));
-                const someModuleSelected = moduleIds.some(id => selectedPermissionIds.includes(id)) && !allModuleSelected;
+            <div className="bg-white border border-slate-100 overflow-hidden">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-slate-50/70">
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 border-b border-slate-100 w-40">Module</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 border-b border-slate-100">Quyền hạn</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 border-b border-slate-100 text-right w-32">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {Object.entries(permissionsByModule).map(([module, perms]) => {
+                    const moduleIds = perms.map(p => p.id);
+                    const allModuleSelected = moduleIds.every(id => selectedPermissionIds.includes(id));
+                    const selectedCount = moduleIds.filter(id => selectedPermissionIds.includes(id)).length;
 
-                return (
-                  <div key={module} className="bg-white border border-slate-100 overflow-hidden flex flex-col group">
-                    <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">
-                        Module: {module}
-                      </span>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="sm"
-                        className={cn(
-                          "h-8 px-3 rounded-none text-[9px] font-black uppercase tracking-widest transition-all",
-                          allModuleSelected ? "bg-brand-primary text-white" : "bg-white text-slate-400 hover:text-brand-primary"
-                        )}
-                        onClick={() => toggleModule(perms)}
-                      >
-                        {allModuleSelected ? "Đã chọn tất cả" : "Chọn tất cả"}
-                      </Button>
-                    </div>
-                    <div className="p-2 divide-y divide-slate-50">
-                      {perms.map((perm) => (
-                        <div 
-                          key={perm.id} 
-                          className={cn(
-                            "flex items-center justify-between p-4 cursor-pointer transition-all hover:bg-slate-50/50",
-                            selectedPermissionIds.includes(perm.id) ? "bg-indigo-50/30" : ""
-                          )}
-                          onClick={() => togglePermission(perm.id)}
-                        >
-                          <div className="space-y-1">
-                            <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{perm.name}</p>
-                            <p className="text-[11px] text-slate-500 font-medium italic">{perm.description}</p>
+                    return (
+                      <tr key={module} className="group hover:bg-slate-50/30 transition-colors">
+                        <td className="px-6 py-5 align-top">
+                          <div className="flex flex-col gap-2">
+                            <span className="text-xs font-black text-slate-900 uppercase tracking-tight">{module}</span>
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              {selectedCount}/{perms.length} quyền
+                            </span>
                           </div>
-                          <div className="shrink-0 ms-4">
-                            {selectedPermissionIds.includes(perm.id) ? (
-                              <CheckCircle2 className="size-5 text-brand-primary transition-all scale-110" />
-                            ) : (
-                              <Circle className="size-5 text-slate-200" />
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex flex-wrap gap-2">
+                            {perms.map((perm) => {
+                              const isSelected = selectedPermissionIds.includes(perm.id);
+                              // Show resource:action format for clarity
+                              const [resource, action] = perm.name.split(':');
+                              const displayName = action ? `${resource} · ${action}` : perm.name;
+                              
+                              return (
+                                <button
+                                  key={perm.id}
+                                  type="button"
+                                  onClick={() => togglePermission(perm.id)}
+                                  className={cn(
+                                    "px-3 py-2 text-[10px] font-bold uppercase tracking-wide rounded-sm border transition-all flex items-center gap-2",
+                                    isSelected 
+                                      ? "bg-brand-primary text-white border-brand-primary shadow-sm" 
+                                      : "bg-white text-slate-400 border-slate-200 hover:border-brand-primary hover:text-brand-primary"
+                                  )}
+                                  title={perm.description || perm.name}
+                                >
+                                  {isSelected ? (
+                                    <CheckCircle2 size={12} />
+                                  ) : (
+                                    <Circle size={12} />
+                                  )}
+                                  {displayName}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                        </td>
+                        <td className="px-6 py-5 align-top text-right">
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="sm"
+                            className={cn(
+                              "h-8 px-4 rounded-sm text-[9px] font-black uppercase tracking-wide transition-all",
+                              allModuleSelected 
+                                ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" 
+                                : "bg-slate-50 text-slate-400 hover:bg-brand-primary/10 hover:text-brand-primary"
                             )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
+                            onClick={() => toggleModule(perms)}
+                          >
+                            {allModuleSelected ? "✓ Đầy đủ" : "Chọn hết"}
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
+
         </div>
 
         <div className="fixed bottom-10 right-10 z-50">
