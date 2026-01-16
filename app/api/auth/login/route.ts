@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { login, generateTokens } from "@/services/auth";
 import { apiResponse, apiError } from "@/utils/api-response";
@@ -17,10 +17,12 @@ export async function POST(request: Request) {
     
     const { username, password } = dataOrError;
 
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
 
     if (!user) {
-      // Generic error message to prevent username enumeration
       return apiError("Invalid credentials", 401);
     }
 

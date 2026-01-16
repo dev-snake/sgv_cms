@@ -4,6 +4,8 @@ import { apiResponse, apiError } from "@/utils/api-response";
 import { eq } from "drizzle-orm";
 // @ts-ignore
 import bcrypt from "bcryptjs";
+import { verifyAuth } from "@/middlewares/middleware";
+import { NextRequest } from "next/server";
 
 export async function GET(
   request: Request,
@@ -73,13 +75,22 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id: userId } = await params;
     
-    // Prevent self-deletion if possible (future enhancement)
+    // Get current user from session
+    const session = await verifyAuth(request);
+    if (!session) {
+      return apiError("Unauthorized", 401);
+    }
+
+    // Prevent self-deletion
+    if (userId === session.user.id) {
+      return apiError("Bạn không thể xóa chính tài khoản của mình", 400);
+    }
     
     const [deletedUser] = await db
       .delete(users)

@@ -199,6 +199,8 @@ export default function MediaManagementPage() {
                     src={image.url}
                     alt={image.filename}
                     fill
+                    unoptimized
+                    quality={100}
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   

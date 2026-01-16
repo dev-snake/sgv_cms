@@ -103,6 +103,7 @@ export default function Lightbox({
                 src={images[currentIndex]}
                 alt={`Image ${currentIndex + 1}`}
                 fill
+                unoptimized
                 className="object-contain"
                 quality={100}
                 priority

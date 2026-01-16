@@ -63,7 +63,7 @@ async function main() {
   if (existingUser.length === 0) {
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
     await db.insert(users).values({ 
-      username: adminUsername, 
+      username: adminUsername,
       password: hashedPassword,
       full_name: 'Administrator',
       role: 'admin'
