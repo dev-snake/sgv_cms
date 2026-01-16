@@ -2,6 +2,8 @@ import { db } from "@/db";
 import { categories, categoryTypes } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { withAuth } from "@/middlewares/middleware";
+import { NextRequest } from "next/server";
 
 // GET /api/categories - List all categories
 export async function GET(request: Request) {
@@ -33,7 +35,7 @@ export async function GET(request: Request) {
 }
 
 // POST /api/categories - Create a new category
-export async function POST(request: Request) {
+export const POST = withAuth(async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { name, category_type_id } = body;
@@ -52,4 +54,4 @@ export async function POST(request: Request) {
     console.error("Error creating category:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['system:manage'] });

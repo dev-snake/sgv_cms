@@ -1,16 +1,16 @@
 "use client";
 
-import { User } from "@/types";
+import { Role } from "@/types";
 import api from "@/services/axios";
 import { 
   Plus, 
   Search, 
   MoreHorizontal, 
-  User as UserIcon, 
+  ShieldCheck, 
   Edit2, 
   Trash2, 
-  ShieldCheck,
   Loader2,
+  Lock,
 } from "lucide-react";
 import * as React from "react";
 import Link from "next/link";
@@ -26,71 +26,71 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
-import { useAuth } from "@/hooks/use-auth";
 
-export default function UsersManagementPage() {
-  const [users, setUsers] = React.useState<User[]>([]);
+export default function RolesManagementPage() {
+  const [roles, setRoles] = React.useState<Role[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [itemToDelete, setItemToDelete] = React.useState<User | null>(null);
-  const { user: currentUser } = useAuth();
+  const [itemToDelete, setItemToDelete] = React.useState<Role | null>(null);
 
-  const fetchUsers = async () => {
+  const fetchRoles = async () => {
     setIsLoading(true);
     try {
-      const res = await api.get(API_ROUTES.USERS);
-      setUsers(res.data.data || []);
+      const res = await api.get(API_ROUTES.ROLES);
+      setRoles(res.data.data || []);
     } catch (error) {
       console.error(error);
-      toast.error("Không thể tải danh sách tài khoản");
+      toast.error("Không thể tải danh sách vai trò");
     } finally {
       setIsLoading(false);
     }
   };
 
   React.useEffect(() => {
-    fetchUsers();
+    fetchRoles();
   }, []);
 
-  const handleDeleteClick = (user: User) => {
-    setItemToDelete(user);
+  const handleDeleteClick = (role: Role) => {
+    if (role.name === 'admin') {
+      toast.error("Không thể xóa vai trò quản trị viên hệ thống");
+      return;
+    }
+    setItemToDelete(role);
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
     try {
-      await api.delete(`${API_ROUTES.USERS}/${itemToDelete.id}`);
-      toast.success("Đã xóa tài khoản thành công");
-      setUsers(users.filter(u => u.id !== itemToDelete.id));
+      await api.delete(`${API_ROUTES.ROLES}/${itemToDelete.id}`);
+      toast.success("Đã xóa vai trò thành công");
+      setRoles(roles.filter(r => r.id !== itemToDelete.id));
     } catch (error) {
       console.error(error);
-      toast.error("Lỗi khi xóa tài khoản");
+      toast.error("Lỗi khi xóa vai trò");
     } finally {
       setDeleteDialogOpen(false);
       setItemToDelete(null);
     }
   };
 
-  const filteredUsers = users.filter(user => 
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
+  const filteredRoles = roles.filter(role => 
+    role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (role.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
   );
 
   return (
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Quản lý tài khoản</h1>
-          <p className="text-slate-500 font-medium italic mt-2 text-sm">Quản lý danh sách quản trị viên và phân quyền truy cập hệ thống.</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Phân quyền & Vai trò</h1>
+          <p className="text-slate-500 font-medium italic mt-2 text-sm">Định nghĩa các nhóm quyền và gán cho tài khoản quản trị.</p>
         </div>
-        <Link href={PORTAL_ROUTES.users.add}>
+        <Link href={PORTAL_ROUTES.users.roles.add}>
           <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
-            <Plus className="mr-2 size-4" /> Tạo tài khoản mới
+            <Plus className="mr-2 size-4" /> Tạo vai trò mới
           </Button>
         </Link>
       </div>
@@ -101,7 +101,7 @@ export default function UsersManagementPage() {
           <div className="relative w-full md:w-1/2 group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-300 group-focus-within:text-brand-primary transition-colors" />
             <input 
-              placeholder="TÌM KIẾM THEO TÊN HOẶC USERNAME..." 
+              placeholder="TÌM KIẾM THEO TÊN VAI TRÒ HOẶC MÔ TẢ..." 
               className="w-full pl-12 bg-slate-50 border-none text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20 h-14 rounded-none outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -114,51 +114,29 @@ export default function UsersManagementPage() {
           <div className="flex items-center justify-center h-[400px]">
             <Loader2 size={40} className="animate-spin text-brand-primary opacity-20" />
           </div>
-        ) : filteredUsers.length > 0 ? (
+        ) : filteredRoles.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/30">
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Username</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Họ và tên</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Vai trò</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Ngày tạo</th>
+                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50 w-64">Tên vai trò</th>
+                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50">Mô tả</th>
                   <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-50 text-right">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-50/30 transition-colors group">
+                {filteredRoles.map((role) => (
+                  <tr key={role.id} className="hover:bg-slate-50/30 transition-colors group">
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-3">
-                        <div className="size-8 bg-slate-100 flex items-center justify-center">
-                          <UserIcon size={14} className="text-slate-400" />
+                        <div className="size-8 bg-indigo-50 flex items-center justify-center">
+                          <ShieldCheck size={14} className="text-indigo-600" />
                         </div>
-                        <span className="text-sm font-black text-slate-900 uppercase tracking-tight">{user.username}</span>
+                        <span className="text-sm font-black text-slate-900 uppercase tracking-tight">{role.name}</span>
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <span className="text-sm font-medium text-slate-600">{user.full_name || "---"}</span>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex flex-wrap gap-2">
-                        {user.roles && user.roles.length > 0 ? (
-                          user.roles.map((r: any) => (
-                            <Badge key={r.id} className="bg-indigo-50 text-indigo-600 border-indigo-100 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-none shadow-sm">
-                               <ShieldCheck className="mr-1 size-3" /> {r.name}
-                            </Badge>
-                          ))
-                        ) : (
-                          <Badge className="bg-slate-50 text-slate-400 border-slate-100 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-none">
-                             {user.role}
-                          </Badge>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">
-                        {user.created_at ? format(new Date(user.created_at), "dd/MM/yyyy", { locale: vi }) : "---"}
-                      </span>
+                      <span className="text-sm font-medium text-slate-600 line-clamp-1">{role.description || "---"}</span>
                     </td>
                     <td className="px-8 py-6 text-right">
                       <DropdownMenu>
@@ -169,26 +147,24 @@ export default function UsersManagementPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-64 p-2 rounded-none border border-slate-100 bg-white">
                           <DropdownMenuItem asChild className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
-                             <Link href={PORTAL_ROUTES.users.edit(user.id)} className="flex items-center gap-3 w-full">
+                             <Link href={PORTAL_ROUTES.users.roles.edit(role.id)} className="flex items-center gap-3 w-full">
                                <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
-                               <span className="text-xs font-bold uppercase tracking-tight">Sửa thông tin</span>
+                               <span className="text-xs font-bold uppercase tracking-tight">Cấu hình quyền</span>
                              </Link>
                           </DropdownMenuItem>
-                          {/* Hide delete option if viewing own account */}
-                          {currentUser?.id !== user.id && (
+                          {role.name !== 'admin' && (
                             <>
                               <DropdownMenuSeparator className="bg-slate-50" />
                               <DropdownMenuItem 
                                 className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-rose-50 group"
-                                onClick={() => handleDeleteClick(user)}
+                                onClick={() => handleDeleteClick(role)}
                               >
-                                <Trash2 size={16} className="text-slate-400 group-hover:text-rose-600 transition-colors" />
-                                <span className="text-xs font-bold uppercase tracking-tight text-rose-600">Xóa tài khoản</span>
+                                 <Trash2 size={16} className="text-slate-400 group-hover:text-rose-600 transition-colors" />
+                                 <span className="text-xs font-bold uppercase tracking-tight text-rose-600">Xóa vai trò</span>
                               </DropdownMenuItem>
                             </>
                           )}
                         </DropdownMenuContent>
-
                       </DropdownMenu>
                     </td>
                   </tr>
@@ -198,8 +174,8 @@ export default function UsersManagementPage() {
           </div>
         ) : (
           <div className="p-24 text-center h-[500px] flex items-center justify-center flex-col">
-            <UserIcon size={64} className="text-slate-100 mb-6" />
-            <p className="text-slate-400 font-medium uppercase text-[10px] tracking-[0.2em]">Không tìm thấy thành viên nào phù hợp.</p>
+            <Lock size={64} className="text-slate-100 mb-6" />
+            <p className="text-slate-400 font-medium uppercase text-[10px] tracking-[0.2em]">Chưa có vai trò nào được định nghĩa.</p>
           </div>
         )}
       </div>
@@ -208,9 +184,9 @@ export default function UsersManagementPage() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
-        title="Xóa tài khoản"
-        description="Tài khoản này sẽ bị xóa vĩnh viễn và không thể truy cập vào hệ thống nữa."
-        itemName={itemToDelete?.username}
+        title="Xóa vai trò"
+        description="Việc xóa vai trò sẽ gỡ bỏ quyền truy cập của tất cả người dùng thuộc vai trò này. Bạn có chắc chắn muốn tiếp tục?"
+        itemName={itemToDelete?.name}
       />
     </div>
   );

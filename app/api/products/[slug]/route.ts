@@ -2,12 +2,10 @@ import { db } from "@/db";
 import { products } from "@/db/schema";
 import { eq, isNull, and } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { withAuth } from "@/middlewares/middleware";
 
 // GET /api/products/[slug] - Get a single product by slug or ID
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export const GET = withAuth(async (request, session, { params }) => {
   try {
     const { slug } = await params;
     
@@ -29,13 +27,10 @@ export async function GET(
   } catch (error) {
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['products:read'] });
 
 // PATCH /api/products/[id] - Update a product
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> } // Named 'slug' because folder is [slug]
-) {
+export const PATCH = withAuth(async (request, session, { params }) => {
   try {
     const { slug: id } = await params;
     const body = await request.json();
@@ -65,13 +60,10 @@ export async function PATCH(
     console.error("Error updating product:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['products:write'] });
 
 // DELETE /api/products/[id] - Soft delete a product
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> } // Named 'slug' because folder is [slug]
-) {
+export const DELETE = withAuth(async (request, session, { params }) => {
   try {
     const { slug: id } = await params;
     
@@ -93,4 +85,4 @@ export async function DELETE(
     console.error("Error deleting product:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['products:delete'] });

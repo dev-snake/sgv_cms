@@ -42,6 +42,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import api from "@/services/axios";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 import { cn } from "@/lib/utils";
 import { PORTAL_ROUTES } from "@/constants/routes";
@@ -58,46 +59,61 @@ const data = {
        title: "Quản lý Tin tức",
        url: PORTAL_ROUTES.cms.news.list,
        icon: FileText,
+       requiredPermission: "news:read",
     },
     {
        title: "Quản lý Dự án",
        url: PORTAL_ROUTES.cms.projects.list,
        icon: Briefcase,
+       requiredPermission: "projects:read",
     },
     {
        title: "Quản lý Sản phẩm",
        url: PORTAL_ROUTES.cms.products.list,
        icon: Box,
+       requiredPermission: "products:read",
     },
     {
        title: "Thư viện Media",
        url: PORTAL_ROUTES.cms.media,
        icon: Images,
+       requiredPermission: "media:read",
     },
     {
       title: "Cài đặt hệ thống",
       url: PORTAL_ROUTES.settings,
       icon: Settings,
+      requiredPermission: "system:manage",
     },
     {
        title: "Quản lý Liên hệ",
        url: PORTAL_ROUTES.contacts,
        icon: Mail,
+       requiredPermission: "contacts:read",
     },
     {
-       title: "Quản lý Tuyển dụng",
-       url: PORTAL_ROUTES.cms.jobs.list,
-       icon: UserRoundSearch,
+      title: "Quản lý Tuyển dụng",
+      url: PORTAL_ROUTES.cms.jobs.list,
+      icon: UserRoundSearch,
+      requiredPermission: "jobs:read",
     },
     {
        title: "Danh sách Ứng viên",
        url: PORTAL_ROUTES.cms.applications.list,
        icon: ClipboardList,
+       requiredPermission: "applications:read",
     },
     {
       title: "Tài khoản Admin",
-      url: "/portal/users",
+      url: PORTAL_ROUTES.users.list,
       icon: ShieldCheck,
+      requiredPermission: "users:read",
+    },
+    {
+      title: "Phân quyền & Vai trò",
+      url: PORTAL_ROUTES.users.roles.list,
+      icon: Lock,
+      requiredPermission: "rbac:manage",
     },
   ],
   user: {
@@ -110,6 +126,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, hasPermission, isAdmin } = useAuth();
   const [isMounted, setIsMounted] = React.useState(false);
 
   // Prevent hydration mismatch with Radix UI DropdownMenu
@@ -178,8 +195,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="scrollbar-hide bg-[#002d6b] py-2 overflow-x-hidden">
         <SidebarGroup className="p-0">
           <SidebarMenu className="gap-0 group-data-[collapsible=icon]:items-center">
-            {data.navMain.map((item) => {
-              const isActive = item.url === PORTAL_ROUTES.dashboard ? pathname === PORTAL_ROUTES.dashboard : pathname.startsWith(item.url);
+            {data.navMain.map((item: any) => {
+              if (item.requiredPermission && !hasPermission(item.requiredPermission)) {
+                return null;
+              }
+              // Special handling to prevent /portal/users and /portal/users/roles from both being active
+              const isActive = (() => {
+                if (item.url === PORTAL_ROUTES.dashboard) {
+                  return pathname === PORTAL_ROUTES.dashboard;
+                }
+                // For users list, exclude /portal/users/roles paths
+                if (item.url === PORTAL_ROUTES.users.list) {
+                  return pathname === PORTAL_ROUTES.users.list || 
+                         (pathname.startsWith(PORTAL_ROUTES.users.list) && !pathname.startsWith(PORTAL_ROUTES.users.roles.list));
+                }
+                return pathname.startsWith(item.url);
+              })();
+
               return (
                 <SidebarMenuItem key={item.title} className="w-full flex justify-center">
                   <SidebarMenuButton 
@@ -218,8 +250,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   {data.user.avatar}
                 </div>
                 <div className="flex flex-col items-start leading-none group-data-[collapsible=icon]:hidden overflow-hidden ms-1">
-                  <span className="text-[10px] font-black uppercase tracking-tight truncate w-full">{data.user.name}</span>
-                  <span className="text-[8px] font-medium text-white/30 lowercase mt-0.5 truncate w-full">{data.user.email}</span>
+                  <span className="text-[10px] font-black uppercase tracking-tight truncate w-full">{user?.full_name || user?.username || "Guest"}</span>
+                  <span className="text-[8px] font-medium text-white/30 lowercase mt-0.5 truncate w-full">{user?.username}@saigonvalve.vn</span>
                 </div>
                 <ChevronRight className="ml-auto size-3 text-white/20 group-data-[collapsible=icon]:hidden" />
               </SidebarMenuButton>

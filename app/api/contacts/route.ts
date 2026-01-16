@@ -4,6 +4,8 @@ import { apiResponse, apiError } from "@/utils/api-response";
 import { sendThankYouEmail } from "@/services/mail";
 import { desc, ilike, or, gte, lte, and, sql } from "drizzle-orm";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
+import { withAuth } from "@/middlewares/middleware";
+import { NextRequest } from "next/server";
 import { validateBody, sanitizeHtml } from "@/middlewares/middleware";
 import { contactSchema } from "@/validations/contact.schema";
 
@@ -51,7 +53,8 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
+// GET /api/contacts - List all contact submissions
+export const GET = withAuth(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search");
@@ -117,4 +120,4 @@ export async function GET(request: Request) {
     console.error("Error fetching contacts:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['contacts:read'] });

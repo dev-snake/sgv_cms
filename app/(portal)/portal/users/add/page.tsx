@@ -10,7 +10,9 @@ import {
   Shield, 
   Lock, 
   User as UserIcon,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  Circle
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -25,6 +27,8 @@ import {
 } from "@/components/ui/select";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
+import { Role } from "@/types";
+import { cn } from "@/lib/utils";
 
 export default function AddUserPage() {
   const router = useRouter();
@@ -33,8 +37,26 @@ export default function AddUserPage() {
     username: "",
     password: "",
     full_name: "",
-    role: "admin", // Default to admin
+    role: "admin",
+    roleIds: [] as string[],
   });
+  const [availableRoles, setAvailableRoles] = React.useState<Role[]>([]);
+  const [isLoadingRoles, setIsLoadingRoles] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await api.get(API_ROUTES.ROLES);
+        setAvailableRoles(res.data.data || []);
+      } catch (error) {
+        console.error(error);
+        toast.error("Không thể tải danh sách vai trò");
+      } finally {
+        setIsLoadingRoles(false);
+      }
+    };
+    fetchRoles();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,12 +139,45 @@ export default function AddUserPage() {
                 />
               </div>
 
-              <div className="pt-6 border-t border-slate-50">
-                 <div className="flex items-start gap-4 p-5 bg-brand-primary/5 border-l-2 border-l-brand-primary">
+               <div className="pt-6 border-t border-slate-50 space-y-6">
+                 <div>
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 block">Gán vai trò (RBAC)</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {availableRoles.map((role) => (
+                        <div 
+                          key={role.id}
+                          className={cn(
+                            "p-4 border border-slate-100 flex items-center justify-between cursor-pointer transition-all hover:bg-slate-50",
+                            formData.roleIds.includes(role.id) ? "bg-indigo-50/50 border-indigo-200" : "bg-white"
+                          )}
+                          onClick={() => {
+                            const newRoleIds = formData.roleIds.includes(role.id)
+                              ? formData.roleIds.filter(id => id !== role.id)
+                              : [...formData.roleIds, role.id];
+                            setFormData({ ...formData, roleIds: newRoleIds });
+                          }}
+                        >
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] font-black uppercase tracking-tight text-slate-900">{role.name}</p>
+                            <p className="text-[9px] text-slate-500 font-medium italic line-clamp-1">{role.description}</p>
+                          </div>
+                          <div className="shrink-0 ms-3">
+                            {formData.roleIds.includes(role.id) ? (
+                              <CheckCircle2 size={16} className="text-indigo-600" />
+                            ) : (
+                              <Circle size={16} className="text-slate-200" />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                 </div>
+
+                 <div className="flex items-start gap-4 p-5 bg-brand-primary/5 border-l-2 border-l-brand-primary mt-6">
                     <Shield size={20} className="text-brand-primary shrink-0 mt-1" />
                     <div className="space-y-1">
-                       <p className="text-[10px] font-black uppercase tracking-widest text-brand-primary">Mặc định: Toàn quyền Admin</p>
-                       <p className="text-[11px] text-slate-500 font-medium leading-relaxed italic">Tài khoản này sẽ có quyền truy cập và chỉnh sửa toàn bộ dữ liệu trên hệ thống Portal.</p>
+                       <p className="text-[10px] font-black uppercase tracking-widest text-brand-primary">Lưu ý</p>
+                       <p className="text-[11px] text-slate-500 font-medium leading-relaxed italic">Người dùng sẽ nhận được tất cả quyền hạn từ các vai trò được gán.</p>
                     </div>
                  </div>
               </div>

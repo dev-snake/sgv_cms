@@ -2,6 +2,8 @@ import { db } from "@/db";
 import { authors } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { withAuth } from "@/middlewares/middleware";
+import { NextRequest } from "next/server";
 
 // GET /api/authors - List all authors
 export async function GET() {
@@ -15,7 +17,7 @@ export async function GET() {
 }
 
 // POST /api/authors - Create a new author
-export async function POST(request: Request) {
+export const POST = withAuth(async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { name, role } = body;
@@ -34,4 +36,4 @@ export async function POST(request: Request) {
     console.error("Error creating author:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['system:manage'] });

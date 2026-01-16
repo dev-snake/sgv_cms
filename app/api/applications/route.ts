@@ -3,7 +3,7 @@ import { jobApplications, jobPostings } from "@/db/schema";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { desc, ilike, or, gte, lte, and, sql, eq } from "drizzle-orm";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
-import { sanitizeHtml } from "@/middlewares/middleware";
+import { sanitizeHtml, withAuth } from "@/middlewares/middleware";
 import { jobApplicationSchema } from "@/validations/application.schema";
 import { sendApplicationConfirmationEmail } from "@/services/mail";
 import { writeFile, mkdir } from "fs/promises";
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
 }
 
 // GET /api/applications - List all applications (Admin)
-export async function GET(request: Request) {
+export const GET = withAuth(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search");
@@ -167,4 +167,4 @@ export async function GET(request: Request) {
     console.error("Error fetching applications:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['applications:read'] });

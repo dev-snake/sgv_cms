@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { newsArticles, categories, authors } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { withAuth } from "@/middlewares/middleware";
 
 // UUID regex pattern
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -66,10 +67,7 @@ export async function GET(
 }
 
 // PATCH /api/news/[slug] - Update an article by ID or slug
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export const PATCH = withAuth(async (request, session, { params }) => {
   try {
     const { slug } = await params;
     const body = await request.json();
@@ -99,13 +97,10 @@ export async function PATCH(
     console.error("Error updating article:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['news:write'] });
 
 // DELETE /api/news/[slug] - Delete an article by ID or slug
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export const DELETE = withAuth(async (request, session, { params }) => {
   try {
     const { slug } = await params;
     const isUUID = UUID_REGEX.test(slug);
@@ -124,5 +119,5 @@ export async function DELETE(
     console.error("Error deleting article:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['news:delete'] });
 

@@ -40,18 +40,18 @@ export async function POST(request: Request) {
       role: user.role,
     };
 
-    // Generate Tokens
-    const { accessToken, refreshToken } = await generateTokens(sessionUser);
+    // Generate Tokens (now includes roles/permissions)
+    const { accessToken, refreshToken, sessionPayload } = await generateTokens(sessionUser);
 
     // Set Cookies
     const { setAuthCookies } = await import("@/services/auth");
     await setAuthCookies(accessToken, refreshToken);
 
     // Prepare session for cookie (backward compatibility for middleware)
-    await login(sessionUser);
+    await login(sessionPayload);
 
     return apiResponse({ 
-      user: sessionUser
+      user: sessionPayload
     });
   } catch (error) {
     console.error("Login Error:", error);

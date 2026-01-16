@@ -72,7 +72,26 @@ export interface User {
   id: string;
   username: string;
   full_name?: string;
-  role: string;
+  role: string; // Legacy field
+  roles?: Role[]; // For list/detail views
+  permissions?: string[]; // For checking permissions
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  description: string;
+  module: string;
+  created_at?: string;
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
+  permissions?: Permission[];
   created_at?: string;
   updated_at?: string;
 }

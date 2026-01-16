@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir, readdir, stat } from "fs/promises";
 import path from "path";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { withAuth } from "@/middlewares/middleware";
 
 // GET /api/upload - List all uploaded images (recursively)
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request: NextRequest) => {
   try {
     const baseDir = path.join(process.cwd(), "public", "uploads");
     await mkdir(baseDir, { recursive: true });
@@ -45,9 +46,9 @@ export async function GET(request: NextRequest) {
     console.error("Error listing uploads:", error);
     return apiError("Failed to list uploads", 500);
   }
-}
+}, { requiredPermissions: ['media:read'] });
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest) => {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
@@ -100,10 +101,10 @@ export async function POST(request: NextRequest) {
     console.error("Error uploading file:", error);
     return apiError("Failed to upload file", 500);
   }
-}
+}, { requiredPermissions: ['media:write'] });
 
 // DELETE /api/upload - Delete an uploaded file
-export async function DELETE(request: NextRequest) {
+export const DELETE = withAuth(async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
     const filename = searchParams.get("filename");
@@ -132,4 +133,4 @@ export async function DELETE(request: NextRequest) {
     console.error("Error deleting file:", error);
     return apiError("Failed to delete file", 500);
   }
-}
+}, { requiredPermissions: ['media:delete'] });

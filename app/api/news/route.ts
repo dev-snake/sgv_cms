@@ -3,6 +3,8 @@ import { newsArticles, categories, authors } from "@/db/schema";
 import { eq, desc, sql, and, or, ilike, gte, lte, isNull } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
+import { withAuth } from "@/middlewares/middleware";
+import { NextRequest } from "next/server";
 
 // GET /api/news - List news articles with pagination
 export async function GET(request: Request) {
@@ -113,7 +115,7 @@ export async function GET(request: Request) {
 
 
 // POST /api/news - Create a new article
-export async function POST(request: Request) {
+export const POST = withAuth(async (request) => {
   try {
     const body = await request.json();
     const { title, slug, summary, content, category_id, author_id, status, published_at, image_url, gallery } = body;
@@ -140,4 +142,4 @@ export async function POST(request: Request) {
     console.error("Error creating news article:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['news:write'] });

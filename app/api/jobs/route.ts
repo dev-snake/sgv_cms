@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { jobPostings } from "@/db/schema";
 import { eq, desc, ilike, and, SQL, isNull } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { withAuth } from "@/middlewares/middleware";
 
 // GET /api/jobs - List all job postings
 export async function GET(request: Request) {
@@ -59,7 +60,7 @@ export async function GET(request: Request) {
 }
 
 // POST /api/jobs - Create a new job posting
-export async function POST(request: Request) {
+export const POST = withAuth(async (request) => {
   try {
     const body = await request.json();
     const { 
@@ -104,4 +105,4 @@ export async function POST(request: Request) {
     }
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['jobs:write'] });

@@ -2,8 +2,10 @@ import { db } from "@/db";
 import { newsArticles, projects, products, contacts } from "@/db/schema";
 import { sql } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { withAuth } from "@/middlewares/middleware";
 
-export async function GET() {
+// GET /api/stats - Dashboard statistics
+export const GET = withAuth(async () => {
   try {
     const [newsCount] = await db.select({ count: sql`count(*)` }).from(newsArticles);
     const [projectsCount] = await db.select({ count: sql`count(*)` }).from(projects);
@@ -57,4 +59,4 @@ export async function GET() {
     console.error("Error fetching stats:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['dashboard:read'] });

@@ -1,6 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/db";
+import { roles, permissions, role_permissions, user_roles } from "@/db/schema";
+import { eq, inArray } from "drizzle-orm";
 
 const secretKey = process.env.JWT_SECRET || "secret";
 const key = new TextEncoder().encode(secretKey);
@@ -25,9 +28,40 @@ export async function decrypt(input: string): Promise<any> {
 }
 
 export async function generateTokens(user: any) {
-  const accessToken = await encrypt({ user }, "15m");
-  const refreshToken = await encrypt({ user }, "7d");
-  return { accessToken, refreshToken };
+  // Fetch full roles and permissions for the session
+  const userRoles = await db
+    .select({
+      id: roles.id,
+      name: roles.name
+    })
+    .from(user_roles)
+    .innerJoin(roles, eq(user_roles.role_id, roles.id))
+    .where(eq(user_roles.user_id, user.id));
+
+  const roleIds = userRoles.map(r => r.id);
+  
+  let userPermissions: string[] = [];
+  if (roleIds.length > 0) {
+    const perms = await db
+      .select({
+        name: permissions.name
+      })
+      .from(role_permissions)
+      .innerJoin(permissions, eq(role_permissions.permission_id, permissions.id))
+      .where(inArray(role_permissions.role_id, roleIds));
+    
+    userPermissions = Array.from(new Set(perms.map(p => p.name)));
+  }
+
+  const sessionPayload = {
+    ...user,
+    roles: userRoles.map(r => r.name),
+    permissions: userPermissions,
+  };
+
+  const accessToken = await encrypt({ user: sessionPayload }, "15m");
+  const refreshToken = await encrypt({ user: sessionPayload }, "7d");
+  return { accessToken, refreshToken, sessionPayload };
 }
 
 export async function setAuthCookies(accessToken: string, refreshToken: string) {

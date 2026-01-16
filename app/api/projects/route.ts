@@ -3,9 +3,11 @@ import { projects, categories } from "@/db/schema";
 import { eq, desc, sql, and, or, ilike, gte, lte, isNull } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
+import { withAuth } from "@/middlewares/middleware";
+import { NextRequest } from "next/server";
 
 // GET /api/projects - List projects with pagination
-export async function GET(request: Request) {
+export const GET = withAuth(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const categoryId = searchParams.get("categoryId");
@@ -87,11 +89,11 @@ export async function GET(request: Request) {
     console.error("Error fetching projects:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['projects:read'] });
 
 
 // POST /api/projects - Create a new project
-export async function POST(request: Request) {
+export const POST = withAuth(async (request) => {
   try {
     const body = await request.json();
     const { 
@@ -129,4 +131,4 @@ export async function POST(request: Request) {
     console.error("Error creating project:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['projects:write'] });

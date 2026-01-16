@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 import { withAuth, UserSession } from "@/middlewares/middleware";
 
 // GET /api/applications/[id] - View application details
-export const GET = withAuth(async (request: NextRequest, session: UserSession, { params }: { params: Promise<{ id: string }> }) => {
+export const GET = withAuth(async (request: NextRequest, session, { params }) => {
   try {
     const { id } = await params;
     
@@ -35,10 +35,10 @@ export const GET = withAuth(async (request: NextRequest, session: UserSession, {
     console.error("Error fetching application:", error);
     return apiError("Internal Server Error", 500);
   }
-});
+}, { requiredPermissions: ['applications:read'] });
 
 // PATCH /api/applications/[id] - Update application status
-export const PATCH = withAuth(async (request: NextRequest, session: UserSession, { params }: { params: Promise<{ id: string }> }) => {
+export const PATCH = withAuth(async (request: NextRequest, session, { params }) => {
   try {
     const { id } = await params;
     const { status } = await request.json();
@@ -61,10 +61,10 @@ export const PATCH = withAuth(async (request: NextRequest, session: UserSession,
     console.error("Error updating application:", error);
     return apiError("Internal Server Error", 500);
   }
-});
+}, { requiredPermissions: ['applications:write'] });
 
 // DELETE /api/applications/[id] - Delete an application
-export const DELETE = withAuth(async (request: NextRequest, session: UserSession, { params }: { params: Promise<{ id: string }> }) => {
+export const DELETE = withAuth(async (request: NextRequest, session, { params }) => {
   try {
     const { id } = await params;
 
@@ -80,4 +80,4 @@ export const DELETE = withAuth(async (request: NextRequest, session: UserSession
     console.error("Error deleting application:", error);
     return apiError("Internal Server Error", 500);
   }
-});
+}, { requiredPermissions: ['applications:delete'] });

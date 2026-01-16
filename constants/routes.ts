@@ -72,6 +72,11 @@ export const PORTAL_ROUTES = {
     list: "/portal/users",
     add: "/portal/users/add",
     edit: (id: string) => `/portal/users/${id}`,
+    roles: {
+      list: "/portal/users/roles",
+      add: "/portal/users/roles/add",
+      edit: (id: string) => `/portal/users/roles/${id}/edit`,
+    }
   },
 
   // Contacts
@@ -103,6 +108,8 @@ export const API_ROUTES = {
   STATS: "/api/stats",
   JOBS: "/api/jobs",
   APPLICATIONS: "/api/applications",
+  ROLES: "/api/roles",
+  PERMISSIONS: "/api/permissions",
 } as const;
 
 export type PortalRoute = typeof PORTAL_ROUTES;

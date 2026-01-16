@@ -10,7 +10,9 @@ import {
   Lock, 
   User as UserIcon,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  CheckCircle2,
+  Circle
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -19,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Role } from "@/types";
 
 export default function EditUserPage() {
   const router = useRouter();
@@ -32,18 +35,28 @@ export default function EditUserPage() {
     password: "", // Optional for edit
     full_name: "",
     role: "admin",
+    roleIds: [] as string[],
   });
+  const [availableRoles, setAvailableRoles] = React.useState<Role[]>([]);
 
   React.useEffect(() => {
-    const fetchUser = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get(`${API_ROUTES.USERS}/${userId}`);
-        const user = res.data.data;
+        const [userRes, rolesRes] = await Promise.all([
+          api.get(`${API_ROUTES.USERS}/${userId}`),
+          api.get(API_ROUTES.ROLES)
+        ]);
+        
+        const user = userRes.data.data;
+        const roles = rolesRes.data.data;
+        
+        setAvailableRoles(roles || []);
         setFormData({
           username: user.username,
           password: "",
           full_name: user.full_name || "",
           role: user.role || "admin",
+          roleIds: user.roles?.map((r: any) => r.id) || [],
         });
       } catch (error) {
         console.error(error);
@@ -54,7 +67,7 @@ export default function EditUserPage() {
       }
     };
 
-    fetchUser();
+    fetchData();
   }, [userId, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,12 +163,45 @@ export default function EditUserPage() {
                 />
               </div>
 
-              <div className="pt-6 border-t border-slate-50">
-                 <div className="flex items-start gap-4 p-5 bg-fbbf24/5 border-l-2 border-l-fbbf24">
+              <div className="pt-6 border-t border-slate-50 space-y-6">
+                 <div>
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 block">Gán vai trò (RBAC)</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {availableRoles.map((role) => (
+                        <div 
+                          key={role.id}
+                          className={cn(
+                            "p-4 border border-slate-100 flex items-center justify-between cursor-pointer transition-all hover:bg-slate-50",
+                            formData.roleIds.includes(role.id) ? "bg-indigo-50/50 border-indigo-200" : "bg-white"
+                          )}
+                          onClick={() => {
+                            const newRoleIds = formData.roleIds.includes(role.id)
+                              ? formData.roleIds.filter(id => id !== role.id)
+                              : [...formData.roleIds, role.id];
+                            setFormData({ ...formData, roleIds: newRoleIds });
+                          }}
+                        >
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] font-black uppercase tracking-tight text-slate-900">{role.name}</p>
+                            <p className="text-[9px] text-slate-500 font-medium italic line-clamp-1">{role.description}</p>
+                          </div>
+                          <div className="shrink-0 ms-3">
+                            {formData.roleIds.includes(role.id) ? (
+                              <CheckCircle2 size={16} className="text-indigo-600" />
+                            ) : (
+                              <Circle size={16} className="text-slate-200" />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                 </div>
+
+                 <div className="flex items-start gap-4 p-5 bg-fbbf24/5 border-l-2 border-l-fbbf24 mt-6">
                     <Shield size={20} className="text-[#002d6b] shrink-0 mt-1" />
                     <div className="space-y-1">
-                       <p className="text-[10px] font-black uppercase tracking-widest text-[#002d6b]">Cấp độ: Toàn quyền hệ thống</p>
-                       <p className="text-[11px] text-slate-500 font-medium leading-relaxed italic">Tài khoản này được định danh là Admin cấp cao nhất.</p>
+                       <p className="text-[10px] font-black uppercase tracking-widest text-[#002d6b]">Lưu ý</p>
+                       <p className="text-[11px] text-slate-500 font-medium leading-relaxed italic">Phân quyền dựa trên tất cả các vai trò được gán cho người dùng này.</p>
                     </div>
                  </div>
               </div>

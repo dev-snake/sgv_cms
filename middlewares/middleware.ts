@@ -16,7 +16,9 @@ export interface UserSession {
     id: string;
     username: string;
     full_name?: string | null;
-    role: string;
+    role: string; // Legacy role string
+    roles: string[];
+    permissions: string[];
   };
 }
 
@@ -53,11 +55,45 @@ export async function requireAuth(request: NextRequest): Promise<UserSession | R
   return session;
 }
 
-/**
- * Check if user has required role
- */
 export function hasRole(user: UserSession['user'], allowedRoles: string[]): boolean {
-  return allowedRoles.includes(user.role);
+  // Check legacy role first
+  if (allowedRoles.includes(user.role)) return true;
+  
+  // Check new multi-role structure
+  return user.roles?.some(r => allowedRoles.includes(r)) || false;
+}
+
+/**
+ * Check if user has specific permission
+ */
+export function hasPermission(user: UserSession['user'], permission: string): boolean {
+  // Admins have all permissions
+  if (user.role === 'admin' || user.roles?.includes('admin')) return true;
+  
+  return user.permissions?.includes(permission) || false;
+}
+
+/**
+ * Require specific permission
+ */
+export async function requirePermission(
+  request: NextRequest,
+  permission: string
+): Promise<UserSession | Response> {
+  const sessionOrError = await requireAuth(request);
+  
+  if (sessionOrError instanceof Response) {
+    return sessionOrError;
+  }
+  
+  if (!hasPermission(sessionOrError.user, permission)) {
+    return apiError(
+      `Forbidden - Required permission: ${permission}`,
+      403
+    );
+  }
+  
+  return sessionOrError;
 }
 
 /**
@@ -146,18 +182,16 @@ export function sanitizeHtml(html: string): string {
     .replace(/javascript:/gi, '');
 }
 
-/**
- * Check if user is admin
- */
 export function isAdmin(user: UserSession['user']): boolean {
-  return user.role === 'admin';
+  return user.role === 'admin' || user.roles?.includes('admin');
 }
 
 /**
  * Check if user can edit (admin or editor)
  */
 export function canEdit(user: UserSession['user']): boolean {
-  return ['admin', 'editor'].includes(user.role);
+  if (isAdmin(user)) return true;
+  return ['editor'].includes(user.role) || user.roles?.includes('editor');
 }
 
 /**
@@ -182,15 +216,30 @@ export function withAuth(
   handler: (request: NextRequest, session: UserSession, context?: any) => Promise<Response>,
   options?: {
     allowedRoles?: string[];
+    requiredPermissions?: string[];
   }
 ) {
   return async (request: NextRequest, context?: any) => {
-    const sessionOrError = options?.allowedRoles
-      ? await requireRole(request, options.allowedRoles)
-      : await requireAuth(request);
+    let sessionOrError: UserSession | Response;
+    
+    if (options?.allowedRoles) {
+      sessionOrError = await requireRole(request, options.allowedRoles);
+    } else {
+      sessionOrError = await requireAuth(request);
+    }
     
     if (sessionOrError instanceof Response) {
       return sessionOrError;
+    }
+
+    if (options?.requiredPermissions && options.requiredPermissions.length > 0) {
+      const hasAll = options.requiredPermissions.every(p => hasPermission(sessionOrError.user, p));
+      if (!hasAll && !isAdmin(sessionOrError.user)) {
+        return apiError(
+          `Forbidden - Required permissions: ${options.requiredPermissions.join(', ')}`,
+          403
+        );
+      }
     }
     
     return handler(request, sessionOrError, context);

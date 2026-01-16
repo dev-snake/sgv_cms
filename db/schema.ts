@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import { pgTable, varchar, text, timestamp, decimal, integer, pgEnum, bigint, uuid, boolean, jsonb } from 'drizzle-orm/pg-core';
 
 export const statusEnum = pgEnum('status', ['draft', 'published']);
@@ -151,3 +152,33 @@ export const jobApplications = pgTable('job_applications', {
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 });
+// RBAC System Tables
+export const roles = pgTable('roles', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 255 }).notNull().unique(),
+  description: text('description'),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const permissions = pgTable('permissions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 255 }).notNull().unique(), // e.g., 'news:read', 'news:write'
+  description: text('description'),
+  module: varchar('module', { length: 100 }).notNull(), // e.g., 'news', 'products'
+  created_at: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const role_permissions = pgTable('role_permissions', {
+  role_id: uuid('role_id').references(() => roles.id, { onDelete: 'cascade' }).notNull(),
+  permission_id: uuid('permission_id').references(() => permissions.id, { onDelete: 'cascade' }).notNull(),
+}, (table) => ({
+  pk: sql`PRIMARY KEY (${table.role_id}, ${table.permission_id})`,
+}));
+
+export const user_roles = pgTable('user_roles', {
+  user_id: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  role_id: uuid('role_id').references(() => roles.id, { onDelete: 'cascade' }).notNull(),
+}, (table) => ({
+  pk: sql`PRIMARY KEY (${table.user_id}, ${table.role_id})`,
+}));

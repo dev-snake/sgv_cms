@@ -4,11 +4,12 @@ import { eq, desc, sql, and, or, ilike, gte, lte, isNull } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 import { createProductSchema, productFilterSchema } from "@/validations/product.schema";
-import { validateQuery, validateBody } from "@/middlewares/middleware";
+import { validateQuery, validateBody, withAuth } from "@/middlewares/middleware";
 import { ZodError } from "zod";
+import { NextRequest } from "next/server";
 
 // GET /api/products - List products with pagination
-export async function GET(request: Request) {
+export const GET = withAuth(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     
@@ -112,11 +113,11 @@ export async function GET(request: Request) {
     console.error("Error fetching products:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['products:read'] });
 
 
 // POST /api/products - Create a new product
-export async function POST(request: Request) {
+export const POST = withAuth(async (request) => {
   try {
     // Validate request body
     const dataOrError = await validateBody(request, createProductSchema);
@@ -170,4 +171,4 @@ export async function POST(request: Request) {
     console.error("Error creating product:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: ['products:write'] });
