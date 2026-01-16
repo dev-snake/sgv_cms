@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import { getThankYouTemplate } from "./mail/templates/thank-you";
 import { getAdminNotificationTemplate } from "./mail/templates/admin-notification";
+import { getApplicationConfirmationTemplate } from "./mail/templates/application-confirmation";
 
 const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
@@ -64,6 +65,17 @@ export async function sendAdminNotificationEmail(contactData: {
 
   return sendEmail({
     to: process.env.MAIL_FROM || process.env.MAIL_USER || "info@saigonvalve.vn",
+    subject,
+    html,
+  });
+}
+
+export async function sendApplicationConfirmationEmail(email: string, name: string, jobTitle: string) {
+  const subject = `[XÁC NHẬN] Đã tiếp nhận hồ sơ ứng tuyển: ${jobTitle}`;
+  const html = getApplicationConfirmationTemplate(name, jobTitle);
+
+  return sendEmail({
+    to: email,
     subject,
     html,
   });

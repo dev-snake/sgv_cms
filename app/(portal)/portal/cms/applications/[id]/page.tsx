@@ -221,7 +221,7 @@ export default function ApplicationDetailPage() {
                         <FileDown size={16} /> Tải hồ sơ gốc
                     </a>
                 </div>
-                <div className="aspect-[3/4] md:aspect-auto md:h-[1000px] w-full bg-slate-50">
+                <div className="aspect-3/4 md:aspect-auto md:h-[1000px] w-full bg-slate-50">
                     <iframe 
                         src={`${application.cv_url}#toolbar=0&navpanes=0&scrollbar=0`} 
                         className="w-full h-full border-none"

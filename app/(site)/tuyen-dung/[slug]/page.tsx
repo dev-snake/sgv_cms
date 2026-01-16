@@ -266,25 +266,21 @@ function ApplyForm({ jobId, jobTitle }: { jobId: string, jobTitle: string }) {
 
     setIsSubmitting(true);
     try {
-      // 1. Upload CV
-      const uploadData = new FormData();
-      uploadData.append("file", cvFile);
-      
-      const uploadRes = await api.post("/api/upload", uploadData, {
+      const data = new FormData();
+      data.append("file", cvFile);
+      data.append("job_id", jobId);
+      data.append("full_name", formData.full_name);
+      data.append("email", formData.email);
+      data.append("phone", formData.phone);
+      if (formData.cover_letter) {
+        data.append("cover_letter", formData.cover_letter);
+      }
+
+      const response = await api.post("/api/applications", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      if (!uploadRes.data.success) throw new Error("Upload failed");
-      const cvUrl = uploadRes.data.data.url;
-
-      // 2. Submit Application
-      const applicationRes = await api.post("/api/applications", {
-        ...formData,
-        job_id: jobId,
-        cv_url: cvUrl,
-      });
-
-      if (applicationRes.data.success) {
+      if (response.data.success) {
         toast.success("Nộp hồ sơ thành công! Chúng tôi sẽ liên hệ sớm.");
         setFormData({ full_name: "", email: "", phone: "", cv_url: "", cover_letter: "" });
         setCvFile(null);
