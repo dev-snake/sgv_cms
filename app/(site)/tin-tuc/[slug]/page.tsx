@@ -82,7 +82,7 @@ export default function NewsDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+        <div className="animate-spin h-12 w-12 border-b-2 border-brand-primary"></div>
       </div>
     );
   }
@@ -129,7 +129,7 @@ export default function NewsDetailPage() {
       <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="space-y-6">
-            <div className="inline-flex items-center rounded-full bg-brand-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-primary">
+            <div className="inline-flex items-center bg-brand-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-primary rounded-none">
               {article.category}
             </div>
             
@@ -139,7 +139,7 @@ export default function NewsDetailPage() {
 
             <div className="flex flex-wrap items-center gap-y-4 gap-6 pt-4 border-t border-slate-100 social-meta text-slate-500">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                <div className="h-10 w-10 bg-slate-50 flex items-center justify-center text-slate-400 rounded-none border border-slate-100">
                   <User size={20} />
                 </div>
                 <div>
@@ -149,8 +149,8 @@ export default function NewsDetailPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                  <CalendarDays size={20} />
+                <div className="h-10 w-10 bg-slate-50 flex items-center justify-center text-slate-400 rounded-none border border-slate-100">
+                  <User size={20} />
                 </div>
                 <div>
                   <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ngày đăng</div>
@@ -161,7 +161,7 @@ export default function NewsDetailPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                <div className="h-10 w-10 bg-slate-50 flex items-center justify-center text-slate-400 rounded-none border border-slate-100">
                   <Clock size={20} />
                 </div>
                 <div>
@@ -171,10 +171,10 @@ export default function NewsDetailPage() {
               </div>
 
               <div className="ml-auto flex items-center gap-2">
-                <button title="Chia sẻ" className="h-9 w-9 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all">
+                <button title="Chia sẻ" className="h-9 w-9 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all rounded-none">
                   <Share2 size={16} />
                 </button>
-                <button title="In" className="h-9 w-9 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all">
+                <button title="In" className="h-9 w-9 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all rounded-none">
                   <Printer size={16} />
                 </button>
               </div>
@@ -196,7 +196,7 @@ export default function NewsDetailPage() {
                 </p>
 
                 <div 
-                  className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-a:text-brand-primary hover:prose-a:text-brand-secondary prose-img:rounded-xl"
+                  className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-a:text-brand-primary hover:prose-a:text-brand-secondary prose-img:rounded-none"
                   dangerouslySetInnerHTML={{ __html: article.content || `<p>Nội dung chi tiết đang được cập nhật...</p>` }}
                 />
 
@@ -206,7 +206,7 @@ export default function NewsDetailPage() {
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Chia sẻ:</span>
                     <div className="flex gap-2">
                       {[Facebook, Linkedin, Twitter].map((Icon, i) => (
-                        <button key={i} className="h-8 w-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-brand-primary hover:text-white transition-all">
+                        <button key={i} className="h-8 w-8 flex items-center justify-center bg-slate-50 text-slate-400 hover:bg-brand-primary hover:text-white transition-all rounded-none border border-slate-100">
                           <Icon size={14} />
                         </button>
                       ))}
@@ -214,10 +214,10 @@ export default function NewsDetailPage() {
                   </div>
                   
                   <div className="flex gap-3">
-                    <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600 bg-slate-50 px-5 py-2.5 rounded-full hover:bg-slate-200 transition-all">
+                    <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600 bg-slate-50 px-5 py-2.5 hover:bg-slate-200 transition-all rounded-none border border-slate-100">
                       <Bookmark size={14} /> Lưu bài viết
                     </button>
-                    <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white bg-brand-primary px-5 py-2.5 rounded-full hover:bg-brand-secondary shadow-lg shadow-brand-primary/20 transition-all">
+                    <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white bg-brand-primary px-5 py-2.5 hover:bg-brand-secondary transition-all rounded-none">
                       Liên hệ tư vấn <MoveRight size={14} />
                     </button>
                   </div>
@@ -226,86 +226,26 @@ export default function NewsDetailPage() {
             </div>
 
             {/* Sidebar */}
-            <aside className="lg:col-span-4 space-y-10">
-              
-              {/* Search */}
-              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 mb-4">Tìm kiếm</h3>
-                <form onSubmit={handleSearch} className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Nhập từ khóa..."
-                    className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all"
-                  />
-                  <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 flex items-center justify-center bg-brand-primary text-white rounded-lg hover:bg-brand-secondary transition-all">
-                    <Search size={18} />
-                  </button>
-                </form>
-              </div>
+            <aside className="lg:col-span-4 space-y-12">
 
-              {/* Categories */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
-                  <span className="w-8 h-px bg-brand-primary"></span> Danh mục
-                </h3>
-                <div className="flex flex-col gap-2">
-                  {categories.map((cat) => (
-                    <Link 
-                      key={cat.id} 
-                      href={`/tin-tuc?category=${encodeURIComponent(cat.name)}`}
-                      className="group flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-brand-primary hover:bg-brand-primary/5 transition-all text-sm"
-                    >
-                      <span className="font-bold text-slate-600 group-hover:text-brand-primary">{cat.name}</span>
-                      <MoveRight size={14} className="text-slate-300 group-hover:text-brand-primary group-hover:translate-x-1 transition-all" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
 
               {/* Recent News */}
-              <div className="space-y-6">
-                <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
-                  <span className="w-8 h-px bg-brand-primary"></span> Tin mới nhất
+              <div className="space-y-8">
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-3">
+                  <span className="w-8 h-[2px] bg-brand-primary"></span> Tin mới nhất
                 </h3>
                 <div className="space-y-6">
                   {recentArticles.map((news) => (
-                    <Link key={news.id} href={`/tin-tuc/${news.slug}`} className="group flex gap-4">
-                      <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-slate-100">
-                        {news.image_url ? (
-                          <Image src={news.image_url} alt={news.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
-                        ) : (
-                          <div className="flex items-center justify-center h-full text-slate-300"><CalendarDays size={20} /></div>
-                        )}
+                    <Link key={news.id} href={`/tin-tuc/${news.slug}`} className="group block space-y-2">
+                      <div className="text-[10px] font-black text-brand-primary/60 uppercase tracking-widest">
+                        {news.published_at ? format(new Date(news.published_at), "dd/MM/yyyy", { locale: vi }) : "Đang cập nhật"}
                       </div>
-                      <div className="flex flex-col justify-center gap-1">
-                        <div className="text-[10px] font-bold text-slate-400 capitalize">
-                          {news.published_at ? format(new Date(news.published_at), "dd/MM/yyyy", { locale: vi }) : "Đang cập nhật"}
-                        </div>
-                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-2 leading-tight tracking-tight">
-                          {news.title}
-                        </h4>
-                      </div>
+                      <h4 className="text-sm font-bold text-slate-900 group-hover:text-brand-primary transition-colors leading-snug tracking-tight">
+                        {news.title}
+                      </h4>
+                      <div className="h-px w-0 group-hover:w-full bg-slate-100 transition-all duration-500"></div>
                     </Link>
                   ))}
-                </div>
-              </div>
-
-              {/* CTA Box */}
-              <div className="relative overflow-hidden bg-slate-900 rounded-3xl p-8 text-white group">
-                <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-brand-primary/20 rounded-full blur-3xl group-hover:bg-brand-primary/30 transition-all duration-700"></div>
-                <div className="relative z-10 space-y-6">
-                  <div className="h-12 w-12 rounded-2xl bg-brand-primary flex items-center justify-center">
-                    <Share2 size={24} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black leading-tight uppercase mb-2">Bạn cần tư vấn giải pháp?</h3>
-                    <p className="text-slate-400 text-sm leading-relaxed">Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7.</p>
-                  </div>
-                  <Link href="/lien-he" className="flex items-center justify-center gap-2 w-full bg-white text-slate-900 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-brand-primary hover:text-white transition-all">
-                    Liên hệ ngay <MoveRight size={14} />
-                  </Link>
                 </div>
               </div>
 
@@ -327,14 +267,14 @@ export default function NewsDetailPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {relatedArticles.map((news) => (
-              <Link key={news.id} href={`/tin-tuc/${news.slug}`} className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-slate-100 flex flex-col">
-                <div className="relative aspect-16/10 overflow-hidden bg-slate-100">
+              <Link key={news.id} href={`/tin-tuc/${news.slug}`} className="group bg-white overflow-hidden hover:translate-y-[-4px] transition-all duration-500 border border-slate-100 flex flex-col rounded-none">
+                <div className="relative aspect-16/10 overflow-hidden bg-slate-100 rounded-none">
                   {news.image_url ? (
                     <Image src={news.image_url} alt={news.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                   ) : (
                     <div className="flex items-center justify-center h-full text-slate-300"><CalendarDays size={32} /></div>
                   )}
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[8px] font-black uppercase tracking-widest text-brand-primary rounded">
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[8px] font-black uppercase tracking-widest text-brand-primary rounded-none">
                     {news.category}
                   </div>
                 </div>
