@@ -14,6 +14,9 @@ import {
   Mail,
   Users,
   Images,
+  UserRoundSearch,
+  ClipboardList,
+  ShieldCheck,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -84,17 +87,17 @@ const data = {
     {
        title: "Quản lý Tuyển dụng",
        url: PORTAL_ROUTES.cms.jobs.list,
-       icon: Briefcase,
+       icon: UserRoundSearch,
     },
     {
        title: "Danh sách Ứng viên",
        url: PORTAL_ROUTES.cms.applications.list,
-       icon: Users,
+       icon: ClipboardList,
     },
     {
       title: "Tài khoản Admin",
       url: "/portal/users",
-      icon: Users,
+      icon: ShieldCheck,
     },
   ],
   user: {
