@@ -59,10 +59,12 @@ const NAV_LINKS: NavLink[] = [
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const pathname = usePathname();
 
   React.useEffect(() => {
+    setMounted(true);
     const handleScroll = () => setIsScrolled(window.scrollY > 40);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -98,7 +100,7 @@ export default function Header() {
           <div className="hidden lg:flex items-center gap-2">
             <NavigationMenu>
               <NavigationMenuList className="gap-2">
-                {NAV_LINKS.map((link) => (
+                {mounted && NAV_LINKS.map((link) => (
                   <NavigationMenuItem key={link.label}>
                     {"submenu" in link || "featured" in link ? (
                       <>
@@ -136,7 +138,7 @@ export default function Header() {
                         <Link 
                           href={link.href}
                           className={cn(
-                            "group inline-flex h-10 w-max items-center justify-center rounded-sm bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-colors hover:text-brand-primary focus:outline-none",
+                            "group inline-flex h-max w-max items-center justify-center rounded-sm bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-colors hover:text-brand-primary focus:outline-none",
                             pathname === link.href ? "text-brand-primary" : "text-foreground"
                           )}
                         >

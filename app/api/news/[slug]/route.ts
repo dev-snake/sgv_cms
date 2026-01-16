@@ -16,13 +16,49 @@ export async function GET(
     const isUUID = UUID_REGEX.test(slug);
     
     const whereCondition = isUUID ? eq(newsArticles.id, slug) : eq(newsArticles.slug, slug);
-    const [article] = await db.select().from(newsArticles).where(whereCondition);
+    
+    const [article] = await db.select({
+      id: newsArticles.id,
+      title: newsArticles.title,
+      slug: newsArticles.slug,
+      summary: newsArticles.summary,
+      content: newsArticles.content,
+      status: newsArticles.status,
+      image_url: newsArticles.image_url,
+      gallery: newsArticles.gallery,
+      published_at: newsArticles.published_at,
+      created_at: newsArticles.created_at,
+      updated_at: newsArticles.updated_at,
+      category_id: newsArticles.category_id,
+      category: categories.name,
+      author_id: newsArticles.author_id,
+      author: authors.name,
+    })
+    .from(newsArticles)
+    .leftJoin(categories, eq(newsArticles.category_id, categories.id))
+    .leftJoin(authors, eq(newsArticles.author_id, authors.id))
+    .where(whereCondition);
 
     if (!article) {
       return apiError("Article not found", 404);
     }
 
-    return apiResponse(article);
+    // Add derived fields
+    const wordCount = article.content ? article.content.split(/\s+/).length : 0;
+    const readTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
+    
+    // Fallback image
+    const fallbackImage = `https://saigonvalve.vn/uploads/files/2025/06/24/thumbs/datalogger-1-306x234-5.png`;
+
+    const transformedArticle = {
+      ...article,
+      readTime: `${readTimeMinutes} PHÚT`,
+      category: article.category || "Tin tức",
+      author: article.author || "Admin",
+      image_url: article.image_url || fallbackImage,
+    };
+
+    return apiResponse(transformedArticle);
   } catch (error) {
     console.error("Error fetching article:", error);
     return apiError("Internal Server Error", 500);

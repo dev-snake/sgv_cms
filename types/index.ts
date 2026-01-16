@@ -8,7 +8,8 @@ export interface NewsArticle {
   published_at?: string;
   date?: string; // Legacy field for frontend compatibility
   readTime?: string; // Legacy field for frontend compatibility
-  image: string;
+  image?: string;
+  image_url: string;
   category_id: string;
   category?: string;
   author_id: string;
@@ -26,8 +27,8 @@ export interface Product {
   status: "active" | "inactive";
   price: string;
   stock: string;
-  image: string;
-  image_url?: string;
+  image?: string;
+  image_url: string;
   sku: string;
   is_featured?: boolean;
   tech_specs?: any;
@@ -51,8 +52,8 @@ export interface Project {
   end_date?: string;
   category_id: string;
   category?: string;
-  image: string;
-  image_url?: string;
+  image?: string;
+  image_url: string;
   status: "ongoing" | "completed";
 }
 

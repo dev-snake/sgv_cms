@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Save, ImagePlus } from "lucide-react";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,9 +17,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatusFormSection } from "@/components/portal/status-form-section";
+import { ImageUploader } from "@/components/portal/ImageUploader";
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import api from "@/services/axios";
 import { toast } from "sonner";
+import { Calendar as CalendarIcon } from "lucide-react";
 
 interface NewsArticle {
   id: string;
@@ -30,6 +41,8 @@ interface NewsArticle {
   category_id: string;
   author_id: string;
   status: string;
+  image_url: string | null;
+  gallery: string[] | null;
   published_at: string | null;
 }
 
@@ -51,14 +64,21 @@ export default function EditNewsPage() {
     category_id: "",
     author_id: "",
     status: "draft" as "draft" | "published",
-    published_at: "",
+    image_url: "",
+    gallery: [] as string[],
+    published_at: undefined as Date | undefined,
   });
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch article by ID
-        const articleRes = await api.get(`${API_ROUTES.NEWS}/${newsId}`);
+        // Fetch article, categories and authors in parallel
+        const [articleRes, catRes, authorRes] = await Promise.all([
+          api.get(`${API_ROUTES.NEWS}/${newsId}`),
+          api.get(`${API_ROUTES.CATEGORIES}?type=news`),
+          api.get(`${API_ROUTES.AUTHORS}`)
+        ]);
+
         if (articleRes.data.success) {
           const a = articleRes.data.data;
           setArticle(a);
@@ -68,17 +88,23 @@ export default function EditNewsPage() {
             summary: a.summary || "",
             content: a.content || "",
             category_id: a.category_id || "",
-            author_id: a.author_id || "",
+            author_id: a.author_id || (authorRes.data.data?.[0]?.id || ""),
             status: a.status || "draft",
-            published_at: a.published_at ? a.published_at.slice(0, 16) : "",
+            image_url: a.image_url || "",
+            gallery: Array.isArray(a.gallery) ? a.gallery : [],
+            published_at: a.published_at ? new Date(a.published_at) : undefined,
           });
         }
 
-        // Fetch categories
-        const catRes = await api.get(`${API_ROUTES.CATEGORIES}?type=news`);
         if (catRes.data.success) {
           setCategories(catRes.data.data || []);
         }
+
+        // If no author_id set, try to use the first one from author list
+        if (authorRes.data.success && authorRes.data.data?.length > 0 && !formData.author_id) {
+          setFormData(prev => ({ ...prev, author_id: authorRes.data.data[0].id }));
+        }
+
       } catch (error) {
         console.error("Error fetching article:", error);
         toast.error("Không thể tải thông tin bài viết");
@@ -93,7 +119,11 @@ export default function EditNewsPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const response = await api.patch(`${API_ROUTES.NEWS}/${newsId}`, formData);
+      const submissionData = {
+        ...formData,
+        published_at: formData.published_at ? formData.published_at.toISOString() : null,
+      };
+      const response = await api.patch(`${API_ROUTES.NEWS}/${newsId}`, submissionData);
       if (response.data.success) {
         toast.success("Cập nhật bài viết thành công!");
         router.push(PORTAL_ROUTES.cms.news.list);
@@ -108,8 +138,9 @@ export default function EditNewsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+        <p className="mt-4 text-slate-500 font-medium italic animate-pulse">Đang tải thông tin bài viết...</p>
       </div>
     );
   }
@@ -125,13 +156,12 @@ export default function EditNewsPage() {
     );
   }
 
-
   return (
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-6">
           <Link href={PORTAL_ROUTES.cms.news.list}>
-            <Button variant="outline" className="h-14 w-14 p-0 border-slate-100 rounded-none hover:bg-slate-50">
+            <Button variant="outline" className="h-14 w-14 p-0 border-slate-100 rounded-none hover:bg-slate-50" disabled={saving}>
               <ArrowLeft size={20} />
             </Button>
           </Link>
@@ -141,11 +171,17 @@ export default function EditNewsPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 rounded-none text-slate-500">
+          <Button 
+            variant="outline" 
+            className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 rounded-none text-slate-500"
+            onClick={() => router.back()}
+            disabled={saving}
+          >
             Hủy thay đổi
           </Button>
-          <Button onClick={handleSubmit} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
-            <Save className="mr-2 size-4" /> Lưu thay đổi
+          <Button onClick={handleSubmit} disabled={saving} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+            {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />} 
+            Lưu thay đổi
           </Button>
         </div>
       </div>
@@ -188,7 +224,7 @@ export default function EditNewsPage() {
           />
 
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">Phân loại & Tác giả</h3>
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">Phân loại & Thời gian</h3>
             <div className="space-y-3">
               <Label htmlFor="category_id" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Danh mục *</Label>
               <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
@@ -201,18 +237,48 @@ export default function EditNewsPage() {
               </Select>
             </div>
             <div className="space-y-3">
-              <Label htmlFor="author_id" className="text-[10px] font-black uppercase tracking-widest text-slate-500">ID Tác giả *</Label>
-              <Input id="author_id" type="number" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20" value={formData.author_id} onChange={(e) => setFormData({ ...formData, author_id: e.target.value })} required />
+              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Ngày xuất bản</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "h-14 w-full justify-start text-left font-bold bg-slate-50 border-none rounded-none shadow-none focus:ring-1 focus:ring-brand-primary/20",
+                      !formData.published_at && "text-slate-300"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.published_at ? format(formData.published_at, "PPP", { locale: vi }) : <span>Chọn ngày</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 rounded-none border-slate-100" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.published_at}
+                    onSelect={(date) => setFormData({ ...formData, published_at: date })}
+                    initialFocus
+                    locale={vi}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
-            <div className="space-y-3">
-              <Label htmlFor="published_at" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Ngày xuất bản</Label>
-              <Input id="published_at" type="datetime-local" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20" value={formData.published_at} onChange={(e) => setFormData({ ...formData, published_at: e.target.value })} />
-            </div>
+          </div>
+
+          <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">
+              Hình ảnh bài viết
+            </h3>
+            <ImageUploader
+              value={formData.image_url}
+              onChange={(url) => setFormData({ ...formData, image_url: url })}
+              gallery={formData.gallery}
+              onGalleryChange={(urls) => setFormData({ ...formData, gallery: urls })}
+            />
           </div>
 
           <div className="p-6 bg-brand-primary/5 border border-brand-primary/10">
             <p className="text-[10px] text-slate-500 leading-relaxed italic">
-              Dữ liệu được chuẩn hóa theo cấu trúc database CMS.
+              Dữ liệu được chuẩn hóa theo cấu trúc database CMS. Tác giả được tự động gán là quản trị viên.
             </p>
           </div>
         </div>

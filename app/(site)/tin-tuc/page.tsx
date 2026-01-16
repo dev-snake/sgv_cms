@@ -42,7 +42,7 @@ interface NewsArticle {
   published_at: string | null;
   created_at: string;
   readTime: string;
-  image: string;
+  image_url: string;
 }
 
 const ITEMS_PER_PAGE = 6;
@@ -143,7 +143,7 @@ export default function NewsPage() {
             <div className="w-full space-y-16">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <AnimatePresence mode="popLayout">
-                  {otherNews.map((article) => (
+                  {news.map((article) => (
                     <motion.div
                       key={article.id}
                       layout
@@ -154,7 +154,7 @@ export default function NewsPage() {
                     >
                       <div className="relative aspect-4/3 w-full overflow-hidden">
                         <Image
-                          src={article.image}
+                          src={article.image_url}
                           alt={article.title}
                           fill
                           className="object-cover transition-transform duration-1000 group-hover:scale-110"

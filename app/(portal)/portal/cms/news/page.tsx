@@ -266,8 +266,8 @@ export default function NewsManagementPage() {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-6">
                         <div className="relative h-16 w-24 rounded-none overflow-hidden shrink-0 border border-slate-100 transition-transform group-hover:scale-105 bg-slate-100">
-                           {news.image ? (
-                             <Image src={news.image} alt={news.title} fill className="object-cover" />
+                           {news.image_url ? (
+                             <Image src={news.image_url} alt={news.title} fill className="object-cover" />
                            ) : (
                              <div className="flex items-center justify-center h-full w-full text-slate-300">
                                <Newspaper size={20} />

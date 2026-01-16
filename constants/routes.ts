@@ -94,6 +94,7 @@ export const API_ROUTES = {
   CONTACTS: "/api/contacts",
   CATEGORIES: "/api/categories",
   USERS: "/api/users",
+  AUTHORS: "/api/authors",
   MEDIA: "/api/media",
   STATS: "/api/stats",
   JOBS: "/api/jobs",

@@ -62,10 +62,12 @@ export async function GET(request: Request) {
       category: categories.name,
       author_id: newsArticles.author_id,
       author: authors.name,
+      image_url: newsArticles.image_url,
+      gallery: newsArticles.gallery,
     })
     .from(newsArticles)
-    .innerJoin(categories, eq(newsArticles.category_id, categories.id))
-    .innerJoin(authors, eq(newsArticles.author_id, authors.id))
+    .leftJoin(categories, eq(newsArticles.category_id, categories.id))
+    .leftJoin(authors, eq(newsArticles.author_id, authors.id))
     .orderBy(desc(newsArticles.created_at))
     .limit(limit)
     .offset(offset);
@@ -82,10 +84,14 @@ export async function GET(request: Request) {
       const wordCount = article.content ? article.content.split(/\s+/).length : 0;
       const readTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
       
+      const fallbackImage = `https://saigonvalve.vn/uploads/files/2025/06/24/thumbs/datalogger-1-306x234-5.png`;
+      
       return {
         ...article,
         readTime: `${readTimeMinutes} PHÚT`,
-        image: `https://saigonvalve.vn/uploads/files/2025/06/24/thumbs/datalogger-1-306x234-5.png`,
+        category: article.category || "Tin tức",
+        author: article.author || "Admin",
+        image_url: article.image_url || fallbackImage,
       };
     });
     
@@ -104,7 +110,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, slug, summary, content, category_id, author_id, status, published_at } = body;
+    const { title, slug, summary, content, category_id, author_id, status, published_at, image_url, gallery } = body;
 
     if (!title || !slug || !summary || !content || !category_id || !author_id) {
       return apiError("Missing required fields", 400);
@@ -118,6 +124,8 @@ export async function POST(request: Request) {
       category_id,
       author_id,
       status: status || 'draft',
+      image_url: image_url || null,
+      gallery: gallery || [],
       published_at: published_at ? new Date(published_at) : null,
     }).returning();
 

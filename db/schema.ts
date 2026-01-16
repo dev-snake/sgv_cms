@@ -32,6 +32,8 @@ export const newsArticles = pgTable('news_articles', {
   category_id: uuid('category_id').references(() => categories.id).notNull(),
   author_id: uuid('author_id').references(() => authors.id).notNull(),
   status: statusEnum('status').default('draft').notNull(),
+  image_url: varchar('image_url', { length: 255 }),
+  gallery: jsonb('gallery'), // Array of image URLs
   published_at: timestamp('published_at'),
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),

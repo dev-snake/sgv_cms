@@ -19,14 +19,20 @@ import {
 } from "@/components/ui/select";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
+import { ImageUploader } from "@/components/portal/ImageUploader";
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Calendar as CalendarIcon } from "lucide-react";
 
 interface Category {
-  id: string;
-  name: string;
-}
-
-interface Author {
   id: string;
   name: string;
 }
@@ -35,7 +41,6 @@ export default function AddNewsPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categories, setCategories] = React.useState<Category[]>([]);
-  const [authors, setAuthors] = React.useState<Author[]>([]);
   
   const [formData, setFormData] = React.useState({
     title: "",
@@ -45,7 +50,9 @@ export default function AddNewsPage() {
     category_id: "",
     author_id: "",
     status: "draft" as "draft" | "published",
-    published_at: "",
+    image_url: "",
+    gallery: [] as string[],
+    published_at: undefined as Date | undefined,
   });
 
   React.useEffect(() => {
@@ -53,12 +60,11 @@ export default function AddNewsPage() {
       try {
         const [catsRes, authorsRes] = await Promise.all([
           api.get(`${API_ROUTES.CATEGORIES}?type=news`),
-          api.get("/api/authors")
+          api.get(API_ROUTES.AUTHORS)
         ]);
         
         setCategories(catsRes.data.data || []);
         const authorsData = authorsRes.data.data || [];
-        setAuthors(authorsData);
         if (authorsData.length > 0) {
           setFormData(prev => ({ ...prev, author_id: authorsData[0].id }));
         }
@@ -92,15 +98,19 @@ export default function AddNewsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.category_id || !formData.author_id) {
-      toast.error("Vui lòng chọn danh mục và tác giả");
+      toast.error("Vui lòng chọn danh mục");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await api.post(API_ROUTES.NEWS, formData);
+      const submissionData = {
+        ...formData,
+        published_at: formData.published_at ? formData.published_at.toISOString() : null,
+      };
+      await api.post(API_ROUTES.NEWS, submissionData);
 
-      toast.success("Đã tạo bài viết thành công");
+      toast.success("Đã tạo bài viết thành công!");
       router.push(PORTAL_ROUTES.cms.news.list);
     } catch (error: any) {
       console.error(error);
@@ -209,7 +219,7 @@ export default function AddNewsPage() {
 
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">
-              Phân loại bài viết
+              Phân loại & Thời gian
             </h3>
 
             <div className="space-y-3">
@@ -231,35 +241,51 @@ export default function AddNewsPage() {
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="author_id" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                Tác giả *
-              </Label>
-              <Select value={formData.author_id} onValueChange={(value) => setFormData({ ...formData, author_id: value })}>
-                <SelectTrigger className="h-14 bg-slate-50 border-none rounded-none text-sm font-bold shadow-none focus:ring-1 focus:ring-brand-primary/20">
-                  <SelectValue placeholder="Chọn tác giả" />
-                </SelectTrigger>
-                <SelectContent className="rounded-none border-slate-100">
-                  {authors.map((author) => (
-                    <SelectItem key={author.id} value={author.id} className="text-sm font-bold rounded-none">
-                      {author.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="published_at" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">
                 Ngày xuất bản
               </Label>
-              <Input
-                id="published_at"
-                type="datetime-local"
-                className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20"
-                value={formData.published_at}
-                onChange={(e) => setFormData({ ...formData, published_at: e.target.value })}
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "h-14 w-full justify-start text-left font-bold bg-slate-50 border-none rounded-none shadow-none focus:ring-1 focus:ring-brand-primary/20",
+                      !formData.published_at && "text-slate-300"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.published_at ? format(formData.published_at, "PPP", { locale: vi }) : <span>Chọn ngày</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 rounded-none border-slate-100" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.published_at}
+                    onSelect={(date) => setFormData({ ...formData, published_at: date })}
+                    initialFocus
+                    locale={vi}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
+          </div>
+
+          <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">
+              Hình ảnh bài viết
+            </h3>
+            <ImageUploader
+              value={formData.image_url}
+              onChange={(url) => setFormData({ ...formData, image_url: url })}
+              gallery={formData.gallery}
+              onGalleryChange={(urls) => setFormData({ ...formData, gallery: urls })}
+            />
+          </div>
+
+          <div className="p-6 bg-brand-primary/5 border border-brand-primary/10">
+            <p className="text-[10px] text-slate-500 leading-relaxed italic">
+              Dữ liệu được chuẩn hóa theo cấu trúc database CMS. Tác giả được tự động gán là quản trị viên.
+            </p>
           </div>
         </div>
       </form>

@@ -17,6 +17,8 @@ import {
   Bookmark,
   Printer
 } from "lucide-react";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -133,7 +135,9 @@ export default function NewsDetailPage() {
                 </div>
                 <div>
                   <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ngày đăng</div>
-                  <div className="text-xs font-bold text-slate-900">{article.date}</div>
+                  <div className="text-xs font-bold text-slate-900">
+                    {article.published_at ? format(new Date(article.published_at), "dd/MM/yyyy", { locale: vi }) : "Đang cập nhật"}
+                  </div>
                 </div>
               </div>
 
@@ -178,7 +182,7 @@ export default function NewsDetailPage() {
 
             <div className="space-y-8">
               <p className="text-xl sm:text-2xl text-slate-600 font-medium leading-relaxed italic border-l-4 border-brand-primary pl-8">
-                {article.desc}
+                {article.summary}
               </p>
 
               <div 
@@ -239,7 +243,7 @@ export default function NewsDetailPage() {
                 </div>
                 <div className="p-6 flex flex-col grow">
                   <div className="text-[9px] font-bold text-slate-400 mb-2 flex items-center gap-2">
-                    <CalendarDays size={10} /> {news.date}
+                    <CalendarDays size={10} /> {news.published_at ? format(new Date(news.published_at), "dd/MM/yy", { locale: vi }) : "Đang cập nhật"}
                   </div>
                   <h4 className="text-sm font-bold text-slate-900 group-hover:text-brand-primary transition-colors uppercase line-clamp-2 leading-tight mb-4 grow tracking-tight">
                     {news.title}
