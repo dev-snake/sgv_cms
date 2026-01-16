@@ -4,6 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Save, Package, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { generateSlug } from "@/utils/slug";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -109,6 +111,16 @@ export default function EditProductPage() {
     }
   }, [productId]);
 
+  const handleNameChange = (name: string) => {
+    const slug = generateSlug(name);
+    
+    setFormData((prev) => ({ 
+      ...prev, 
+      name, 
+      slug: prev.slug === "" || prev.slug === generateSlug(prev.name) ? slug : prev.slug,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -196,11 +208,25 @@ export default function EditProductPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tên sản phẩm *</Label>
-                <Input id="name" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                <Input id="name" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.name} onChange={(e) => handleNameChange(e.target.value)} required />
               </div>
               <div className="space-y-3">
                 <Label htmlFor="sku" className="text-[10px] font-black uppercase tracking-widest text-slate-500"><Package size={12} className="inline mr-1" /> Mã SKU *</Label>
                 <Input id="sku" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} required />
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <Label htmlFor="slug" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Slug (URL) *</Label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-sm font-medium">/</span>
+                <Input 
+                  id="slug" 
+                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none pl-6 focus-visible:ring-brand-primary/20" 
+                  value={formData.slug} 
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })} 
+                  required 
+                />
               </div>
             </div>
 

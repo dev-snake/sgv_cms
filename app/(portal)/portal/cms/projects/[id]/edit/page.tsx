@@ -27,6 +27,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { generateSlug } from "@/utils/slug";
 import { Calendar as CalendarIcon, X } from "lucide-react";
 import api from "@/services/axios";
 import { toast } from "sonner";
@@ -185,21 +186,12 @@ export default function EditProjectPage() {
                 value={formData.name} 
                 onChange={(e) => {
                   const name = e.target.value;
-                  const slug = name
-                    .toLowerCase()
-                    .trim()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .replace(/[đĐ]/g, "d")
-                    .replace(/[^a-z0-9\s-]/g, "")
-                    .replace(/\s+/g, "-")
-                    .replace(/-+/g, "-")
-                    .replace(/^-+|-+$/g, "");
+                  const slug = generateSlug(name);
                   
                   setFormData((prev) => ({ 
                     ...prev, 
                     name, 
-                    slug: prev.slug === "" || prev.slug === prev.name.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, "d").replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "") ? slug : prev.slug,
+                    slug: prev.slug === "" || prev.slug === generateSlug(prev.name) ? slug : prev.slug,
                   }));
                 }} 
                 required 
@@ -208,7 +200,16 @@ export default function EditProjectPage() {
 
             <div className="space-y-3">
               <Label htmlFor="slug" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Slug (URL) *</Label>
-              <Input id="slug" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-sm font-medium">/</span>
+                <Input 
+                  id="slug" 
+                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none pl-6 focus-visible:ring-brand-primary/20" 
+                  value={formData.slug} 
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })} 
+                  required 
+                />
+              </div>
             </div>
 
             <div className="space-y-3">

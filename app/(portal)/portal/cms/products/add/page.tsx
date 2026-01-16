@@ -4,7 +4,21 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api from "@/services/axios";
-import { ArrowLeft, Save, Package, Loader2 } from "lucide-react";
+import { 
+  Plus, 
+  Trash2, 
+  Save, 
+  ArrowLeft, 
+  Loader2, 
+  X,
+  PlusCircle,
+  FileText,
+  Settings,
+  Image as ImageIcon,
+  Package
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { generateSlug } from "@/utils/slug";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,20 +83,12 @@ export default function AddProductPage() {
   }, []);
 
   const handleNameChange = (name: string) => {
-    const slug = name
-      .toLowerCase()
-      .trim()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[đĐ]/g, "d")
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
+    const slug = generateSlug(name);
     
     setFormData((prev) => ({ 
       ...prev, 
       name, 
-      slug: prev.slug === "" || prev.slug === prev.name.toLowerCase().replace(/\s+/g, "-") ? slug : prev.slug,
+      slug: prev.slug === "" || prev.slug === generateSlug(prev.name) ? slug : prev.slug,
     }));
   };
 

@@ -1,6 +1,6 @@
 import { db } from "@/db";
-import { categories } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { categories, newsArticles, products, projects } from "@/db/schema";
+import { eq, or } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 
 // GET /api/categories/[id] - Get a single category
@@ -59,6 +59,18 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+
+    // Check if category is in use
+    const [newsUsage, productUsage, projectUsage] = await Promise.all([
+      db.select({ id: newsArticles.id }).from(newsArticles).where(eq(newsArticles.category_id, id)).limit(1),
+      db.select({ id: products.id }).from(products).where(eq(products.category_id, id)).limit(1),
+      db.select({ id: projects.id }).from(projects).where(eq(projects.category_id, id)).limit(1),
+    ]);
+
+    if (newsUsage.length > 0 || productUsage.length > 0 || projectUsage.length > 0) {
+      return apiError("Không thể xóa danh mục này vì đang có dữ liệu (Tin tức, Sản phẩm hoặc Dự án) liên kết với nó. Vui lòng xóa hoặc chuyển các dữ liệu đó sang danh mục khác trước.", 400);
+    }
+
     const [deletedCategory] = await db.delete(categories)
       .where(eq(categories.id, id))
       .returning();

@@ -27,6 +27,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { generateSlug } from "@/utils/slug";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import api from "@/services/axios";
 import { toast } from "sonner";
@@ -130,6 +131,16 @@ export default function EditNewsPage() {
     };
     fetchData();
   }, [newsId]);
+
+  const handleTitleChange = (title: string) => {
+    const slug = generateSlug(title);
+    
+    setFormData((prev) => ({ 
+      ...prev, 
+      title, 
+      slug: prev.slug === "" || prev.slug === generateSlug(prev.title) ? slug : prev.slug,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -368,12 +379,21 @@ export default function EditNewsPage() {
             <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
               <div className="space-y-3">
                 <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tiêu đề bài viết *</Label>
-                <Input id="title" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
+                <Input id="title" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.title} onChange={(e) => handleTitleChange(e.target.value)} required />
               </div>
               
               <div className="space-y-3">
                 <Label htmlFor="slug" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Slug (URL) *</Label>
-                <Input id="slug" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-sm font-medium">/</span>
+                  <Input 
+                    id="slug" 
+                    className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none pl-6 focus-visible:ring-brand-primary/20" 
+                    value={formData.slug} 
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })} 
+                    required 
+                  />
+                </div>
               </div>
 
               <div className="space-y-3">

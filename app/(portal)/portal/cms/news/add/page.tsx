@@ -29,7 +29,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { generateSlug } from "@/utils/slug";
+import { 
+toast } from "sonner";
 import { Calendar as CalendarIcon } from "lucide-react";
 import {
   Tabs,
@@ -94,20 +96,12 @@ export default function AddNewsPage() {
   }, []);
 
   const handleTitleChange = (title: string) => {
-    const slug = title
-      .toLowerCase()
-      .trim()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[đĐ]/g, "d")
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
+    const slug = generateSlug(title);
     
     setFormData((prev) => ({ 
       ...prev, 
       title, 
-      slug: prev.slug === "" || prev.slug === prev.title.toLowerCase().replace(/\s+/g, "-") ? slug : prev.slug,
+      slug: prev.slug === "" || prev.slug === generateSlug(prev.title) ? slug : prev.slug,
     }));
   };
 

@@ -28,6 +28,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { generateSlug } from "@/utils/slug";
 import { Calendar as CalendarIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { DateRange } from "react-day-picker";
@@ -70,21 +71,12 @@ export default function AddProjectPage() {
   }, []);
 
   const handleNameChange = (name: string) => {
-    const slug = name
-      .toLowerCase()
-      .trim()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[đĐ]/g, "d")
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+    const slug = generateSlug(name);
     
     setFormData((prev) => ({ 
       ...prev, 
       name, 
-      slug: prev.slug === "" || prev.slug === prev.name.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, "d").replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "") ? slug : prev.slug,
+      slug: prev.slug === "" || prev.slug === generateSlug(prev.name) ? slug : prev.slug,
     }));
   };
 
