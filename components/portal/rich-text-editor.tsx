@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -55,6 +56,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MediaSelectorDialog } from "./media-selector-dialog";
 
 interface RichTextEditorProps {
   content: string;
@@ -95,6 +97,7 @@ const ToolbarButton = ({
 const Separator = () => <div className="w-px h-5 bg-slate-200 mx-1" />;
 
 export function RichTextEditor({ content, onChange, placeholder, className }: RichTextEditorProps) {
+  const [isMediaSelectorOpen, setIsMediaSelectorOpen] = useState(false);
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -166,9 +169,13 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
   };
 
   const addImage = () => {
-    const url = window.prompt("URL hình ảnh:");
-    if (url) {
+    setIsMediaSelectorOpen(true);
+  };
+
+  const handleImageSelect = (url: string) => {
+    if (url && editor) {
       editor.chain().focus().setImage({ src: url }).run();
+      setIsMediaSelectorOpen(false);
     }
   };
 
@@ -416,6 +423,12 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
          </div>
          <div>Sài Gòn Valve CMS v2.0</div>
       </div>
+
+      <MediaSelectorDialog 
+        open={isMediaSelectorOpen}
+        onOpenChange={setIsMediaSelectorOpen}
+        onSelect={handleImageSelect}
+      />
     </div>
   );
 }

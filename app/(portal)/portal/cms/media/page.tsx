@@ -254,7 +254,9 @@ export default function MediaManagementPage() {
           <div className="bg-slate-900 p-8 text-white relative">
              <div className="flex items-center gap-4 mb-2">
                 <Upload className="text-brand-accent" size={20} />
-                <h3 className="text-lg font-black uppercase tracking-tight italic">Tải tài sản mới</h3>
+                <DialogTitle className="text-lg font-black uppercase tracking-tight italic text-white">
+                  Tải tài sản mới
+                </DialogTitle>
              </div>
              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Hỗ trợ định dạng JPEG, PNG, WebP (Tối đa 10MB)</p>
              <button 
