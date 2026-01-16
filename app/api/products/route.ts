@@ -3,21 +3,33 @@ import { products, categories } from "@/db/schema";
 import { eq, desc, sql, and, or, ilike, gte, lte, isNull } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
+import { createProductSchema, productFilterSchema } from "@/validations/product.schema";
+import { validateQuery, validateBody } from "@/middlewares/middleware";
+import { ZodError } from "zod";
 
 // GET /api/products - List products with pagination
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const categoryId = searchParams.get("categoryId");
-    const status = searchParams.get("status") as "active" | "inactive" | null;
-    const isFeatured = searchParams.get("isFeatured") === "true";
-    const search = searchParams.get("search");
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
-    const includeDeleted = searchParams.get("includeDeleted") === "true"; // For admin only
     
-    // Parse pagination params
-    const { page, limit } = parsePaginationParams(searchParams, { limit: 12 });
+    // Validate query parameters
+    const filterValidation = validateQuery(searchParams, productFilterSchema);
+    if (filterValidation instanceof Response) {
+      return filterValidation;
+    }
+    
+    const {
+      categoryId,
+      status,
+      isFeatured,
+      search,
+      startDate,
+      endDate,
+      includeDeleted,
+      page = 1,
+      limit = 12
+    } = filterValidation;
+    
     const offset = calculateOffset(page, limit);
 
     // Build where conditions
@@ -51,7 +63,7 @@ export async function GET(request: Request) {
       conditions.push(lte(products.created_at, end));
     }
 
-    // Count total items (excluding soft deleted)
+    // Count total items
     const countQuery = db.select({ count: sql<number>`count(*)` }).from(products);
     if (conditions.length > 0) {
       countQuery.where(and(...conditions));
@@ -106,47 +118,55 @@ export async function GET(request: Request) {
 // POST /api/products - Create a new product
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { 
-      name, 
-      slug, 
-      description, 
-      price, 
-      sku, 
-      stock, 
-      category_id, 
-      status, 
-      image_url 
-    } = body;
-
-    if (!name || !slug || !description || !price || !sku || !category_id) {
-      return apiError("Missing required fields", 400);
+    // Validate request body
+    const dataOrError = await validateBody(request, createProductSchema);
+    if (dataOrError instanceof Response) {
+      return dataOrError;
     }
 
-    const [newProduct] = await db.insert(products).values({
-      name,
-      slug,
-      description,
-      price: price.toString(),
-      sku,
-      stock: stock || 0,
-      category_id,
-      status: status || 'active',
-      image_url: image_url || null,
-      is_featured: body.is_featured || false,
-      tech_specs: body.tech_specs || null,
-      features: body.features || null,
-      gallery: body.gallery || null,
-      tech_summary: body.tech_summary || null,
-      catalog_url: body.catalog_url || null,
-      warranty: body.warranty || null,
-      origin: body.origin || null,
-      availability: body.availability || null,
-      delivery_info: body.delivery_info || null,
-    }).returning();
+    // Check for duplicate SKU
+    const existingSku = await db.select().from(products)
+      .where(eq(products.sku, dataOrError.sku))
+      .limit(1);
+    
+    if (existingSku.length > 0) {
+      return apiError("SKU already exists", 409);
+    }
+
+    // Check for duplicate slug
+    const existingSlug = await db.select().from(products)
+      .where(eq(products.slug, dataOrError.slug))
+      .limit(1);
+    
+    if (existingSlug.length > 0) {
+      return apiError("Slug already exists", 409);
+    }
+
+    // Verify category exists
+    const [category] = await db.select().from(categories)
+      .where(eq(categories.id, dataOrError.category_id))
+      .limit(1);
+    
+    if (!category) {
+      return apiError("Category not found", 404);
+    }
+
+    const [newProduct] = await db.insert(products).values(dataOrError).returning();
 
     return apiResponse(newProduct, { status: 201 });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return apiError("Validation failed", 400, { errors: error.issues });
+    }
+    
+    // Handle database constraint errors
+    if ((error as any).code === '23505') { // Unique violation
+      return apiError("Duplicate value - SKU or Slug already exists", 409);
+    }
+    if ((error as any).code === '23503') { // Foreign key violation
+      return apiError("Invalid category_id", 404);
+    }
+    
     console.error("Error creating product:", error);
     return apiError("Internal Server Error", 500);
   }

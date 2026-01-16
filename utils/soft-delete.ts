@@ -13,7 +13,7 @@ export async function softDelete<T extends { id: string; deleted_at?: Date | nul
   table: any,
   id: string
 ) {
-  const [deleted] = await db
+  const result = await db
     .update(table)
     .set({ 
       deleted_at: new Date(),
@@ -22,7 +22,7 @@ export async function softDelete<T extends { id: string; deleted_at?: Date | nul
     .where(eq(table.id, id))
     .returning();
 
-  return deleted;
+  return result[0];
 }
 
 /**
@@ -32,7 +32,7 @@ export async function restoreSoftDeleted<T extends { id: string; deleted_at?: Da
   table: any,
   id: string
 ) {
-  const [restored] = await db
+  const result = await db
     .update(table)
     .set({ 
       deleted_at: null,
@@ -41,7 +41,7 @@ export async function restoreSoftDeleted<T extends { id: string; deleted_at?: Da
     .where(eq(table.id, id))
     .returning();
 
-  return restored;
+  return result[0];
 }
 
 /**
@@ -49,24 +49,24 @@ export async function restoreSoftDeleted<T extends { id: string; deleted_at?: Da
  * Only works on records that are already soft deleted
  */
 export async function permanentlyDelete(table: any, id: string) {
-  const [deleted] = await db
+  const result = await db
     .delete(table)
     .where(eq(table.id, id))
-    .returning();
+    .returning() as any[];
 
-  return deleted;
+  return result[0];
 }
 
 /**
  * Check if a record exists and is not soft deleted
  */
 export async function findActiveById<T>(table: any, id: string) {
-  const [record] = await db
+  const result = await db
     .select()
     .from(table)
     .where(and(eq(table.id, id), isNull(table.deleted_at)));
 
-  return record;
+  return result[0];
 }
 
 /**

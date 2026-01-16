@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { decrypt } from "@/services/auth";
+import { checkRateLimit, RATE_LIMITS } from "@/middlewares/rate-limit";
 
 import { SITE_ROUTES, ADMIN_ROUTES, API_ROUTES } from "@/constants/routes";
 
@@ -11,9 +12,37 @@ const publicPaths = [
   API_ROUTES.AUTH.REFRESH,
 ];
 
+// Role-based permissions
+const ROLE_PERMISSIONS = {
+  admin: ['read', 'write', 'delete', 'manage_users'],
+  editor: ['read', 'write'],
+  viewer: ['read']
+} as const;
+
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const method = request.method;
+
+  // ===== RATE LIMITING =====
+  // Apply rate limits based on endpoint type
+  if (pathname.startsWith(API_ROUTES.AUTH.LOGIN)) {
+    const rateLimitError = checkRateLimit(request, RATE_LIMITS.AUTH);
+    if (rateLimitError) return rateLimitError;
+  } else if (pathname === API_ROUTES.CONTACTS && method === 'POST') {
+    const rateLimitError = checkRateLimit(request, RATE_LIMITS.CONTACT);
+    if (rateLimitError) return rateLimitError;
+  } else if (pathname.startsWith('/api/upload')) {
+    const rateLimitError = checkRateLimit(request, RATE_LIMITS.UPLOAD);
+    if (rateLimitError) return rateLimitError;
+  } else if (method === 'GET') {
+    // Relaxed rate limit for public reads
+    const rateLimitError = checkRateLimit(request, RATE_LIMITS.PUBLIC);
+    if (rateLimitError) return rateLimitError;
+  } else if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
+    // Moderate rate limit for writes
+    const rateLimitError = checkRateLimit(request, RATE_LIMITS.WRITE);
+    if (rateLimitError) return rateLimitError;
+  }
 
   // 1. Allow public paths explicitly
   if (publicPaths.some((path) => pathname === path || pathname.startsWith(path))) {
@@ -33,12 +62,11 @@ export default async function proxy(request: NextRequest) {
   }
 
   // 2. Allow ALL public GET requests for API (Content fetching)
-  // Except for portal-specific APIs if any, but usually content APIs are public for GET
   if (pathname.startsWith("/api/") && method === "GET") {
     return NextResponse.next();
   }
 
-  // 3. Special case: POST /api/contacts is public
+  // 3. Special case: POST /api/contacts is public (with rate limit already applied)
   if (pathname === API_ROUTES.CONTACTS && method === "POST") {
     return NextResponse.next();
   }
@@ -52,17 +80,55 @@ export default async function proxy(request: NextRequest) {
 
     if (!session) {
       if (pathname.startsWith("/api/")) {
-        return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        return NextResponse.json({ 
+          success: false, 
+          error: "Unauthorized - Authentication required" 
+        }, { status: 401 });
       }
       return NextResponse.redirect(new URL(SITE_ROUTES.LOGIN, request.url));
     }
 
     try {
-      await decrypt(session);
+      const sessionData = await decrypt(session);
+      
+      // Check role-based permissions for sensitive operations
+      if (isProtectedApi) {
+        const userRole = sessionData?.user?.role;
+        
+        // DELETE operations require admin role
+        if (method === 'DELETE' && userRole !== 'admin') {
+          return NextResponse.json({
+            success: false,
+            error: "Forbidden - Admin role required for delete operations"
+          }, { status: 403 });
+        }
+        
+        // User management requires admin
+        if (pathname.startsWith('/api/users') && userRole !== 'admin') {
+          return NextResponse.json({
+            success: false,
+            error: "Forbidden - Admin role required for user management"
+          }, { status: 403 });
+        }
+        
+        // Write operations require at least editor role
+        if (['POST', 'PATCH', 'PUT'].includes(method)) {
+          if (!['admin', 'editor'].includes(userRole)) {
+            return NextResponse.json({
+              success: false,
+              error: "Forbidden - Editor or Admin role required"
+            }, { status: 403 });
+          }
+        }
+      }
+      
       return NextResponse.next();
     } catch (error) {
       if (pathname.startsWith("/api/")) {
-        return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        return NextResponse.json({ 
+          success: false, 
+          error: "Unauthorized - Invalid session" 
+        }, { status: 401 });
       }
       return NextResponse.redirect(new URL(SITE_ROUTES.LOGIN, request.url));
     }

@@ -4,25 +4,30 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { login, generateTokens } from "@/services/auth";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { validateBody } from "@/middlewares/middleware";
+import { loginSchema } from "@/validations/auth.schema";
 
 export async function POST(request: Request) {
   try {
-    const { username, password } = await request.json();
-
-    if (!username || !password) {
-      return apiError("Username and password are required", 400);
+    // Validate request body
+    const dataOrError = await validateBody(request, loginSchema);
+    if (dataOrError instanceof Response) {
+      return dataOrError;
     }
+    
+    const { username, password } = dataOrError;
 
     const [user] = await db.select().from(users).where(eq(users.username, username));
 
     if (!user) {
-      return apiError("Invalid username or password", 401);
+      // Generic error message to prevent username enumeration
+      return apiError("Invalid credentials", 401);
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      return apiError("Invalid username or password", 401);
+      return apiError("Invalid credentials", 401);
     }
 
     // Success

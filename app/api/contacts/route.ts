@@ -4,31 +4,42 @@ import { apiResponse, apiError } from "@/utils/api-response";
 import { sendThankYouEmail } from "@/services/mail";
 import { desc, ilike, or, gte, lte, and, sql } from "drizzle-orm";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
+import { validateBody, sanitizeHtml } from "@/middlewares/middleware";
+import { contactSchema } from "@/validations/contact.schema";
 
 export async function POST(request: Request) {
   try {
-    const { name, email, phone, address, message } = await request.json();
-
-    if (!name || !email || !phone || !address || !message) {
-      return apiError("Họ tên, email, số điện thoại, địa chỉ và yêu cầu là bắt buộc", 400);
+    // Validate request body
+    const dataOrError = await validateBody(request, contactSchema);
+    if (dataOrError instanceof Response) {
+      return dataOrError;
     }
+    
+    // Sanitize message to prevent XSS
+    const sanitizedData = {
+      ...dataOrError,
+      message: sanitizeHtml(dataOrError.message),
+      subject: dataOrError.subject ? sanitizeHtml(dataOrError.subject) : null,
+    };
 
     const [newContact] = await db
       .insert(contacts)
       .values({
-        name,
-        email,
-        phone,
-        address,
-        message,
+        ...sanitizedData,
         status: "new",
       })
       .returning();
 
     // Send emails asynchronously (don't block the response)
     Promise.all([
-      sendThankYouEmail(email, name),
-      import("@/services/mail").then(m => m.sendAdminNotificationEmail({ name, email, phone, address, message }))
+      sendThankYouEmail(newContact.email, newContact.name),
+      import("@/services/mail").then(m => m.sendAdminNotificationEmail({
+        name: newContact.name,
+        email: newContact.email,
+        phone: newContact.phone || '',
+        address: newContact.address || '',
+        message: newContact.message
+      }))
     ]).catch((error) => {
       console.error("Failed to send emails:", error);
     });
