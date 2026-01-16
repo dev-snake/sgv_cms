@@ -4,6 +4,7 @@ import { apiResponse, apiError } from "@/utils/api-response";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { withAuth, UserSession } from "@/middlewares/middleware";
+import { PERMISSIONS } from "@/constants/rbac";
 
 // GET /api/applications/[id] - View application details
 export const GET = withAuth(async (request: NextRequest, session, { params }) => {
@@ -35,7 +36,7 @@ export const GET = withAuth(async (request: NextRequest, session, { params }) =>
     console.error("Error fetching application:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['applications:read'] });
+}, { requiredPermissions: [PERMISSIONS.APPLICATIONS_READ] });
 
 // PATCH /api/applications/[id] - Update application status
 export const PATCH = withAuth(async (request: NextRequest, session, { params }) => {
@@ -61,7 +62,7 @@ export const PATCH = withAuth(async (request: NextRequest, session, { params }) 
     console.error("Error updating application:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['applications:write'] });
+}, { requiredPermissions: [PERMISSIONS.APPLICATIONS_WRITE] });
 
 // DELETE /api/applications/[id] - Delete an application
 export const DELETE = withAuth(async (request: NextRequest, session, { params }) => {
@@ -80,4 +81,4 @@ export const DELETE = withAuth(async (request: NextRequest, session, { params })
     console.error("Error deleting application:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['applications:delete'] });
+}, { requiredPermissions: [PERMISSIONS.APPLICATIONS_DELETE] });

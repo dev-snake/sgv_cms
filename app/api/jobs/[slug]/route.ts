@@ -3,6 +3,7 @@ import { jobPostings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { withAuth } from "@/middlewares/middleware";
+import { PERMISSIONS } from "@/constants/rbac";
 
 // GET /api/jobs/[slug] - Get a single job by slug or ID
 export async function GET(
@@ -64,7 +65,7 @@ export const PATCH = withAuth(async (request, session, { params }) => {
     }
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['jobs:write'] });
+}, { requiredPermissions: [PERMISSIONS.JOBS_WRITE] });
 
 // DELETE /api/jobs/[slug] - Delete a job posting
 export const DELETE = withAuth(async (request, session, { params }) => {
@@ -83,4 +84,4 @@ export const DELETE = withAuth(async (request, session, { params }) => {
     console.error("Error deleting job:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['jobs:delete'] });
+}, { requiredPermissions: [PERMISSIONS.JOBS_DELETE] });

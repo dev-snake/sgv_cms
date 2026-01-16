@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
 import { toast } from "sonner";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
+import { PROTECTED_ROLES } from "@/constants/rbac";
 
 export default function RolesManagementPage() {
   const [roles, setRoles] = React.useState<Role[]>([]);
@@ -53,7 +54,7 @@ export default function RolesManagementPage() {
   }, []);
 
   const handleDeleteClick = (role: Role) => {
-    if (role.name === 'admin') {
+    if (PROTECTED_ROLES.includes(role.name)) {
       toast.error("Không thể xóa vai trò quản trị viên hệ thống");
       return;
     }
@@ -152,7 +153,7 @@ export default function RolesManagementPage() {
                                <span className="text-xs font-bold uppercase tracking-tight">Cấu hình quyền</span>
                              </Link>
                           </DropdownMenuItem>
-                          {role.name !== 'admin' && (
+                          {!PROTECTED_ROLES.includes(role.name) && (
                             <>
                               <DropdownMenuSeparator className="bg-slate-50" />
                               <DropdownMenuItem 

@@ -20,6 +20,7 @@ import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 import { Permission, Role } from "@/types";
 import { cn } from "@/lib/utils";
+import { PROTECTED_ROLES } from "@/constants/rbac";
 
 interface RoleFormProps {
   initialData?: Role;
@@ -137,7 +138,7 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
                 className="h-16 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-brand-primary/10 rounded-none transition-all"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value.toUpperCase() })}
-                disabled={isSubmitting || (isEditing && initialData?.name === 'admin')}
+                disabled={isSubmitting || (isEditing && PROTECTED_ROLES.includes(initialData?.name || ''))}
               />
             </div>
             <div className="space-y-4">

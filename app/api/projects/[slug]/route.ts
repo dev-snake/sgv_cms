@@ -3,12 +3,16 @@ import { projects, categories } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { withAuth } from "@/middlewares/middleware";
+import { PERMISSIONS } from "@/constants/rbac";
 
 // UUID regex pattern
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// GET /api/projects/[slug] - Get a single project by slug or ID
-export const GET = withAuth(async (request, session, { params }) => {
+// GET /api/projects/[slug] - Get a single project by slug or ID (Public)
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
   try {
     const { slug } = await params;
     
@@ -47,7 +51,8 @@ export const GET = withAuth(async (request, session, { params }) => {
     console.error("Error fetching project:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['projects:read'] });
+}
+
 
 
 
@@ -85,7 +90,7 @@ export const PATCH = withAuth(async (request, session, { params }) => {
     console.error("Error updating project:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['projects:write'] });
+}, { requiredPermissions: [PERMISSIONS.PROJECTS_WRITE] });
 
 // DELETE /api/projects/[slug] - Delete a project by ID or slug
 export const DELETE = withAuth(async (request, session, { params }) => {
@@ -109,5 +114,5 @@ export const DELETE = withAuth(async (request, session, { params }) => {
     console.error("Error deleting project:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['projects:delete'] });
+}, { requiredPermissions: [PERMISSIONS.PROJECTS_DELETE] });
 

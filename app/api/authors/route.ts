@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { withAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
+import { PERMISSIONS } from "@/constants/rbac";
 
 // GET /api/authors - List all authors
 export async function GET() {
@@ -36,4 +37,4 @@ export const POST = withAuth(async (request: NextRequest) => {
     console.error("Error creating author:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['system:manage'] });
+}, { requiredPermissions: [PERMISSIONS.SYSTEM_MANAGE] });

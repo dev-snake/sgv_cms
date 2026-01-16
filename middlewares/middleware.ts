@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { decrypt } from "@/services/auth";
 import { ZodSchema, ZodError } from "zod";
 import { apiError } from "@/utils/api-response";
+import { SUPER_ADMIN_ROLE } from "@/constants/rbac";
 
 /**
  * User session interface
@@ -65,7 +66,7 @@ export function hasRole(user: UserSession['user'], allowedRoles: string[]): bool
  */
 export function hasPermission(user: UserSession['user'], permission: string): boolean {
   // Only admins in RBAC roles array bypass permission checks
-  if (user.roles?.includes('admin')) return true;
+  if (user.roles?.includes(SUPER_ADMIN_ROLE)) return true;
   
   return user.permissions?.includes(permission) || false;
 }
@@ -181,7 +182,7 @@ export function sanitizeHtml(html: string): string {
 
 export function isAdmin(user: UserSession['user']): boolean {
   // Only check RBAC roles array
-  return user.roles?.includes('admin') || false;
+  return user.roles?.includes(SUPER_ADMIN_ROLE) || false;
 }
 
 /**

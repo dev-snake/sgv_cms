@@ -6,6 +6,7 @@ import { desc, eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { withAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
+import { PERMISSIONS } from "@/constants/rbac";
 
 // GET /api/users - List all users with their roles
 export const GET = withAuth(async () => {
@@ -42,7 +43,7 @@ export const GET = withAuth(async () => {
     console.error("Error fetching users:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['users:read'] });
+}, { requiredPermissions: [PERMISSIONS.USERS_READ] });
 
 // POST /api/users - Create a new user
 export const POST = withAuth(async (request: NextRequest) => {
@@ -91,4 +92,4 @@ export const POST = withAuth(async (request: NextRequest) => {
     }
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['users:write'] });
+}, { requiredPermissions: [PERMISSIONS.USERS_WRITE] });

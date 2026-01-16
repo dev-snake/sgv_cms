@@ -7,9 +7,10 @@ import { createProductSchema, productFilterSchema } from "@/validations/product.
 import { validateQuery, validateBody, withAuth } from "@/middlewares/middleware";
 import { ZodError } from "zod";
 import { NextRequest } from "next/server";
+import { PERMISSIONS } from "@/constants/rbac";
 
-// GET /api/products - List products with pagination
-export const GET = withAuth(async (request) => {
+// GET /api/products - List products with pagination (Public)
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     
@@ -113,7 +114,7 @@ export const GET = withAuth(async (request) => {
     console.error("Error fetching products:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['products:read'] });
+}
 
 
 // POST /api/products - Create a new product
@@ -171,4 +172,4 @@ export const POST = withAuth(async (request) => {
     console.error("Error creating product:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['products:write'] });
+}, { requiredPermissions: [PERMISSIONS.PRODUCTS_WRITE] });

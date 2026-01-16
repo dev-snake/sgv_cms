@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { permissions } from "@/db/schema";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { RBAC_MANAGEMENT_ROLES } from "@/constants/rbac";
 import { asc } from "drizzle-orm";
 import { withAuth } from "@/middlewares/middleware";
 
@@ -24,4 +25,4 @@ export const GET = withAuth(async () => {
     console.error("Error fetching permissions:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { allowedRoles: ['admin'] });
+}, { allowedRoles: RBAC_MANAGEMENT_ROLES });

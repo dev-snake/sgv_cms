@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Cookies from "js-cookie";
 import { decodeJwt } from "jose";
+import { SUPER_ADMIN_ROLE } from "@/constants/rbac";
 
 export interface AuthUser {
   id: string;
@@ -44,7 +45,7 @@ export function useAuth() {
   const hasPermission = (permission: string) => {
     if (!user) return false;
     // Only check RBAC roles array for admin, NOT the legacy 'role' field
-    if (user.roles?.includes('admin')) return true;
+    if (user.roles?.includes(SUPER_ADMIN_ROLE)) return true;
     return user.permissions?.includes(permission) || false;
   };
 
@@ -54,7 +55,7 @@ export function useAuth() {
   };
 
   // isAdmin only checks if user has 'admin' role in RBAC system
-  const isAdmin = user?.roles?.includes('admin') || false;
+  const isAdmin = user?.roles?.includes(SUPER_ADMIN_ROLE) || false;
 
   return {
     user,

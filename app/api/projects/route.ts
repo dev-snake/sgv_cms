@@ -5,9 +5,10 @@ import { apiResponse, apiError } from "@/utils/api-response";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 import { withAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
+import { PERMISSIONS } from "@/constants/rbac";
 
-// GET /api/projects - List projects with pagination
-export const GET = withAuth(async (request) => {
+// GET /api/projects - List projects with pagination (Public)
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const categoryId = searchParams.get("categoryId");
@@ -89,7 +90,7 @@ export const GET = withAuth(async (request) => {
     console.error("Error fetching projects:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['projects:read'] });
+}
 
 
 // POST /api/projects - Create a new project
@@ -131,4 +132,4 @@ export const POST = withAuth(async (request) => {
     console.error("Error creating project:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['projects:write'] });
+}, { requiredPermissions: [PERMISSIONS.PROJECTS_WRITE] });

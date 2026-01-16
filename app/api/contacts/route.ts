@@ -6,6 +6,7 @@ import { desc, ilike, or, gte, lte, and, sql } from "drizzle-orm";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 import { withAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
+import { PERMISSIONS } from "@/constants/rbac";
 import { validateBody, sanitizeHtml } from "@/middlewares/middleware";
 import { contactSchema } from "@/validations/contact.schema";
 
@@ -120,4 +121,4 @@ export const GET = withAuth(async (request) => {
     console.error("Error fetching contacts:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['contacts:read'] });
+}, { requiredPermissions: [PERMISSIONS.CONTACTS_READ] });

@@ -3,6 +3,7 @@ import { newsArticles, projects, products, contacts } from "@/db/schema";
 import { sql } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { withAuth } from "@/middlewares/middleware";
+import { PERMISSIONS } from "@/constants/rbac";
 
 // GET /api/stats - Dashboard statistics
 export const GET = withAuth(async () => {
@@ -59,4 +60,4 @@ export const GET = withAuth(async () => {
     console.error("Error fetching stats:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['dashboard:read'] });
+}, { requiredPermissions: [PERMISSIONS.DASHBOARD_READ] });

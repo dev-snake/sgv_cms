@@ -3,9 +3,13 @@ import { products } from "@/db/schema";
 import { eq, isNull, and } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { withAuth } from "@/middlewares/middleware";
+import { PERMISSIONS } from "@/constants/rbac";
 
-// GET /api/products/[slug] - Get a single product by slug or ID
-export const GET = withAuth(async (request, session, { params }) => {
+// GET /api/products/[slug] - Get a single product by slug or ID (Public)
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
   try {
     const { slug } = await params;
     
@@ -27,7 +31,8 @@ export const GET = withAuth(async (request, session, { params }) => {
   } catch (error) {
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['products:read'] });
+}
+
 
 // PATCH /api/products/[id] - Update a product
 export const PATCH = withAuth(async (request, session, { params }) => {
@@ -60,7 +65,7 @@ export const PATCH = withAuth(async (request, session, { params }) => {
     console.error("Error updating product:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['products:write'] });
+}, { requiredPermissions: [PERMISSIONS.PRODUCTS_WRITE] });
 
 // DELETE /api/products/[id] - Soft delete a product
 export const DELETE = withAuth(async (request, session, { params }) => {
@@ -85,4 +90,4 @@ export const DELETE = withAuth(async (request, session, { params }) => {
     console.error("Error deleting product:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['products:delete'] });
+}, { requiredPermissions: [PERMISSIONS.PRODUCTS_DELETE] });

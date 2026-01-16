@@ -3,6 +3,7 @@ import { writeFile, mkdir, readdir, stat } from "fs/promises";
 import path from "path";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { withAuth } from "@/middlewares/middleware";
+import { PERMISSIONS } from "@/constants/rbac";
 
 // GET /api/upload - List all uploaded images (recursively)
 export const GET = withAuth(async (request: NextRequest) => {
@@ -46,7 +47,7 @@ export const GET = withAuth(async (request: NextRequest) => {
     console.error("Error listing uploads:", error);
     return apiError("Failed to list uploads", 500);
   }
-}, { requiredPermissions: ['media:read'] });
+}, { requiredPermissions: [PERMISSIONS.MEDIA_READ] });
 
 export const POST = withAuth(async (request: NextRequest) => {
   try {
@@ -101,7 +102,7 @@ export const POST = withAuth(async (request: NextRequest) => {
     console.error("Error uploading file:", error);
     return apiError("Failed to upload file", 500);
   }
-}, { requiredPermissions: ['media:write'] });
+}, { requiredPermissions: [PERMISSIONS.MEDIA_WRITE] });
 
 // DELETE /api/upload - Delete an uploaded file
 export const DELETE = withAuth(async (request: NextRequest) => {
@@ -133,4 +134,4 @@ export const DELETE = withAuth(async (request: NextRequest) => {
     console.error("Error deleting file:", error);
     return apiError("Failed to delete file", 500);
   }
-}, { requiredPermissions: ['media:delete'] });
+}, { requiredPermissions: [PERMISSIONS.MEDIA_DELETE] });

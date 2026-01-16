@@ -3,6 +3,7 @@ import { roles, role_permissions, permissions } from "@/db/schema";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { eq, sql } from "drizzle-orm";
 import { withAuth } from "@/middlewares/middleware";
+import { RBAC_MANAGEMENT_ROLES, PROTECTED_ROLES } from "@/constants/rbac";
 
 export const GET = withAuth(async (request, session, { params }) => {
   try {
@@ -78,7 +79,7 @@ export const DELETE = withAuth(async (request, session, { params }) => {
 
     // Prevent deleting 'admin' role if needed, or check if it's protected
     const [role] = await db.select().from(roles).where(eq(roles.id, roleId));
-    if (role && role.name === 'admin') {
+    if (role && PROTECTED_ROLES.includes(role.name)) {
       return apiError("Không thể xóa vai trò admin hệ thống", 400);
     }
 

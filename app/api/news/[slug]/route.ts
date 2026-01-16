@@ -3,6 +3,7 @@ import { newsArticles, categories, authors } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { withAuth } from "@/middlewares/middleware";
+import { PERMISSIONS } from "@/constants/rbac";
 
 // UUID regex pattern
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -97,7 +98,7 @@ export const PATCH = withAuth(async (request, session, { params }) => {
     console.error("Error updating article:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['news:write'] });
+}, { requiredPermissions: [PERMISSIONS.NEWS_WRITE] });
 
 // DELETE /api/news/[slug] - Delete an article by ID or slug
 export const DELETE = withAuth(async (request, session, { params }) => {
@@ -119,5 +120,5 @@ export const DELETE = withAuth(async (request, session, { params }) => {
     console.error("Error deleting article:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['news:delete'] });
+}, { requiredPermissions: [PERMISSIONS.NEWS_DELETE] });
 

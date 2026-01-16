@@ -5,6 +5,7 @@ import { apiResponse, apiError } from "@/utils/api-response";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 import { withAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
+import { PERMISSIONS } from "@/constants/rbac";
 
 // GET /api/news - List news articles with pagination
 export async function GET(request: Request) {
@@ -142,4 +143,4 @@ export const POST = withAuth(async (request) => {
     console.error("Error creating news article:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['news:write'] });
+}, { requiredPermissions: [PERMISSIONS.NEWS_WRITE] });

@@ -4,6 +4,8 @@ import { apiResponse, apiError } from "@/utils/api-response";
 import { desc, ilike, or, gte, lte, and, sql, eq } from "drizzle-orm";
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/utils/pagination";
 import { sanitizeHtml, withAuth } from "@/middlewares/middleware";
+import { NextRequest } from "next/server";
+import { PERMISSIONS } from "@/constants/rbac";
 import { jobApplicationSchema } from "@/validations/application.schema";
 import { sendApplicationConfirmationEmail } from "@/services/mail";
 import { writeFile, mkdir } from "fs/promises";
@@ -167,4 +169,4 @@ export const GET = withAuth(async (request) => {
     console.error("Error fetching applications:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['applications:read'] });
+}, { requiredPermissions: [PERMISSIONS.APPLICATIONS_READ] });

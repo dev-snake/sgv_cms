@@ -4,6 +4,7 @@ import { eq, or } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { withAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
+import { PERMISSIONS } from "@/constants/rbac";
 
 // GET /api/categories/[id] - Get a single category
 export async function GET(
@@ -49,7 +50,7 @@ export const PATCH = withAuth(async (request: NextRequest, session, { params }) 
     console.error("Error updating category:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['system:manage'] });
+}, { requiredPermissions: [PERMISSIONS.SYSTEM_MANAGE] });
 
 // DELETE /api/categories/[id] - Delete a category
 export const DELETE = withAuth(async (request: NextRequest, session, { params }) => {
@@ -80,4 +81,4 @@ export const DELETE = withAuth(async (request: NextRequest, session, { params })
     console.error("Error deleting category:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['system:manage'] });
+}, { requiredPermissions: [PERMISSIONS.SYSTEM_MANAGE] });

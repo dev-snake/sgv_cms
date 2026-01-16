@@ -3,6 +3,8 @@ import { jobPostings } from "@/db/schema";
 import { eq, desc, ilike, and, SQL, isNull } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { withAuth } from "@/middlewares/middleware";
+import { NextRequest } from "next/server";
+import { PERMISSIONS } from "@/constants/rbac";
 
 // GET /api/jobs - List all job postings
 export async function GET(request: Request) {
@@ -105,4 +107,4 @@ export const POST = withAuth(async (request) => {
     }
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['jobs:write'] });
+}, { requiredPermissions: [PERMISSIONS.JOBS_WRITE] });

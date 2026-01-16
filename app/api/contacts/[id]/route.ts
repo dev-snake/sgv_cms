@@ -3,6 +3,7 @@ import { contacts } from "@/db/schema";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { eq } from "drizzle-orm";
 import { withAuth } from "@/middlewares/middleware";
+import { PERMISSIONS } from "@/constants/rbac";
 import { NextRequest } from "next/server";
 
 // PATCH /api/contacts/[id] - Update a contact submission
@@ -34,7 +35,7 @@ export const PATCH = withAuth(async (request: NextRequest, session, { params }) 
     console.error("Error updating contact:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['contacts:write'] });
+}, { requiredPermissions: [PERMISSIONS.CONTACTS_WRITE] });
 
 // DELETE /api/contacts/[id] - Delete a contact submission
 export const DELETE = withAuth(async (request: NextRequest, session, { params }) => {
@@ -55,4 +56,4 @@ export const DELETE = withAuth(async (request: NextRequest, session, { params })
     console.error("Error deleting contact:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: ['contacts:delete'] });
+}, { requiredPermissions: [PERMISSIONS.CONTACTS_DELETE] });
