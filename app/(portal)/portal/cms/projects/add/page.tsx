@@ -18,7 +18,19 @@ import {
 } from "@/components/ui/select";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
+import { ImageUploader } from "@/components/portal/ImageUploader";
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { Calendar as CalendarIcon, X } from "lucide-react";
 import { toast } from "sonner";
+import { DateRange } from "react-day-picker";
 
 interface Category {
   id: string;
@@ -35,11 +47,12 @@ export default function AddProjectPage() {
     slug: "",
     description: "",
     client_name: "",
-    start_date: "",
-    end_date: "",
+    start_date: undefined as Date | undefined,
+    end_date: undefined as Date | undefined,
     category_id: "",
     status: "ongoing" as "ongoing" | "completed",
     image: "",
+    gallery: [] as string[],
   });
 
   React.useEffect(() => {
@@ -65,12 +78,13 @@ export default function AddProjectPage() {
       .replace(/[đĐ]/g, "d")
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
     
     setFormData((prev) => ({ 
       ...prev, 
       name, 
-      slug: prev.slug === "" || prev.slug === prev.name.toLowerCase().replace(/\s+/g, "-") ? slug : prev.slug,
+      slug: prev.slug === "" || prev.slug === prev.name.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, "d").replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "") ? slug : prev.slug,
     }));
   };
 
@@ -83,7 +97,14 @@ export default function AddProjectPage() {
 
     setIsSubmitting(true);
     try {
-      await api.post(API_ROUTES.PROJECTS, formData);
+      const submissionData = {
+        ...formData,
+        start_date: formData.start_date?.toISOString() || null,
+        end_date: formData.end_date?.toISOString() || null,
+        image_url: formData.image,
+      };
+      
+      await api.post(API_ROUTES.PROJECTS, submissionData);
 
       toast.success("Đã tạo dự án thành công");
       router.push(PORTAL_ROUTES.cms.projects.list);
@@ -181,30 +202,73 @@ export default function AddProjectPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <Label htmlFor="start_date" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  Ngày bắt đầu
-                </Label>
-                <Input
-                  id="start_date"
-                  type="date"
-                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                />
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="end_date" className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  Ngày kết thúc (Dự kiến)
-                </Label>
-                <Input
-                  id="end_date"
-                  type="date"
-                  className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20"
-                  value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                />
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Thời gian thực hiện dự án
+              </Label>
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="date"
+                      variant={"outline"}
+                      className={cn(
+                        "h-14 w-full sm:w-[350px] justify-start text-left font-bold bg-slate-50 border-none rounded-none shadow-none focus:ring-1 focus:ring-brand-primary/20",
+                        !formData.start_date && "text-slate-300"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.start_date ? (
+                        formData.end_date ? (
+                          <>
+                            {format(formData.start_date, "dd/MM/yyyy", { locale: vi })} -{" "}
+                            {format(formData.end_date, "dd/MM/yyyy", { locale: vi })}
+                          </>
+                        ) : (
+                          format(formData.start_date, "dd/MM/yyyy", { locale: vi })
+                        )
+                      ) : (
+                        <span>Chọn khoảng thời gian dự án</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-none border border-slate-100 shadow-xl" align="start">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={formData.start_date}
+                      selected={{
+                        from: formData.start_date,
+                        to: formData.end_date,
+                      }}
+                      onSelect={(range) => {
+                        setFormData({
+                          ...formData,
+                          start_date: range?.from,
+                          end_date: range?.to,
+                        });
+                      }}
+                      numberOfMonths={2}
+                      locale={vi}
+                      className="rounded-none bg-white"
+                    />
+                    {(formData.start_date || formData.end_date) && (
+                      <div className="p-4 border-t border-slate-50 bg-slate-50/50 flex justify-end">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50"
+                          onClick={() => setFormData({ ...formData, start_date: undefined, end_date: undefined })}
+                        >
+                          <X className="mr-2 size-3" /> Xóa ngày
+                        </Button>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">
+                  * Chọn ngày bắt đầu và ngày kết thúc (nếu có)
+                </div>
               </div>
             </div>
           </div>
@@ -243,16 +307,12 @@ export default function AddProjectPage() {
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">
               Hình ảnh dự án
             </h3>
-            <div className="space-y-3">
-              <Label htmlFor="image" className="text-[10px] font-black uppercase tracking-widest text-slate-500">URL hình ảnh đại diện</Label>
-              <Input
-                id="image"
-                placeholder="https://example.com/project.jpg"
-                className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300"
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-              />
-            </div>
+            <ImageUploader
+              value={formData.image}
+              onChange={(url) => setFormData({ ...formData, image: url })}
+              gallery={formData.gallery}
+              onGalleryChange={(urls) => setFormData({ ...formData, gallery: urls })}
+            />
           </div>
         </div>
       </form>

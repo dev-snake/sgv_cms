@@ -3,11 +3,10 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Save, ImagePlus, MapPin } from "lucide-react";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { RichTextEditor } from "@/components/portal/rich-text-editor";
 import {
   Select,
@@ -18,8 +17,20 @@ import {
 } from "@/components/ui/select";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { StatusFormSection } from "@/components/portal/status-form-section";
+import { ImageUploader } from "@/components/portal/ImageUploader";
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { Calendar as CalendarIcon, X } from "lucide-react";
 import api from "@/services/axios";
 import { toast } from "sonner";
+import { DateRange } from "react-day-picker";
 
 interface Project {
   id: string;
@@ -32,6 +43,7 @@ interface Project {
   category_id: string;
   status: string;
   image_url: string | null;
+  gallery: string[] | null;
 }
 
 export default function EditProjectPage() {
@@ -49,11 +61,12 @@ export default function EditProjectPage() {
     slug: "",
     description: "",
     client_name: "",
-    start_date: "",
-    end_date: "",
+    start_date: undefined as Date | undefined,
+    end_date: undefined as Date | undefined,
     category_id: "",
     status: "ongoing",
-    image_url: "",
+    image: "",
+    gallery: [] as string[],
   });
 
   React.useEffect(() => {
@@ -69,11 +82,12 @@ export default function EditProjectPage() {
             slug: p.slug || "",
             description: p.description || "",
             client_name: p.client_name || "",
-            start_date: p.start_date ? p.start_date.split('T')[0] : "",
-            end_date: p.end_date ? p.end_date.split('T')[0] : "",
+            start_date: p.start_date ? new Date(p.start_date) : undefined,
+            end_date: p.end_date ? new Date(p.end_date) : undefined,
             category_id: p.category_id || "",
             status: p.status || "ongoing",
-            image_url: p.image_url || "",
+            image: p.image_url || "",
+            gallery: p.gallery || [],
           });
         }
 
@@ -96,7 +110,13 @@ export default function EditProjectPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const response = await api.patch(`${API_ROUTES.PROJECTS}/${projectId}`, formData);
+      const submissionData = {
+        ...formData,
+        start_date: formData.start_date?.toISOString() || null,
+        end_date: formData.end_date?.toISOString() || null,
+        image_url: formData.image,
+      };
+      const response = await api.patch(`${API_ROUTES.PROJECTS}/${projectId}`, submissionData);
       if (response.data.success) {
         toast.success("Cập nhật dự án thành công!");
         router.push(PORTAL_ROUTES.cms.projects.list);
@@ -144,11 +164,12 @@ export default function EditProjectPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-6 h-auto border-slate-100 rounded-none text-slate-500">
+          <Button variant="outline" onClick={() => router.back()} className="text-[10px] font-black uppercase tracking-widest px-6 py-4 hover:cursor-pointer h-auto bord  er-slate-100 rounded-none text-slate-500">
             Hủy thay đổi
           </Button>
-          <Button onClick={handleSubmit} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
-            <Save className="mr-2 size-4" /> Lưu thay đổi
+          <Button onClick={handleSubmit} disabled={saving} className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 h-auto transition-all rounded-none hover:cursor-pointer">
+            {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />}
+            Lưu thay đổi
           </Button>
         </div>
       </div>
@@ -158,7 +179,31 @@ export default function EditProjectPage() {
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
             <div className="space-y-3">
               <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tên dự án *</Label>
-              <Input id="name" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+              <Input 
+                id="name" 
+                className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" 
+                value={formData.name} 
+                onChange={(e) => {
+                  const name = e.target.value;
+                  const slug = name
+                    .toLowerCase()
+                    .trim()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[đĐ]/g, "d")
+                    .replace(/[^a-z0-9\s-]/g, "")
+                    .replace(/\s+/g, "-")
+                    .replace(/-+/g, "-")
+                    .replace(/^-+|-+$/g, "");
+                  
+                  setFormData((prev) => ({ 
+                    ...prev, 
+                    name, 
+                    slug: prev.slug === "" || prev.slug === prev.name.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, "d").replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "") ? slug : prev.slug,
+                  }));
+                }} 
+                required 
+              />
             </div>
 
             <div className="space-y-3">
@@ -180,14 +225,73 @@ export default function EditProjectPage() {
               <Input id="client_name" placeholder="Ví dụ: Tập đoàn ABC" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300 focus:ring-1 focus:ring-brand-primary/20" value={formData.client_name} onChange={(e) => setFormData({ ...formData, client_name: e.target.value })} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <Label htmlFor="start_date" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Ngày bắt đầu</Label>
-                <Input id="start_date" type="date" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} />
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="end_date" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Ngày kết thúc (Dự kiến)</Label>
-                <Input id="end_date" type="date" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none focus:ring-1 focus:ring-brand-primary/20" value={formData.end_date} onChange={(e) => setFormData({ ...formData, end_date: e.target.value })} />
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Thời gian thực hiện dự án
+              </Label>
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="date"
+                      variant={"outline"}
+                      className={cn(
+                        "h-14 w-full sm:w-[350px] justify-start text-left font-bold bg-slate-50 border-none rounded-none shadow-none focus:ring-1 focus:ring-brand-primary/20",
+                        !formData.start_date && "text-slate-300"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.start_date ? (
+                        formData.end_date ? (
+                          <>
+                            {format(formData.start_date, "dd/MM/yyyy", { locale: vi })} -{" "}
+                            {format(formData.end_date, "dd/MM/yyyy", { locale: vi })}
+                          </>
+                        ) : (
+                          format(formData.start_date, "dd/MM/yyyy", { locale: vi })
+                        )
+                      ) : (
+                        <span>Chọn khoảng thời gian dự án</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-none border border-slate-100 shadow-xl" align="start">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={formData.start_date}
+                      selected={{
+                        from: formData.start_date,
+                        to: formData.end_date,
+                      }}
+                      onSelect={(range) => {
+                        setFormData({
+                          ...formData,
+                          start_date: range?.from,
+                          end_date: range?.to,
+                        });
+                      }}
+                      numberOfMonths={2}
+                      locale={vi}
+                      className="rounded-none bg-white"
+                    />
+                    {(formData.start_date || formData.end_date) && (
+                      <div className="p-4 border-t border-slate-50 bg-slate-50/50 flex justify-end">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50"
+                          onClick={() => setFormData({ ...formData, start_date: undefined, end_date: undefined })}
+                        >
+                          <X className="mr-2 size-3" /> Xóa ngày
+                        </Button>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">
+                  * Chọn ngày bắt đầu và ngày kết thúc (nếu có)
+                </div>
               </div>
             </div>
           </div>
@@ -217,11 +321,13 @@ export default function EditProjectPage() {
           </div>
 
           <div className="bg-white rounded-none border border-slate-100 p-8 space-y-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">Hình ảnh</h3>
-            <div className="space-y-3">
-              <Label htmlFor="image_url" className="text-[10px] font-black uppercase tracking-widest text-slate-500">URL hình ảnh</Label>
-              <Input id="image_url" className="h-14 bg-slate-50 border-none text-sm font-bold rounded-none placeholder:text-slate-300" value={formData.image_url} onChange={(e) => setFormData({ ...formData, image_url: e.target.value })} />
-            </div>
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 border-l-4 border-brand-primary pl-4">Hình ảnh dự án</h3>
+            <ImageUploader
+              value={formData.image}
+              onChange={(url) => setFormData({ ...formData, image: url })}
+              gallery={formData.gallery}
+              onGalleryChange={(urls) => setFormData({ ...formData, gallery: urls })}
+            />
           </div>
 
           <div className="p-6 bg-brand-primary/5 border border-brand-primary/10">

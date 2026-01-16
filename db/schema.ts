@@ -78,6 +78,7 @@ export const projects = pgTable('projects', {
   category_id: uuid('category_id').references(() => categories.id).notNull(),
   status: projectStatusEnum('status').default('ongoing').notNull(),
   image_url: varchar('image_url', { length: 255 }),
+  gallery: jsonb('gallery'), // Array of image URLs
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 });

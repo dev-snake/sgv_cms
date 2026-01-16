@@ -27,6 +27,7 @@ export async function GET(
       end_date: projects.end_date,
       status: projects.status,
       image_url: projects.image_url,
+      gallery: projects.gallery,
       category_id: projects.category_id,
       category: categories.name,
       created_at: projects.created_at,

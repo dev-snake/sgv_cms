@@ -58,6 +58,7 @@ export async function GET(request: Request) {
       end_date: projects.end_date,
       status: projects.status,
       image_url: projects.image_url,
+      gallery: projects.gallery,
       category: categories.name,
     })
     .from(projects)
@@ -96,7 +97,8 @@ export async function POST(request: Request) {
       end_date, 
       category_id, 
       status, 
-      image_url 
+      image_url,
+      gallery 
     } = body;
 
     if (!name || !slug || !description || !category_id) {
@@ -113,6 +115,7 @@ export async function POST(request: Request) {
       category_id,
       status: status || 'ongoing',
       image_url: image_url || null,
+      gallery: gallery || [],
     }).returning();
 
     return apiResponse(newProject, { status: 201 });
