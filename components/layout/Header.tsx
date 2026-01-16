@@ -84,15 +84,10 @@ export default function Header() {
           
           {/* Logo */}
           <Link href={SITE_ROUTES.HOME} className="relative h-14 w-56 shrink-0 group">
-            <Image
-              src="https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png"
+            <img
+              src="/images/logo/logo.png"
               alt="Sài Gòn Valve Logo"
-              fill
-              className="object-contain group-hover:scale-105 transition-transform"
-              priority
-              onError={(e: any) => {
-                e.target.src = "https://via.placeholder.com/200x60?text=SAI+GON+VALVE";
-              }}
+              className="object-contain group-hover:scale-105 transition-transform h-16 w-auto"
             />
           </Link>
 

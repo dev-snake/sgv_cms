@@ -11,7 +11,7 @@ export const MAIL_BRAND = {
 };
 
 export const MAIL_ASSETS = {
-  logo: "https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png",
+  logo: "/images/logo/logo.png",
   website: "https://saigonvalve.vn",
 };
 

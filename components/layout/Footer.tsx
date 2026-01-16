@@ -18,13 +18,11 @@ export default function Footer() {
           <div className="space-y-8">
             <Link href="/" className="relative block h-16 w-56 group">
               <Image
-                src="https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png"
+                src="/images/logo/logo.png"
                 alt="Sài Gòn Valve Logo"
                 fill
                 className="object-contain brightness-0 invert group-hover:scale-105 transition-transform"
-                onError={(e: any) => {
-                  e.target.src = "https://via.placeholder.com/200x60?text=SAI+GON+VALVE";
-                }}
+                priority
               />
             </Link>
             <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">

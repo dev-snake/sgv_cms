@@ -141,7 +141,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
            <div className="relative flex items-center gap-3 group-data-[collapsible=icon]:hidden w-full px-1">
                  <div className="bg-white p-1 rounded-none flex items-center justify-center h-8 w-8 shrink-0">
                     <Image
-                      src="https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png"
+                      src="/images/logo/logo.png"
                       alt="Logo"
                       width={22}
                       height={22}
@@ -152,7 +152,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
            </div>
            <div className="hidden group-data-[collapsible=icon]:flex h-8 w-8 items-center justify-center rounded-none bg-white p-1 shrink-0">
               <Image
-                src="https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png"
+                src="/images/logo/logo.png"
                 alt="Logo"
                 width={20}
                 height={20}
@@ -281,7 +281,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 //             <div className="relative flex items-center gap-3 group-data-[collapsible=icon]:hidden w-full px-1">
 //                   <div className="bg-white p-1 rounded-none flex items-center justify-center h-8 w-8 shrink-0">
 //                      <Image
-//                       src="https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png"
+//                       src="/images/logo/logo.png"
 //                       alt="Logo"
 //                       width={22}
 //                       height={22}
@@ -292,7 +292,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 //            </div>
 //            <div className="hidden group-data-[collapsible=icon]:flex h-8 w-8 items-center justify-center rounded-none bg-white p-1 shrink-0">
 //               <Image
-//                 src="https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png"
+//                 src="/images/logo/logo.png"
 //                 alt="Logo"
 //                 width={20}
 //                 height={20}
