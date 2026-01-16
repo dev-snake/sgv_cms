@@ -29,7 +29,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
 import { TablePagination } from "@/components/portal/table-pagination";
-import { API_ROUTES } from "@/constants/routes";
+import { API_ROUTES, PORTAL_ROUTES } from "@/constants/routes";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -63,6 +64,7 @@ export default function ApplicationsManagementPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [itemToDelete, setItemToDelete] = React.useState<JobApplication | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const router = useRouter();
   
   // Pagination state
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -219,6 +221,16 @@ export default function ApplicationsManagementPage() {
                     <td className="p-4">{getStatusBadge(app.status)}</td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {/* View Detail Button */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 bg-slate-100 hover:bg-brand-primary hover:text-white text-slate-400 transition-colors"
+                          onClick={() => router.push(`${PORTAL_ROUTES.cms.applications.list}/${app.id}`)}
+                        >
+                          <Eye size={14} />
+                        </Button>
+
                         {/* CV Download Button */}
                         <a 
                           href={app.cv_url} 
@@ -237,6 +249,14 @@ export default function ApplicationsManagementPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="rounded-none w-48">
+                            <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-slate-400">Thao tác hồ sơ</DropdownMenuLabel>
+                            <DropdownMenuItem 
+                              onClick={() => router.push(`${PORTAL_ROUTES.cms.applications.list}/${app.id}`)}
+                              className="text-xs font-bold flex items-center gap-2"
+                            >
+                              <Eye size={14} className="text-blue-500" /> Xem chi tiết
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-slate-400">Cập nhật trạng thái</DropdownMenuLabel>
                             {Object.entries(STATUS_CONFIG).map(([key, config]) => (
                                 <DropdownMenuItem 

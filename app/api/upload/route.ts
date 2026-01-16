@@ -3,34 +3,41 @@ import { writeFile, mkdir, readdir, stat } from "fs/promises";
 import path from "path";
 import { apiResponse, apiError } from "@/utils/api-response";
 
-// GET /api/upload - List all uploaded images
+// GET /api/upload - List all uploaded images (recursively)
 export async function GET(request: NextRequest) {
   try {
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    
-    // Create directory if it doesn't exist
-    await mkdir(uploadsDir, { recursive: true });
-    
-    const files = await readdir(uploadsDir);
-    
-    // Filter for image and document files and get their info
-    const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".pdf", ".doc", ".docx"];
-    const images = await Promise.all(
-      files
-        .filter(file => allowedExtensions.some(ext => file.toLowerCase().endsWith(ext)))
-        .map(async (filename) => {
-          const filepath = path.join(uploadsDir, filename);
-          const fileStat = await stat(filepath);
-          return {
-            filename,
-            url: `/uploads/${filename}`,
-            size: fileStat.size,
-            createdAt: fileStat.birthtime,
-          };
-        })
-    );
-    
-    // Sort by creation date (newest first)
+    const baseDir = path.join(process.cwd(), "public", "uploads");
+    await mkdir(baseDir, { recursive: true });
+
+    const getAllFiles = async (dirPath: string): Promise<any[]> => {
+      const files = await readdir(dirPath);
+      let results: any[] = [];
+
+      for (const file of files) {
+        const fullPath = path.join(dirPath, file);
+        const fileStat = await stat(fullPath);
+
+        if (fileStat.isDirectory()) {
+          const nested = await getAllFiles(fullPath);
+          results = results.concat(nested);
+        } else {
+          const relativePublic = path.relative(path.join(process.cwd(), "public"), fullPath);
+          const relativeFromUploads = path.relative(path.join(process.cwd(), "public", "uploads"), fullPath);
+          const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".pdf", ".doc", ".docx"];
+          if (allowedExtensions.some(ext => file.toLowerCase().endsWith(ext))) {
+            results.push({
+              filename: relativeFromUploads,
+              url: `/${relativePublic}`,
+              size: fileStat.size,
+              createdAt: fileStat.birthtime,
+            });
+          }
+        }
+      }
+      return results;
+    };
+
+    const images = await getAllFiles(baseDir);
     images.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     
     return apiResponse(images);
@@ -50,16 +57,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const allowedTypes = [
-      "image/jpeg", 
-      "image/png", 
-      "image/webp", 
-      "image/gif", 
+    const isImage = file.type.startsWith("image/");
+    const isDoc = [
       "application/pdf", 
       "application/msword", 
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    ];
-    if (!allowedTypes.includes(file.type)) {
+    ].includes(file.type);
+
+    if (!isImage && !isDoc) {
       return apiError("Định dạng file không hỗ trợ. Chỉ chấp nhận ảnh (JPG, PNG, WebP, GIF) và tài liệu (PDF, DOC, DOCX)", 400);
     }
 
@@ -69,14 +74,16 @@ export async function POST(request: NextRequest) {
       return apiError("File size exceeds 5MB limit", 400);
     }
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    // Determine target directory
+    const category = isDoc ? "cvs" : "images";
+    const year = new Date().getFullYear().toString();
+    const uploadsDir = path.join(process.cwd(), "public", "uploads", category, year);
     await mkdir(uploadsDir, { recursive: true });
 
     // Generate unique filename
     const timestamp = Date.now();
     const randomSuffix = Math.random().toString(36).substring(2, 8);
-    const extension = file.name.split(".").pop() || "jpg";
+    const extension = file.name.split(".").pop() || (isImage ? "jpg" : "pdf");
     const filename = `${timestamp}-${randomSuffix}.${extension}`;
     const filepath = path.join(uploadsDir, filename);
 
@@ -86,7 +93,7 @@ export async function POST(request: NextRequest) {
     await writeFile(filepath, buffer);
 
     // Return public URL
-    const publicUrl = `/uploads/${filename}`;
+    const publicUrl = `/uploads/${category}/${year}/${filename}`;
 
     return apiResponse({ url: publicUrl, filename }, { status: 201 });
   } catch (error) {
@@ -106,8 +113,13 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Prevent path traversal attacks
-    const safeName = path.basename(filename);
-    const filepath = path.join(process.cwd(), "public", "uploads", safeName);
+    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    const filepath = path.join(uploadsDir, filename);
+
+    // Security check: Ensure the resolved path is inside the uploads directory
+    if (!filepath.startsWith(uploadsDir)) {
+      return apiError("Invalid filename", 400);
+    }
 
     const { unlink } = await import("fs/promises");
     await unlink(filepath);

@@ -35,7 +35,7 @@ export default function RootLayout({
         >
           <ApiProvider>
             {children}
-            <Toaster />
+            <Toaster position="top-right" richColors />
           </ApiProvider>
         </ThemeProvider>
       </body>
