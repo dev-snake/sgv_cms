@@ -60,4 +60,4 @@ export const GET = withAuth(async () => {
     console.error("Error fetching stats:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.DASHBOARD_READ] });
+}, {});
