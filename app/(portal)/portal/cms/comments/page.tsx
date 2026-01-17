@@ -35,6 +35,13 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -173,15 +180,16 @@ export default function CommentsManagementPage() {
                             </div>
                             <div className="flex items-center gap-2">
                                 <Filter size={16} className="text-slate-400" />
-                                <select
-                                    className="h-10 px-3 py-2 bg-white border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-primary"
-                                    value={status}
-                                    onChange={(e) => setStatus(e.target.value)}
-                                >
-                                    <option value="all">Tất cả trạng thái</option>
-                                    <option value="pending">Chờ duyệt</option>
-                                    <option value="approved">Đã duyệt</option>
-                                </select>
+                                <Select value={status} onValueChange={setStatus}>
+                                    <SelectTrigger className="h-10 w-[180px] rounded-none border-slate-200 focus:ring-brand-primary">
+                                        <SelectValue placeholder="Tất cả trạng thái" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-none border-slate-200">
+                                        <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                                        <SelectItem value="pending">Chờ duyệt</SelectItem>
+                                        <SelectItem value="approved">Đã duyệt</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                     </CardHeader>
