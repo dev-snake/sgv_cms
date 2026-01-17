@@ -4,11 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { roles, permissions, role_permissions, user_roles } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
+import { AUTH } from "@/constants/app";
 
 const secretKey = process.env.JWT_SECRET || "secret";
 const key = new TextEncoder().encode(secretKey);
 
-export async function encrypt(payload: any, expireTime: string = "24h") {
+export async function encrypt(payload: any, expireTime: string = AUTH.JWT_EXPIRY) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()

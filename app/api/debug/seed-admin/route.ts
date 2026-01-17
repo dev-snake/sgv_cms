@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { users, roles, permissions, role_permissions, user_roles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
+import { SEED_DEFAULTS, AUTH } from "@/constants/app";
 // @ts-ignore
 import bcrypt from "bcryptjs";
 
@@ -89,17 +90,17 @@ export async function GET() {
     console.log('Permissions assigned to admin role.');
 
     // 5. Create super admin user
-    const adminUsername = 'superadmin';
-    const adminPassword = 'Super@123'; // Change this immediately after first login!
+    const adminUsername = SEED_DEFAULTS.SUPER_ADMIN_USERNAME;
+    const adminPassword = SEED_DEFAULTS.SUPER_ADMIN_PASSWORD; // Change this immediately after first login!
 
     let [adminUser] = await db.select().from(users).where(eq(users.username, adminUsername));
     if (!adminUser) {
-      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      const hashedPassword = await bcrypt.hash(adminPassword, AUTH.BCRYPT_SALT_ROUNDS);
       [adminUser] = await db.insert(users).values({
         username: adminUsername,
         password: hashedPassword,
         full_name: 'Super Administrator',
-        role: 'admin',
+        role: AUTH.DEFAULT_ROLE,
       }).returning();
       console.log('Super admin user created.');
     }

@@ -6,6 +6,7 @@ import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/
 import { withAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
 import { PERMISSIONS } from "@/constants/rbac";
+import { ARTICLE, PAGINATION } from "@/constants/app";
 
 // GET /api/news - List news articles with pagination
 export async function GET(request: Request) {
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
     const includeDeleted = searchParams.get("includeDeleted") === "true";
 
     // Parse pagination params
-    const { page, limit } = parsePaginationParams(searchParams, { limit: 10 });
+    const { page, limit } = parsePaginationParams(searchParams, { limit: PAGINATION.NEWS_LIMIT });
     const offset = calculateOffset(page, limit);
 
     // Build where conditions
@@ -91,16 +92,14 @@ export async function GET(request: Request) {
     // Transform results to include derived fields
     const transformedResults = results.map((article) => {
       const wordCount = article.content ? article.content.split(/\s+/).length : 0;
-      const readTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
-      
-      const fallbackImage = `https://saigonvalve.vn/uploads/files/2025/06/24/thumbs/datalogger-1-306x234-5.png`;
+      const readTimeMinutes = Math.max(1, Math.ceil(wordCount / ARTICLE.WORDS_PER_MINUTE));
       
       return {
         ...article,
-        readTime: `${readTimeMinutes} PHÚT`,
-        category: article.category || "Tin tức",
-        author: article.author || "Admin",
-        image_url: article.image_url || fallbackImage,
+        readTime: `${readTimeMinutes} ${ARTICLE.READ_TIME_SUFFIX}`,
+        category: article.category || ARTICLE.DEFAULT_CATEGORY,
+        author: article.author || ARTICLE.DEFAULT_AUTHOR,
+        image_url: article.image_url || ARTICLE.FALLBACK_IMAGE,
       };
     });
     

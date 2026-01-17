@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { withAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
 import { PERMISSIONS } from "@/constants/rbac";
+import { AUTH } from "@/constants/app";
 
 // GET /api/users - List all users with their roles
 export const GET = withAuth(async () => {
@@ -54,7 +55,7 @@ export const POST = withAuth(async (request: NextRequest) => {
       return apiError("Username and password are required", 400);
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, AUTH.BCRYPT_SALT_ROUNDS);
 
     const newUser = await db.transaction(async (tx) => {
       const [user] = await tx
@@ -63,7 +64,7 @@ export const POST = withAuth(async (request: NextRequest) => {
           username,
           password: hashedPassword,
           full_name,
-          role: role || "admin", // Keep for backward compatibility
+          role: role || AUTH.DEFAULT_ROLE, // Keep for backward compatibility
         })
         .returning({
           id: users.id,

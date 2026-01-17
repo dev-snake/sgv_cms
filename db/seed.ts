@@ -3,6 +3,7 @@ import { db } from './index';
 import { categoryTypes, categories, authors, users, products } from './schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
+import { AUTH, SEED_DEFAULTS } from '@/constants/app';
 
 async function main() {
   console.log('Seeding database...');
@@ -56,12 +57,12 @@ async function main() {
   }
   
   // 4. Seed Default User
-  const adminUsername = process.env.SEED_ADMIN_USERNAME || 'admin';
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'admin123';
+  const adminUsername = SEED_DEFAULTS.ADMIN_USERNAME;
+  const adminPassword = SEED_DEFAULTS.ADMIN_PASSWORD;
 
   const existingUser = await db.select().from(users).where(eq(users.username, adminUsername));
   if (existingUser.length === 0) {
-    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+    const hashedPassword = await bcrypt.hash(adminPassword, AUTH.BCRYPT_SALT_ROUNDS);
     await db.insert(users).values({ 
       username: adminUsername,
       password: hashedPassword,

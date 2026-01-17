@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { withAuth } from "@/middlewares/middleware";
 import { PERMISSIONS } from "@/constants/rbac";
+import { ARTICLE } from "@/constants/app";
 
 // UUID regex pattern
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -47,17 +48,14 @@ export async function GET(
 
     // Add derived fields
     const wordCount = article.content ? article.content.split(/\s+/).length : 0;
-    const readTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
-    
-    // Fallback image
-    const fallbackImage = `https://saigonvalve.vn/uploads/files/2025/06/24/thumbs/datalogger-1-306x234-5.png`;
+    const readTimeMinutes = Math.max(1, Math.ceil(wordCount / ARTICLE.WORDS_PER_MINUTE));
 
     const transformedArticle = {
       ...article,
-      readTime: `${readTimeMinutes} PHÚT`,
-      category: article.category || "Tin tức",
-      author: article.author || "Admin",
-      image_url: article.image_url || fallbackImage,
+      readTime: `${readTimeMinutes} ${ARTICLE.READ_TIME_SUFFIX}`,
+      category: article.category || ARTICLE.DEFAULT_CATEGORY,
+      author: article.author || ARTICLE.DEFAULT_AUTHOR,
+      image_url: article.image_url || ARTICLE.FALLBACK_IMAGE,
     };
 
     return apiResponse(transformedArticle);

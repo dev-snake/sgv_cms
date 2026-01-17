@@ -6,6 +6,7 @@ import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/
 import { withAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
 import { PERMISSIONS } from "@/constants/rbac";
+import { PAGINATION } from "@/constants/app";
 
 // GET /api/projects - List projects with pagination (Public)
 export async function GET(request: Request) {
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
     const includeDeleted = searchParams.get("includeDeleted") === "true";
 
     // Parse pagination params
-    const { page, limit } = parsePaginationParams(searchParams, { limit: 12 });
+    const { page, limit } = parsePaginationParams(searchParams, { limit: PAGINATION.PROJECTS_LIMIT });
     const offset = calculateOffset(page, limit);
 
     // Build where conditions

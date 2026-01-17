@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { verifyAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
+import { AUTH } from "@/constants/app";
 
 export async function GET(
   request: Request,
@@ -58,7 +59,7 @@ export async function PATCH(
       if (full_name !== undefined) updateData.full_name = full_name;
       if (role) updateData.role = role;
       if (password) {
-        updateData.password = await bcrypt.hash(password, 10);
+        updateData.password = await bcrypt.hash(password, AUTH.BCRYPT_SALT_ROUNDS);
       }
 
       const [user] = await tx

@@ -4,6 +4,7 @@ import path from "path";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { withAuth } from "@/middlewares/middleware";
 import { PERMISSIONS } from "@/constants/rbac";
+import { UPLOAD } from "@/constants/app";
 
 // GET /api/upload - List all uploaded images (recursively)
 export const GET = withAuth(async (request: NextRequest) => {
@@ -60,20 +61,15 @@ export const POST = withAuth(async (request: NextRequest) => {
 
     // Validate file type
     const isImage = file.type.startsWith("image/");
-    const isDoc = [
-      "application/pdf", 
-      "application/msword", 
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    ].includes(file.type);
+    const isDoc = UPLOAD.ALLOWED_DOC_TYPES.includes(file.type);
 
     if (!isImage && !isDoc) {
       return apiError("Định dạng file không hỗ trợ. Chỉ chấp nhận ảnh (JPG, PNG, WebP, GIF) và tài liệu (PDF, DOC, DOCX)", 400);
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      return apiError("File size exceeds 5MB limit", 400);
+    // Validate file size
+    if (file.size > UPLOAD.MAX_FILE_SIZE) {
+      return apiError(`File size exceeds ${UPLOAD.MAX_FILE_SIZE_MB}MB limit`, 400);
     }
 
     // Determine target directory

@@ -7,6 +7,7 @@ import { parsePaginationParams, calculateOffset, createPaginationMeta } from "@/
 import { withAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
 import { PERMISSIONS } from "@/constants/rbac";
+import { PAGINATION } from "@/constants/app";
 import { validateBody, sanitizeHtml } from "@/middlewares/middleware";
 import { contactSchema } from "@/validations/contact.schema";
 
@@ -64,7 +65,7 @@ export const GET = withAuth(async (request) => {
     const status = searchParams.get("status");
 
     // Parse pagination params
-    const { page, limit } = parsePaginationParams(searchParams, { limit: 10 });
+    const { page, limit } = parsePaginationParams(searchParams, { limit: PAGINATION.CONTACTS_LIMIT });
     const offset = calculateOffset(page, limit);
 
     // Build where conditions

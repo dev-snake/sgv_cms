@@ -8,6 +8,7 @@ import { validateQuery, validateBody, withAuth } from "@/middlewares/middleware"
 import { ZodError } from "zod";
 import { NextRequest } from "next/server";
 import { PERMISSIONS } from "@/constants/rbac";
+import { PAGINATION } from "@/constants/app";
 
 // GET /api/products - List products with pagination (Public)
 export async function GET(request: Request) {

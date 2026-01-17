@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import { getThankYouTemplate } from "./mail/templates/thank-you";
 import { getAdminNotificationTemplate } from "./mail/templates/admin-notification";
 import { getApplicationConfirmationTemplate } from "./mail/templates/application-confirmation";
+import { COMPANY } from "@/constants/app";
 
 const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
@@ -64,7 +65,7 @@ export async function sendAdminNotificationEmail(contactData: {
   const html = getAdminNotificationTemplate(contactData);
 
   return sendEmail({
-    to: process.env.MAIL_FROM || process.env.MAIL_USER || "info@saigonvalve.vn",
+    to: process.env.MAIL_FROM || process.env.MAIL_USER || COMPANY.EMAIL,
     subject,
     html,
   });
