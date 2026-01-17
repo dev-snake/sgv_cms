@@ -99,11 +99,15 @@ export const media = pgTable('media', {
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   username: varchar('username', { length: 255 }).notNull().unique(),
+  email: varchar('email', { length: 255 }).unique(),
   password: text('password').notNull(),
   full_name: varchar('full_name', { length: 255 }),
-  role: varchar('role', { length: 50 }).default('admin').notNull(),
+  phone: varchar('phone', { length: 20 }),
+  is_active: boolean('is_active').default(true).notNull(),
+  is_locked: boolean('is_locked').default(false).notNull(),
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
+  deleted_at: timestamp('deleted_at'),
 });
 
 export const contacts = pgTable('contacts', {
@@ -152,29 +156,39 @@ export const jobApplications = pgTable('job_applications', {
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 });
+
 // RBAC System Tables
 export const roles = pgTable('roles', {
   id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name', { length: 255 }).notNull().unique(),
+  code: varchar('code', { length: 50 }).notNull().unique(),
+  name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
+  deleted_at: timestamp('deleted_at'),
+});
+
+export const modules = pgTable('modules', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  code: varchar('code', { length: 50 }).notNull().unique(),
+  name: varchar('name', { length: 255 }).notNull(),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull(),
+  deleted_at: timestamp('deleted_at'),
 });
 
 export const permissions = pgTable('permissions', {
   id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name', { length: 255 }).notNull().unique(), // e.g., 'news:read', 'news:write'
-  description: text('description'),
-  module: varchar('module', { length: 100 }).notNull(), // e.g., 'news', 'products'
-  created_at: timestamp('created_at').defaultNow().notNull(),
-});
-
-export const role_permissions = pgTable('role_permissions', {
   role_id: uuid('role_id').references(() => roles.id, { onDelete: 'cascade' }).notNull(),
-  permission_id: uuid('permission_id').references(() => permissions.id, { onDelete: 'cascade' }).notNull(),
-}, (table) => ({
-  pk: sql`PRIMARY KEY (${table.role_id}, ${table.permission_id})`,
-}));
+  module_id: uuid('module_id').references(() => modules.id, { onDelete: 'cascade' }).notNull(),
+  can_view: boolean('can_view').default(false).notNull(),
+  can_create: boolean('can_create').default(false).notNull(),
+  can_update: boolean('can_update').default(false).notNull(),
+  can_delete: boolean('can_delete').default(false).notNull(),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull(),
+  deleted_at: timestamp('deleted_at'),
+});
 
 export const user_roles = pgTable('user_roles', {
   user_id: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
@@ -182,3 +196,4 @@ export const user_roles = pgTable('user_roles', {
 }, (table) => ({
   pk: sql`PRIMARY KEY (${table.user_id}, ${table.role_id})`,
 }));
+

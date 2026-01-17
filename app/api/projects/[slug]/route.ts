@@ -90,7 +90,7 @@ export const PATCH = withAuth(async (request, session, { params }) => {
     console.error("Error updating project:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.PROJECTS_WRITE] });
+}, { requiredPermissions: [PERMISSIONS.PROJECTS_UPDATE] });
 
 // DELETE /api/projects/[slug] - Delete a project by ID or slug
 export const DELETE = withAuth(async (request, session, { params }) => {

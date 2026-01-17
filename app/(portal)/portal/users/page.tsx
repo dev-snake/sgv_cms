@@ -30,6 +30,7 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { useAuth } from "@/hooks/use-auth";
+import { PERMISSIONS } from "@/constants/rbac";
 
 export default function UsersManagementPage() {
   const [users, setUsers] = React.useState<User[]>([]);
@@ -37,7 +38,7 @@ export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [itemToDelete, setItemToDelete] = React.useState<User | null>(null);
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, hasPermission } = useAuth();
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -78,7 +79,7 @@ export default function UsersManagementPage() {
 
   const filteredUsers = users.filter(user => 
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
+    (user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
   );
 
   return (
@@ -88,11 +89,13 @@ export default function UsersManagementPage() {
           <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Quản lý tài khoản</h1>
           <p className="text-slate-500 font-medium italic mt-2 text-sm">Quản lý danh sách quản trị viên và phân quyền truy cập hệ thống.</p>
         </div>
-        <Link href={PORTAL_ROUTES.users.add}>
-          <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
-            <Plus className="mr-2 size-4" /> Tạo tài khoản mới
-          </Button>
-        </Link>
+        {hasPermission(PERMISSIONS.USERS_CREATE) && (
+          <Link href={PORTAL_ROUTES.users.add}>
+            <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+              <Plus className="mr-2 size-4" /> Tạo tài khoản mới
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="bg-white rounded-none border border-slate-100 overflow-hidden min-h-[500px]">
@@ -138,7 +141,7 @@ export default function UsersManagementPage() {
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <span className="text-sm font-medium text-slate-600">{user.full_name || "---"}</span>
+                      <span className="text-sm font-medium text-slate-600">{user.full_name || user.fullName || "---"}</span>
                     </td>
                     <td className="px-8 py-6">
                       <div className="flex flex-wrap gap-2">
@@ -150,16 +153,18 @@ export default function UsersManagementPage() {
                           ))
                         ) : (
                           <Badge className="bg-slate-50 text-slate-400 border-slate-100 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-none">
-                             {user.role}
+                             CHƯA CÓ VAI TRÒ
                           </Badge>
                         )}
                       </div>
                     </td>
                     <td className="px-8 py-6">
                       <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">
-                        {user.created_at ? format(new Date(user.created_at), "dd/MM/yyyy", { locale: vi }) : "---"}
+                        {user.created_at ? format(new Date(user.created_at), "dd/MM/yyyy", { locale: vi }) : 
+                         user.createdAt ? format(new Date(user.createdAt), "dd/MM/yyyy", { locale: vi }) : "---"}
                       </span>
                     </td>
+
                     <td className="px-8 py-6 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -168,14 +173,17 @@ export default function UsersManagementPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-64 p-2 rounded-none border border-slate-100 bg-white">
-                          <DropdownMenuItem asChild className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
-                             <Link href={PORTAL_ROUTES.users.edit(user.id)} className="flex items-center gap-3 w-full">
-                               <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
-                               <span className="text-xs font-bold uppercase tracking-tight">Sửa thông tin</span>
-                             </Link>
-                          </DropdownMenuItem>
+                          {hasPermission(PERMISSIONS.USERS_UPDATE) && (
+                            <DropdownMenuItem asChild className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
+                               <Link href={PORTAL_ROUTES.users.edit(user.id)} className="flex items-center gap-3 w-full">
+                                 <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
+                                 <span className="text-xs font-bold uppercase tracking-tight">Sửa thông tin</span>
+                               </Link>
+                            </DropdownMenuItem>
+                          )}
+                          
                           {/* Hide delete option if viewing own account */}
-                          {currentUser?.id !== user.id && (
+                          {hasPermission(PERMISSIONS.USERS_DELETE) && currentUser?.id !== user.id && (
                             <>
                               <DropdownMenuSeparator className="bg-slate-50" />
                               <DropdownMenuItem 

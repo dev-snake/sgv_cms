@@ -122,4 +122,4 @@ export const GET = withAuth(async (request) => {
     console.error("Error fetching contacts:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.CONTACTS_READ] });
+}, { requiredPermissions: [PERMISSIONS.CONTACTS_VIEW] });

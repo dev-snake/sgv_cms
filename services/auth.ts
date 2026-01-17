@@ -2,7 +2,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { roles, permissions, role_permissions, user_roles } from "@/db/schema";
+import { roles, permissions, user_roles, modules } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { AUTH } from "@/constants/app";
 
@@ -33,7 +33,8 @@ export async function generateTokens(user: any) {
   const userRoles = await db
     .select({
       id: roles.id,
-      name: roles.name
+      name: roles.name,
+      code: roles.code
     })
     .from(user_roles)
     .innerJoin(roles, eq(user_roles.role_id, roles.id))
@@ -45,18 +46,32 @@ export async function generateTokens(user: any) {
   if (roleIds.length > 0) {
     const perms = await db
       .select({
-        name: permissions.name
+        moduleCode: modules.code,
+        canView: permissions.can_view,
+        canCreate: permissions.can_create,
+        canUpdate: permissions.can_update,
+        canDelete: permissions.can_delete,
       })
-      .from(role_permissions)
-      .innerJoin(permissions, eq(role_permissions.permission_id, permissions.id))
-      .where(inArray(role_permissions.role_id, roleIds));
+      .from(permissions)
+      .innerJoin(modules, eq(permissions.module_id, modules.id))
+      .where(inArray(permissions.role_id, roleIds));
     
-    userPermissions = Array.from(new Set(perms.map(p => p.name)));
+    // Convert to a flattened list of permissions like 'BLOG:READ', 'BLOG:WRITE' or similar
+    // for backward compatibility or use the new structure
+    userPermissions = perms.flatMap(p => {
+      const ps = [];
+      if (p.canView) ps.push(`${p.moduleCode}:VIEW`);
+      if (p.canCreate) ps.push(`${p.moduleCode}:CREATE`);
+      if (p.canUpdate) ps.push(`${p.moduleCode}:UPDATE`);
+      if (p.canDelete) ps.push(`${p.moduleCode}:DELETE`);
+      return ps;
+    });
   }
 
   const sessionPayload = {
     ...user,
-    roles: userRoles.map(r => r.name),
+    roles: userRoles.map(r => r.code), // Use code for consistency
+    role: userRoles[0]?.code || 'VIEWER', // Legacy role field for compatibility
     permissions: userPermissions,
   };
 
@@ -64,6 +79,7 @@ export async function generateTokens(user: any) {
   const refreshToken = await encrypt({ user: sessionPayload }, "7d");
   return { accessToken, refreshToken, sessionPayload };
 }
+
 
 export async function setAuthCookies(accessToken: string, refreshToken: string) {
   const cookieStore = await cookies();

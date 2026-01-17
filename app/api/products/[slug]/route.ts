@@ -65,7 +65,7 @@ export const PATCH = withAuth(async (request, session, { params }) => {
     console.error("Error updating product:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.PRODUCTS_WRITE] });
+}, { requiredPermissions: [PERMISSIONS.PRODUCTS_UPDATE] });
 
 // DELETE /api/products/[id] - Soft delete a product
 export const DELETE = withAuth(async (request, session, { params }) => {

@@ -50,7 +50,7 @@ export const PATCH = withAuth(async (request: NextRequest, session, { params }) 
     console.error("Error updating category:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.SYSTEM_MANAGE] });
+}, { requiredPermissions: [PERMISSIONS.CMS_UPDATE] });
 
 // DELETE /api/categories/[id] - Delete a category
 export const DELETE = withAuth(async (request: NextRequest, session, { params }) => {
@@ -81,4 +81,4 @@ export const DELETE = withAuth(async (request: NextRequest, session, { params })
     console.error("Error deleting category:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.SYSTEM_MANAGE] });
+}, { requiredPermissions: [PERMISSIONS.CMS_DELETE] });

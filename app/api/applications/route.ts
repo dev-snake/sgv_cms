@@ -170,4 +170,4 @@ export const GET = withAuth(async (request) => {
     console.error("Error fetching applications:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.APPLICATIONS_READ] });
+}, { requiredPermissions: [PERMISSIONS.RECRUITMENT_VIEW] });

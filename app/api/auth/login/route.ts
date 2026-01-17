@@ -37,7 +37,6 @@ export async function POST(request: Request) {
       id: user.id,
       username: user.username,
       full_name: user.full_name,
-      role: user.role,
     };
 
     // Generate Tokens (now includes roles/permissions)

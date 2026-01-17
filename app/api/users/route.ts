@@ -17,13 +17,15 @@ export const GET = withAuth(async () => {
       .select({
         id: users.id,
         username: users.username,
-        full_name: users.full_name,
-        role: users.role,
-        created_at: users.created_at,
+        fullName: users.full_name,
+        email: users.email,
+        phone: users.phone,
+        isActive: users.is_active,
+        createdAt: users.created_at,
         roles: sql<any[]>`
           COALESCE(
             json_agg(
-              json_build_object('id', ${roles.id}, 'name', ${roles.name})
+              json_build_object('id', ${roles.id}, 'name', ${roles.name}, 'code', ${roles.code})
             ) FILTER (WHERE ${roles.id} IS NOT NULL),
             '[]'
           )
@@ -40,12 +42,12 @@ export const GET = withAuth(async () => {
     console.error("Error fetching users:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.USERS_READ] });
+}, { requiredPermissions: [PERMISSIONS.USERS_VIEW] });
 
 // POST /api/users - Create a new user
 export const POST = withAuth(async (request: NextRequest) => {
   try {
-    const { username, password, full_name, role, roleIds } = await request.json();
+    const { username, password, fullName, email, phone, roleIds } = await request.json();
 
     if (!username || !password) {
       return apiError("Username and password are required", 400);
@@ -59,14 +61,14 @@ export const POST = withAuth(async (request: NextRequest) => {
         .values({
           username,
           password: hashedPassword,
-          full_name,
-          role: role || AUTH.DEFAULT_ROLE, // Keep for backward compatibility
+          full_name: fullName,
+          email,
+          phone,
         })
         .returning({
           id: users.id,
           username: users.username,
-          full_name: users.full_name,
-          role: users.role,
+          fullName: users.full_name,
         });
 
       if (roleIds && Array.isArray(roleIds) && roleIds.length > 0) {
@@ -81,6 +83,7 @@ export const POST = withAuth(async (request: NextRequest) => {
       return user;
     });
 
+
     return apiResponse(newUser, { status: 201 });
   } catch (error) {
     console.error("Error creating user:", error);
@@ -89,4 +92,4 @@ export const POST = withAuth(async (request: NextRequest) => {
     }
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.USERS_WRITE] });
+}, { requiredPermissions: [PERMISSIONS.USERS_CREATE] });

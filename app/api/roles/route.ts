@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import { roles, role_permissions } from "@/db/schema";
+import { roles, permissions } from "@/db/schema";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { desc, eq } from "drizzle-orm";
 import { withAuth } from "@/middlewares/middleware";
-import { RBAC_MANAGEMENT_ROLES } from "@/constants/rbac";
+import { RBAC_MANAGEMENT_ROLES, PERMISSIONS } from "@/constants/rbac";
 
 export const GET = withAuth(async () => {
   try {
@@ -17,11 +17,11 @@ export const GET = withAuth(async () => {
     console.error("Error fetching roles:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { allowedRoles: RBAC_MANAGEMENT_ROLES });
+}, { requiredPermissions: [PERMISSIONS.ROLES_VIEW] });
 
 export const POST = withAuth(async (request) => {
   try {
-    const { name, description, permissionIds } = await request.json();
+    const { name, code, description, permissionsMatrix } = await request.json();
 
     if (!name) {
       return apiError("Role name is required", 400);
@@ -31,16 +31,24 @@ export const POST = withAuth(async (request) => {
     const newRole = await db.transaction(async (tx) => {
       const [insertedRole] = await tx
         .insert(roles)
-        .values({ name, description })
+        .values({ 
+          name, 
+          code: code || name.toUpperCase().replace(/\s+/g, '_'),
+          description 
+        })
         .returning();
 
-      if (permissionIds && Array.isArray(permissionIds) && permissionIds.length > 0) {
-        await tx.insert(role_permissions).values(
-          permissionIds.map((pId: string) => ({
+      if (permissionsMatrix && Array.isArray(permissionsMatrix)) {
+        for (const pm of permissionsMatrix) {
+          await tx.insert(permissions).values({
             role_id: insertedRole.id,
-            permission_id: pId,
-          }))
-        );
+            module_id: pm.moduleId,
+            can_view: pm.canView || false,
+            can_create: pm.canCreate || false,
+            can_update: pm.canUpdate || false,
+            can_delete: pm.canDelete || false,
+          });
+        }
       }
 
       return insertedRole;
@@ -54,4 +62,4 @@ export const POST = withAuth(async (request) => {
     }
     return apiError("Internal Server Error", 500);
   }
-}, { allowedRoles: RBAC_MANAGEMENT_ROLES });
+}, { requiredPermissions: [PERMISSIONS.ROLES_CREATE] });

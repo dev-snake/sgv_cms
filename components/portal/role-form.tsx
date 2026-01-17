@@ -8,11 +8,12 @@ import {
   Save, 
   Shield, 
   Loader2,
-  CheckCircle2,
+  Check,
   Circle
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,49 +31,100 @@ interface RoleFormProps {
 export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isLoadingPermissions, setIsLoadingPermissions] = React.useState(true);
-  const [permissionsByModule, setPermissionsByModule] = React.useState<Record<string, Permission[]>>({});
-  const [selectedPermissionIds, setSelectedPermissionIds] = React.useState<string[]>(
-    initialData?.permissions?.map(p => p.id) || []
-  );
+  const [isLoadingMatrix, setIsLoadingMatrix] = React.useState(true);
+  const [matrix, setMatrix] = React.useState<any[]>([]);
   
   const [formData, setFormData] = React.useState({
     name: initialData?.name || "",
+    code: initialData?.code || "",
     description: initialData?.description || "",
   });
 
-  const fetchPermissions = async () => {
-    setIsLoadingPermissions(true);
+  const fetchMatrix = async () => {
+    setIsLoadingMatrix(true);
     try {
-      const res = await api.get(API_ROUTES.PERMISSIONS);
-      setPermissionsByModule(res.data.data || {});
+      const url = initialData?.id 
+        ? `${API_ROUTES.PERMISSIONS}?roleId=${initialData.id}` 
+        : API_ROUTES.PERMISSIONS;
+      const res = await api.get(url);
+      setMatrix(res.data.data || []);
     } catch (error) {
       console.error(error);
-      toast.error("Không thể tải danh sách quyền");
+      toast.error("Không thể tải ma trận phân quyền");
     } finally {
-      setIsLoadingPermissions(false);
+      setIsLoadingMatrix(false);
     }
   };
 
   React.useEffect(() => {
-    fetchPermissions();
-  }, []);
+    fetchMatrix();
+  }, [initialData?.id]);
 
-  const togglePermission = (id: string) => {
-    setSelectedPermissionIds(prev => 
-      prev.includes(id) ? prev.filter(pId => pId !== id) : [...prev, id]
-    );
+  const togglePermission = (moduleId: string, field: string) => {
+    setMatrix(prev => prev.map(item => {
+      if (item.module.id === moduleId) {
+        return {
+          ...item,
+          permissions: {
+            ...item.permissions,
+            [field]: !item.permissions[field]
+          }
+        };
+      }
+      return item;
+    }));
   };
 
-  const toggleModule = (modulePerms: Permission[]) => {
-    const moduleIds = modulePerms.map(p => p.id);
-    const allSelected = moduleIds.every(id => selectedPermissionIds.includes(id));
-    
-    if (allSelected) {
-      setSelectedPermissionIds(prev => prev.filter(id => !moduleIds.includes(id)));
-    } else {
-      setSelectedPermissionIds(prev => [...new Set([...prev, ...moduleIds])]);
-    }
+  const toggleModuleAll = (moduleId: string) => {
+    setMatrix(prev => prev.map(item => {
+      if (item.module.id === moduleId) {
+        const p = item.permissions;
+        const allSet = p.can_view && p.can_create && p.can_update && p.can_delete;
+        return {
+          ...item,
+          permissions: {
+            can_view: !allSet,
+            can_create: !allSet,
+            can_update: !allSet,
+            can_delete: !allSet,
+          }
+        };
+      }
+      return item;
+    }));
+  };
+
+  const toggleColumn = (field: string) => {
+    setMatrix(prev => {
+      const allSet = prev.every(item => item.permissions[field]);
+      return prev.map(item => ({
+        ...item,
+        permissions: {
+          ...item.permissions,
+          [field]: !allSet
+        }
+      }));
+    });
+  };
+
+  const toggleGlobal = () => {
+    setMatrix(prev => {
+      const allSet = prev.every(item => 
+        item.permissions.can_view && 
+        item.permissions.can_create && 
+        item.permissions.can_update && 
+        item.permissions.can_delete
+      );
+      return prev.map(item => ({
+        ...item,
+        permissions: {
+          can_view: !allSet,
+          can_create: !allSet,
+          can_update: !allSet,
+          can_delete: !allSet,
+        }
+      }));
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,7 +138,13 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
     try {
       const payload = {
         ...formData,
-        permissionIds: selectedPermissionIds
+        permissionsMatrix: matrix.map(item => ({
+          moduleId: item.module.id,
+          canView: item.permissions.can_view,
+          canCreate: item.permissions.can_create,
+          canUpdate: item.permissions.can_update,
+          canDelete: item.permissions.can_delete,
+        }))
       };
 
       if (isEditing && initialData) {
@@ -109,180 +167,177 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
   };
 
   return (
-    <div className="space-y-12">
-      <div className="flex items-center gap-6">
-        <Link href={PORTAL_ROUTES.users.roles.list}>
-          <Button variant="outline" className="h-14 w-14 p-0 border-slate-100 rounded-none hover:bg-slate-50 transition-all active:scale-95">
-            <ArrowLeft size={20} />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">
-            {isEditing ? "Cấu hình vai trò" : "Tạo vai trò mới"}
-          </h1>
-          <p className="text-slate-500 font-medium italic mt-2 text-sm">
-            {isEditing ? `Đang chỉnh sửa cài đặt cho vai trò: ${initialData?.name}` : "Định nghĩa nhóm quyền hạn mới cho hệ thống."}
-          </p>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href={PORTAL_ROUTES.users.roles.list}>
+            <Button variant="ghost" className="h-10 w-10 p-0 rounded-full hover:bg-slate-100 transition-all active:scale-95">
+              <ArrowLeft size={18} className="text-slate-600" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">
+              {isEditing ? "Cấu hình vai trò" : "Tạo vai trò mới"}
+            </h1>
+            <p className="text-slate-500 font-medium mt-1 text-xs">
+              {isEditing ? `Chỉnh sửa: ${initialData?.name}` : "Định nghĩa nhóm quyền hạn mới cho hệ thống."}
+            </p>
+          </div>
         </div>
+
+        <Button 
+          onClick={handleSubmit}
+          className="bg-brand-primary hover:bg-[#002d6b] text-[10px] font-black uppercase tracking-[0.2em] px-8 py-6 h-auto shadow-lg transition-all rounded-none hover:-translate-y-0.5 active:scale-95 border-b-4 border-b-brand-secondary"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <Loader2 className="mr-2 size-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 size-4" />
+          )}
+          {isEditing ? "Lưu thay đổi" : "Tạo vai trò"}
+        </Button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-12 pb-24">
-        <div className="bg-white p-10 border-l-4 border-l-brand-primary shadow-[20px_20px_60px_-15px_rgba(0,0,0,0.03)] space-y-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div className="space-y-4">
-              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
-                <Shield size={12} className="text-brand-primary" /> Tên vai trò <span className="text-rose-500">*</span>
-              </Label>
-              <Input 
-                placeholder="VD: BIÊN TẬP VIÊN"
-                className="h-16 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-brand-primary/10 rounded-none transition-all"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value.toUpperCase() })}
-                disabled={isSubmitting || (isEditing && PROTECTED_ROLES.includes(initialData?.name || ''))}
-              />
-            </div>
-            <div className="space-y-4">
-              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mô tả ngắn gọn</Label>
-              <Input 
-                placeholder="VD: Quản lý tin tức và dự án"
-                className="h-16 bg-slate-50 border-none text-sm font-medium rounded-none focus:ring-2 focus:ring-brand-primary/10 transition-all"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                disabled={isSubmitting}
-              />
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 pb-12">
+        {/* Left Column: Role Information */}
+        <div className="xl:col-span-4 space-y-6">
+          <div className="bg-white p-8 border border-slate-100 shadow-sm rounded-sm">
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-brand-primary mb-8 flex items-center gap-2">
+              <Shield size={14} /> Thông tin vai trò
+            </h3>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Tên vai trò <span className="text-rose-500">*</span></Label>
+                <Input 
+                  placeholder="VD: QUẢN TRỊ VIÊN"
+                  className="h-12 bg-slate-50 border-slate-100 text-sm font-semibold focus:ring-1 focus:ring-brand-primary/20 rounded-none"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value.toUpperCase() })}
+                  disabled={isSubmitting || (isEditing && PROTECTED_ROLES.includes(initialData?.code || ''))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Mã code</Label>
+                <Input 
+                  placeholder="VD: ADMIN"
+                  className="h-12 bg-slate-50 border-slate-100 text-sm font-mono focus:ring-1 focus:ring-brand-primary/20 rounded-none"
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase().replace(/\s+/g, '_') })}
+                  disabled={isSubmitting || isEditing}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Mô tả</Label>
+                <Textarea 
+                  placeholder="Mô tả chức năng của vai trò này..."
+                  className="h-32 bg-slate-50 border-slate-100 text-sm font-medium rounded-none focus:ring-1 focus:ring-brand-primary/20 transition-all resize-none"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  disabled={isSubmitting}
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="space-y-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Ma trận phân quyền</h2>
-              <p className="text-slate-500 text-xs font-medium italic mt-1">Chọn các quyền hạn cụ thể cho vai trò này.</p>
-            </div>
-            {Object.keys(permissionsByModule).length > 0 && (
-              <Button 
-                type="button" 
-                variant="ghost" 
-                className="text-[10px] font-black uppercase tracking-widest p-0 h-auto hover:bg-transparent text-brand-primary"
-                onClick={() => {
-                  const allIds = Object.values(permissionsByModule).flat().map(p => p.id);
-                  if (selectedPermissionIds.length === allIds.length) {
-                    setSelectedPermissionIds([]);
-                  } else {
-                    setSelectedPermissionIds(allIds);
-                  }
-                }}
-              >
-                {selectedPermissionIds.length === Object.values(permissionsByModule).flat().length ? "Bỏ chọn tất cả" : "Chọn tất cả quyền"}
-              </Button>
-            )}
-          </div>
+        {/* Right Column: Permission Matrix */}
+        <div className="xl:col-span-8 space-y-6">
+          <div className="bg-white p-8 border border-slate-100 shadow-sm rounded-sm overflow-x-auto">
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-brand-primary mb-8">
+              Ma trận quyền hạn
+            </h3>
 
-          {isLoadingPermissions ? (
-            <div className="flex items-center justify-center p-20 bg-white border border-slate-50">
-              <Loader2 className="animate-spin text-brand-primary opacity-20" size={32} />
-            </div>
-          ) : (
-            <div className="bg-white border border-slate-100 overflow-hidden">
-              <table className="w-full text-left">
+            {isLoadingMatrix ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="animate-spin text-brand-primary opacity-20" size={32} />
+              </div>
+            ) : (
+              <table className="w-full text-left min-w-[600px]">
                 <thead>
-                  <tr className="bg-slate-50/70">
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 border-b border-slate-100 w-40">Module</th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 border-b border-slate-100">Quyền hạn</th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 border-b border-slate-100 text-right w-32">Thao tác</th>
+                  <tr className="border-b border-slate-100">
+                    <th className="pb-4 w-12 text-center text-slate-400">
+                      <Checkbox 
+                        checked={matrix.every(i => i.permissions.can_view && i.permissions.can_create && i.permissions.can_update && i.permissions.can_delete)}
+                        onCheckedChange={() => toggleGlobal()}
+                        className="mx-auto border-slate-300 data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary rounded-none"
+                      />
+                    </th>
+                    <th className="pb-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Module</th>
+                    {[
+                      { label: 'Xem', field: 'can_view' },
+                      { label: 'Tạo', field: 'can_create' },
+                      { label: 'Sửa', field: 'can_update' },
+                      { label: 'Xóa', field: 'can_delete' }
+                    ].map((col) => (
+                      <th key={col.field} className="pb-4 text-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <Checkbox 
+                            checked={matrix.every(i => i.permissions[col.field])}
+                            onCheckedChange={() => toggleColumn(col.field)}
+                            className="border-slate-300 data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary rounded-none"
+                          />
+                          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{col.label}</span>
+                        </div>
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {Object.entries(permissionsByModule).map(([module, perms]) => {
-                    const moduleIds = perms.map(p => p.id);
-                    const allModuleSelected = moduleIds.every(id => selectedPermissionIds.includes(id));
-                    const selectedCount = moduleIds.filter(id => selectedPermissionIds.includes(id)).length;
-
+                  {matrix.map((item) => {
+                    const { module, permissions: p } = item;
+                    const rowAllSet = p.can_view && p.can_create && p.can_update && p.can_delete;
                     return (
-                      <tr key={module} className="group hover:bg-slate-50/30 transition-colors">
-                        <td className="px-6 py-5 align-top">
-                          <div className="flex flex-col gap-2">
-                            <span className="text-xs font-black text-slate-900 uppercase tracking-tight">{module}</span>
-                            <span className="text-[10px] text-slate-400 font-medium">
-                              {selectedCount}/{perms.length} quyền
-                            </span>
+                      <tr key={module.id} className="group hover:bg-slate-50/50 transition-colors">
+                        <td className="py-4 text-center">
+                          <Checkbox 
+                            checked={rowAllSet}
+                            onCheckedChange={() => toggleModuleAll(module.id)}
+                            className="mx-auto border-slate-200 data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary rounded-none"
+                          />
+                        </td>
+                        <td className="py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="size-8 bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand-primary/5 group-hover:text-brand-primary transition-colors">
+                              <Shield size={14} />
+                            </div>
+                            <div>
+                              <p className="text-[11px] font-bold text-slate-900 uppercase tracking-tight">{module.name}</p>
+                              <p className="text-[9px] text-slate-400 font-medium uppercase tracking-tighter">{module.code}</p>
+                            </div>
                           </div>
                         </td>
-                        <td className="px-6 py-5">
-                          <div className="flex flex-wrap gap-2">
-                            {perms.map((perm) => {
-                              const isSelected = selectedPermissionIds.includes(perm.id);
-                              // Show resource:action format for clarity
-                              const [resource, action] = perm.name.split(':');
-                              const displayName = action ? `${resource} · ${action}` : perm.name;
-                              
-                              return (
-                                <button
-                                  key={perm.id}
-                                  type="button"
-                                  onClick={() => togglePermission(perm.id)}
-                                  className={cn(
-                                    "px-3 py-2 text-[10px] font-bold uppercase tracking-wide rounded-sm border transition-all flex items-center gap-2",
-                                    isSelected 
-                                      ? "bg-brand-primary text-white border-brand-primary shadow-sm" 
-                                      : "bg-white text-slate-400 border-slate-200 hover:border-brand-primary hover:text-brand-primary"
-                                  )}
-                                  title={perm.description || perm.name}
-                                >
-                                  {isSelected ? (
-                                    <CheckCircle2 size={12} />
-                                  ) : (
-                                    <Circle size={12} />
-                                  )}
-                                  {displayName}
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                        </td>
-                        <td className="px-6 py-5 align-top text-right">
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
-                            size="sm"
-                            className={cn(
-                              "h-8 px-4 rounded-sm text-[9px] font-black uppercase tracking-wide transition-all",
-                              allModuleSelected 
-                                ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" 
-                                : "bg-slate-50 text-slate-400 hover:bg-brand-primary/10 hover:text-brand-primary"
-                            )}
-                            onClick={() => toggleModule(perms)}
-                          >
-                            {allModuleSelected ? "✓ Đầy đủ" : "Chọn hết"}
-                          </Button>
-                        </td>
+                        {[
+                          { field: 'can_view', color: 'data-[state=checked]:bg-amber-500' },
+                          { field: 'can_create', color: 'data-[state=checked]:bg-amber-500' },
+                          { field: 'can_update', color: 'data-[state=checked]:bg-amber-500' },
+                          { field: 'can_delete', color: 'data-[state=checked]:bg-amber-500' }
+                        ].map(({ field, color }) => (
+                          <td key={field} className="py-4 text-center">
+                            <Checkbox 
+                              checked={p[field]}
+                              onCheckedChange={() => togglePermission(module.id, field)}
+                              className={cn(
+                                "size-5 mx-auto border-slate-200 rounded-none transition-all",
+                                color,
+                                "data-[state=checked]:border-amber-600 shadow-sm"
+                              )}
+                            />
+                          </td>
+                        ))}
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
-            </div>
-          )}
-
-        </div>
-
-        <div className="fixed bottom-10 right-10 z-50">
-          <Button 
-            type="submit" 
-            className="bg-brand-primary hover:bg-[#002d6b] text-[10px] font-black uppercase tracking-[0.2em] px-16 py-8 h-auto shadow-[0_20px_50px_-15px_rgba(0,45,107,0.3)] transition-all rounded-none hover:-translate-y-1 active:scale-95"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <Loader2 className="mr-3 size-5 animate-spin" />
-            ) : (
-              <Save className="mr-3 size-5" />
             )}
-            Lưu cấu hình vai trò
-          </Button>
+          </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
+

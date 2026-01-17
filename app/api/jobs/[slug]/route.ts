@@ -65,7 +65,7 @@ export const PATCH = withAuth(async (request, session, { params }) => {
     }
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.JOBS_WRITE] });
+}, { requiredPermissions: [PERMISSIONS.RECRUITMENT_UPDATE] });
 
 // DELETE /api/jobs/[slug] - Delete a job posting
 export const DELETE = withAuth(async (request, session, { params }) => {
@@ -84,4 +84,4 @@ export const DELETE = withAuth(async (request, session, { params }) => {
     console.error("Error deleting job:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.JOBS_DELETE] });
+}, { requiredPermissions: [PERMISSIONS.RECRUITMENT_DELETE] });

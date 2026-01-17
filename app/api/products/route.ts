@@ -173,4 +173,4 @@ export const POST = withAuth(async (request) => {
     console.error("Error creating product:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.PRODUCTS_WRITE] });
+}, { requiredPermissions: [PERMISSIONS.PRODUCTS_CREATE] });

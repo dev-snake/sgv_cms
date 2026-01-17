@@ -76,6 +76,11 @@ export const PORTAL_ROUTES = {
       list: "/portal/users/roles",
       add: "/portal/users/roles/add",
       edit: (id: string) => `/portal/users/roles/${id}/edit`,
+    },
+    modules: {
+      list: "/portal/users/modules",
+      add: "/portal/users/modules/add",
+      edit: (id: string) => `/portal/users/modules/${id}/edit`,
     }
   },
 
@@ -96,6 +101,7 @@ export const API_ROUTES = {
     LOGIN: "/api/auth/login",
     LOGOUT: "/api/auth/logout",
     REFRESH: "/api/auth/refresh",
+    PROFILE: "/api/auth/profile",
   },
   PRODUCTS: "/api/products",
   NEWS: "/api/news",
@@ -110,6 +116,7 @@ export const API_ROUTES = {
   APPLICATIONS: "/api/applications",
   ROLES: "/api/roles",
   PERMISSIONS: "/api/permissions",
+  MODULES: "/api/modules",
 } as const;
 
 export type PortalRoute = typeof PORTAL_ROUTES;

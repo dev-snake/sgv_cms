@@ -35,7 +35,7 @@ export const PATCH = withAuth(async (request: NextRequest, session, { params }) 
     console.error("Error updating contact:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.CONTACTS_WRITE] });
+}, { requiredPermissions: [PERMISSIONS.CONTACTS_UPDATE] });
 
 // DELETE /api/contacts/[id] - Delete a contact submission
 export const DELETE = withAuth(async (request: NextRequest, session, { params }) => {

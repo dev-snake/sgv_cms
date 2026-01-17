@@ -4,20 +4,15 @@ import { decrypt } from "@/services/auth";
 import { checkRateLimit, RATE_LIMITS } from "@/middlewares/rate-limit";
 
 import { SITE_ROUTES, ADMIN_ROUTES, API_ROUTES } from "@/constants/routes";
+import { RBAC_ROLES } from "@/constants/rbac";
 
 // Add paths that don't require authentication
 const publicPaths = [
   SITE_ROUTES.LOGIN,
   API_ROUTES.AUTH.LOGIN,
   API_ROUTES.AUTH.REFRESH,
+  API_ROUTES.AUTH.LOGOUT,
 ];
-
-// Role-based permissions
-const ROLE_PERMISSIONS = {
-  admin: ['read', 'write', 'delete', 'manage_users'],
-  editor: ['read', 'write'],
-  viewer: ['read']
-} as const;
 
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -90,13 +85,15 @@ export default async function proxy(request: NextRequest) {
 
     try {
       const sessionData = await decrypt(session);
+      const userRoles = sessionData?.user?.roles || [];
+      const isSuperAdmin = userRoles.includes(RBAC_ROLES.SUPER_ADMIN);
+      const isAdmin = userRoles.includes(RBAC_ROLES.ADMIN) || isSuperAdmin;
+      const isEditor = userRoles.includes(RBAC_ROLES.EDITOR) || isAdmin;
       
       // Check role-based permissions for sensitive operations
       if (isProtectedApi) {
-        const userRole = sessionData?.user?.role;
-        
-        // DELETE operations require admin role
-        if (method === 'DELETE' && userRole !== 'admin') {
+        // DELETE operations require admin role (now checked via RBAC codes)
+        if (method === 'DELETE' && !isAdmin) {
           return NextResponse.json({
             success: false,
             error: "Forbidden - Admin role required for delete operations"
@@ -104,7 +101,7 @@ export default async function proxy(request: NextRequest) {
         }
         
         // User management requires admin
-        if (pathname.startsWith('/api/users') && userRole !== 'admin') {
+        if (pathname.startsWith('/api/users') && !isAdmin) {
           return NextResponse.json({
             success: false,
             error: "Forbidden - Admin role required for user management"
@@ -113,7 +110,7 @@ export default async function proxy(request: NextRequest) {
         
         // Write operations require at least editor role
         if (['POST', 'PATCH', 'PUT'].includes(method)) {
-          if (!['admin', 'editor'].includes(userRole)) {
+          if (!isEditor) {
             return NextResponse.json({
               success: false,
               error: "Forbidden - Editor or Admin role required"

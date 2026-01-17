@@ -44,8 +44,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
+import { PERMISSIONS } from "@/constants/rbac";
 
 export default function ProjectsManagementPage() {
+  const { hasPermission } = useAuth();
   const [projectsList, setProjectsList] = React.useState<Project[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -159,16 +162,20 @@ export default function ProjectsManagementPage() {
           <p className="text-slate-500 font-medium italic mt-2 text-sm">Danh sách các dự án và công trình trọng điểm đã thực hiện.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href={PORTAL_ROUTES.cms.projects.categories.list}>
-            <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-4 hover:cursor-pointer h-auto border-slate-100 bg-white rounded-none">
-              Danh mục
-            </Button>
-          </Link>
-          <Link href={PORTAL_ROUTES.cms.projects.add}>
-            <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 hover:cursor-pointer h-auto transition-all rounded-none">
-              <Plus className="mr-2 size-4" /> Thêm dự án mới
-            </Button>
-          </Link>
+          {hasPermission(PERMISSIONS.CMS_UPDATE) && (
+            <Link href={PORTAL_ROUTES.cms.projects.categories.list}>
+              <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-4 hover:cursor-pointer h-auto border-slate-100 bg-white rounded-none">
+                Danh mục
+              </Button>
+            </Link>
+          )}
+          {hasPermission(PERMISSIONS.PROJECTS_CREATE) && (
+            <Link href={PORTAL_ROUTES.cms.projects.add}>
+              <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 hover:cursor-pointer h-auto transition-all rounded-none">
+                <Plus className="mr-2 size-4" /> Thêm dự án mới
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -313,20 +320,27 @@ export default function ProjectsManagementPage() {
                           <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-4 py-3">Tùy chọn dự án</DropdownMenuLabel>
                           <DropdownMenuSeparator className="bg-slate-50" />
 
-                          <DropdownMenuItem asChild>
-                             <Link href={PORTAL_ROUTES.cms.projects.edit(project.id)} className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
-                                <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
-                                <span className="text-xs font-bold uppercase tracking-tight text-slate-900">Sửa thông tin</span>
-                             </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-slate-50" />
-                          <DropdownMenuItem 
-                            className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-rose-50 group"
-                            onClick={() => handleDeleteClick(project)}
-                          >
-                             <Trash2 size={16} className="text-slate-400 group-hover:text-rose-600 transition-colors" />
-                             <span className="text-xs font-bold uppercase tracking-tight text-rose-600">Xóa dự án</span>
-                          </DropdownMenuItem>
+                          {hasPermission(PERMISSIONS.PROJECTS_UPDATE) && (
+                            <DropdownMenuItem asChild>
+                               <Link href={PORTAL_ROUTES.cms.projects.edit(project.id)} className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
+                                  <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
+                                  <span className="text-xs font-bold uppercase tracking-tight text-slate-900">Sửa thông tin</span>
+                               </Link>
+                            </DropdownMenuItem>
+                          )}
+                          
+                          {hasPermission(PERMISSIONS.PROJECTS_DELETE) && (
+                            <>
+                              <DropdownMenuSeparator className="bg-slate-50" />
+                              <DropdownMenuItem 
+                                className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-rose-50 group"
+                                onClick={() => handleDeleteClick(project)}
+                              >
+                                 <Trash2 size={16} className="text-slate-400 group-hover:text-rose-600 transition-colors" />
+                                 <span className="text-xs font-bold uppercase tracking-tight text-rose-600">Xóa dự án</span>
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>

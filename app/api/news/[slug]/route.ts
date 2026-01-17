@@ -96,7 +96,7 @@ export const PATCH = withAuth(async (request, session, { params }) => {
     console.error("Error updating article:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.NEWS_WRITE] });
+}, { requiredPermissions: [PERMISSIONS.BLOG_UPDATE] });
 
 // DELETE /api/news/[slug] - Delete an article by ID or slug
 export const DELETE = withAuth(async (request, session, { params }) => {
@@ -118,5 +118,5 @@ export const DELETE = withAuth(async (request, session, { params }) => {
     console.error("Error deleting article:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.NEWS_DELETE] });
+}, { requiredPermissions: [PERMISSIONS.BLOG_DELETE] });
 

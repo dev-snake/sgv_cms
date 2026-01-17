@@ -17,6 +17,7 @@ import {
   UserRoundSearch,
   ClipboardList,
   ShieldCheck,
+  Layers,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -48,6 +49,8 @@ import { cn } from "@/lib/utils";
 import { PORTAL_ROUTES } from "@/constants/routes";
 import Link from "next/link";
 
+import { PERMISSIONS } from "@/constants/rbac";
+
 const data = {
   navMain: [
     {
@@ -59,61 +62,67 @@ const data = {
        title: "Quản lý Tin tức",
        url: PORTAL_ROUTES.cms.news.list,
        icon: FileText,
-       requiredPermission: "news:read",
+       requiredPermission: PERMISSIONS.BLOG_VIEW,
     },
     {
        title: "Quản lý Dự án",
        url: PORTAL_ROUTES.cms.projects.list,
        icon: Briefcase,
-       requiredPermission: "projects:read",
+       requiredPermission: PERMISSIONS.PROJECTS_VIEW,
     },
     {
        title: "Quản lý Sản phẩm",
        url: PORTAL_ROUTES.cms.products.list,
        icon: Box,
-       requiredPermission: "products:read",
+       requiredPermission: PERMISSIONS.PRODUCTS_VIEW,
     },
     {
        title: "Thư viện Media",
        url: PORTAL_ROUTES.cms.media,
        icon: Images,
-       requiredPermission: "media:read",
+       requiredPermission: PERMISSIONS.MEDIA_VIEW,
     },
     {
       title: "Cài đặt hệ thống",
       url: PORTAL_ROUTES.settings,
       icon: Settings,
-      requiredPermission: "system:manage",
+      requiredPermission: PERMISSIONS.SYSTEM_VIEW,
     },
     {
        title: "Quản lý Liên hệ",
        url: PORTAL_ROUTES.contacts,
        icon: Mail,
-       requiredPermission: "contacts:read",
+       requiredPermission: PERMISSIONS.CONTACTS_VIEW,
     },
     {
       title: "Quản lý Tuyển dụng",
       url: PORTAL_ROUTES.cms.jobs.list,
       icon: UserRoundSearch,
-      requiredPermission: "jobs:read",
+      requiredPermission: PERMISSIONS.RECRUITMENT_VIEW,
     },
     {
        title: "Danh sách Ứng viên",
        url: PORTAL_ROUTES.cms.applications.list,
        icon: ClipboardList,
-       requiredPermission: "applications:read",
+       requiredPermission: PERMISSIONS.RECRUITMENT_VIEW,
     },
     {
       title: "Tài khoản Admin",
       url: PORTAL_ROUTES.users.list,
       icon: ShieldCheck,
-      requiredPermission: "users:read",
+      requiredPermission: PERMISSIONS.USERS_VIEW,
     },
     {
       title: "Phân quyền & Vai trò",
       url: PORTAL_ROUTES.users.roles.list,
       icon: Lock,
-      requiredPermission: "rbac:manage",
+      requiredPermission: PERMISSIONS.ROLES_VIEW,
+    },
+    {
+      title: "Quản lý Module",
+      url: PORTAL_ROUTES.users.modules.list,
+      icon: Layers,
+      requiredPermission: PERMISSIONS.SYSTEM_VIEW,
     },
   ],
 };
@@ -199,7 +208,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 // For users list, exclude /portal/users/roles paths
                 if (item.url === PORTAL_ROUTES.users.list) {
                   return pathname === PORTAL_ROUTES.users.list || 
-                         (pathname.startsWith(PORTAL_ROUTES.users.list) && !pathname.startsWith(PORTAL_ROUTES.users.roles.list));
+                         (pathname.startsWith(PORTAL_ROUTES.users.list) && 
+                          !pathname.startsWith(PORTAL_ROUTES.users.roles.list) && 
+                          !pathname.startsWith(PORTAL_ROUTES.users.modules.list));
                 }
                 return pathname.startsWith(item.url);
               })();
@@ -248,10 +259,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 className="w-full h-14 items-center gap-3 px-4   bg-[#001d4a] hover:bg-[#001d4a] text-white rounded-none group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer"
               >
                 <div className="flex h-8 w-8  items-center justify-center rounded-none  bg-[#fbbf24] text-[10px] font-black text-[#002d6b] shrink-0">
-                  {(user.full_name || user.username || "?").substring(0, 2).toUpperCase()}
+                  {(user.fullName || user.username || "?").substring(0, 2).toUpperCase()}
                 </div>
                 <div className="flex flex-col items-start leading-none group-data-[collapsible=icon]:hidden overflow-hidden ms-1">
-                  <span className="text-[10px] font-black uppercase tracking-tight truncate w-full">{user.full_name}</span>
+                  <span className="text-[10px] font-black uppercase tracking-tight truncate w-full">{user.fullName}</span>
                   <span className="text-[8px] font-medium text-white/30 lowercase mt-0.5 truncate w-full">{user.username}@saigonvalve.vn</span>
                 </div>
                 <ChevronRight className="ml-auto size-3 text-white/20 group-data-[collapsible=icon]:hidden" />

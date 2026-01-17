@@ -37,4 +37,4 @@ export const POST = withAuth(async (request: NextRequest) => {
     console.error("Error creating author:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.SYSTEM_MANAGE] });
+}, { requiredPermissions: [PERMISSIONS.MEDIA_VIEW] });

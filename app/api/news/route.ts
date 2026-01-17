@@ -142,4 +142,4 @@ export const POST = withAuth(async (request) => {
     console.error("Error creating news article:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.NEWS_WRITE] });
+}, { requiredPermissions: [PERMISSIONS.BLOG_CREATE] });

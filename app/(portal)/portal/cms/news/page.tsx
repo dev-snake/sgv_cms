@@ -43,8 +43,11 @@ import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
+import { PERMISSIONS } from "@/constants/rbac";
 
 export default function NewsManagementPage() {
+  const { hasPermission } = useAuth();
   const [newsList, setNewsList] = React.useState<NewsArticle[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -158,16 +161,20 @@ export default function NewsManagementPage() {
           <p className="text-slate-500 font-medium italic mt-2 text-sm">Cập nhật tin tức, sự kiện và kiến thức kỹ thuật của Sài Gòn Valve.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href={PORTAL_ROUTES.cms.news.categories.list}>
-            <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-4 hover:cursor-pointer h-auto border-slate-100 bg-white rounded-none">
-              Danh mục
-            </Button>
-          </Link>
-          <Link href={PORTAL_ROUTES.cms.news.add}>
-            <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 hover:cursor-pointer h-auto transition-all rounded-none">
-              <Plus className="mr-2 size-4" /> Viết bài mới
-            </Button>
-          </Link>
+          {hasPermission(PERMISSIONS.CMS_UPDATE) && (
+            <Link href={PORTAL_ROUTES.cms.news.categories.list}>
+              <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest px-6 py-4 hover:cursor-pointer h-auto border-slate-100 bg-white rounded-none">
+                Danh mục
+              </Button>
+            </Link>
+          )}
+          {hasPermission(PERMISSIONS.BLOG_CREATE) && (
+            <Link href={PORTAL_ROUTES.cms.news.add}>
+              <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 hover:cursor-pointer h-auto transition-all rounded-none">
+                <Plus className="mr-2 size-4" /> Viết bài mới
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -306,20 +313,27 @@ export default function NewsManagementPage() {
                           <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-4 py-3">Tùy chọn bài viết</DropdownMenuLabel>
                           <DropdownMenuSeparator className="bg-slate-50" />
 
-                          <DropdownMenuItem asChild>
-                             <Link href={PORTAL_ROUTES.cms.news.edit(news.id)} className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
-                                <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
-                                <span className="text-xs font-bold uppercase tracking-tight text-slate-900">Sửa nội dung</span>
-                             </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-slate-50" />
-                          <DropdownMenuItem 
-                            className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-rose-50 group"
-                            onClick={() => handleDeleteClick(news)}
-                          >
-                             <Trash2 size={16} className="text-slate-400 group-hover:text-rose-600 transition-colors" />
-                             <span className="text-xs font-bold uppercase tracking-tight text-rose-600">Xóa bài viết</span>
-                          </DropdownMenuItem>
+                          {hasPermission(PERMISSIONS.BLOG_UPDATE) && (
+                            <DropdownMenuItem asChild>
+                               <Link href={PORTAL_ROUTES.cms.news.edit(news.id)} className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-slate-50 group">
+                                  <Edit2 size={16} className="text-slate-400 group-hover:text-brand-primary transition-colors" />
+                                  <span className="text-xs font-bold uppercase tracking-tight text-slate-900">Sửa nội dung</span>
+                               </Link>
+                            </DropdownMenuItem>
+                          )}
+                          
+                          {hasPermission(PERMISSIONS.BLOG_DELETE) && (
+                            <>
+                              <DropdownMenuSeparator className="bg-slate-50" />
+                              <DropdownMenuItem 
+                                className="rounded-none px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-rose-50 group"
+                                onClick={() => handleDeleteClick(news)}
+                              >
+                                 <Trash2 size={16} className="text-slate-400 group-hover:text-rose-600 transition-colors" />
+                                 <span className="text-xs font-bold uppercase tracking-tight text-rose-600">Xóa bài viết</span>
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>

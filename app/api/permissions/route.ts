@@ -1,28 +1,43 @@
 import { db } from "@/db";
-import { permissions } from "@/db/schema";
+import { permissions, modules } from "@/db/schema";
 import { apiResponse, apiError } from "@/utils/api-response";
-import { RBAC_MANAGEMENT_ROLES } from "@/constants/rbac";
-import { asc } from "drizzle-orm";
+import { RBAC_MANAGEMENT_ROLES, PERMISSIONS } from "@/constants/rbac";
+import { eq } from "drizzle-orm";
 import { withAuth } from "@/middlewares/middleware";
+import { NextRequest } from "next/server";
 
-export const GET = withAuth(async () => {
+export const GET = withAuth(async (request: NextRequest) => {
   try {
-    const allPermissions = await db
-      .select()
-      .from(permissions)
-      .orderBy(asc(permissions.module), asc(permissions.name));
+    const { searchParams } = new URL(request.url);
+    const roleId = searchParams.get("roleId");
 
-    // Group by module for easier UI rendering
-    const grouped = allPermissions.reduce((acc: any, perm) => {
-      const module = perm.module || 'other';
-      if (!acc[module]) acc[module] = [];
-      acc[module].push(perm);
-      return acc;
-    }, {});
+    const allModules = await db.select().from(modules);
+    
+    let rolePermissions: any[] = [];
+    if (roleId) {
+      rolePermissions = await db
+        .select()
+        .from(permissions)
+        .where(eq(permissions.role_id, roleId));
+    }
 
-    return apiResponse(grouped);
+    // Combine modules with role permissions for a matrix view
+    const matrix = allModules.map(module => {
+      const perm = rolePermissions.find(p => p.module_id === module.id);
+      return {
+        module: module,
+        permissions: perm || {
+          can_view: false,
+          can_create: false,
+          can_update: false,
+          can_delete: false,
+        }
+      };
+    });
+
+    return apiResponse(matrix);
   } catch (error) {
-    console.error("Error fetching permissions:", error);
+    console.error("Error fetching permissions matrix:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { allowedRoles: RBAC_MANAGEMENT_ROLES });
+}, { requiredPermissions: [PERMISSIONS.ROLES_VIEW] });

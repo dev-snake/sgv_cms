@@ -4,23 +4,28 @@ import { apiResponse, apiError } from "@/utils/api-response";
 import { eq } from "drizzle-orm";
 // @ts-ignore
 import bcrypt from "bcryptjs";
-import { verifyAuth } from "@/middlewares/middleware";
+import { withAuth } from "@/middlewares/middleware";
 import { NextRequest } from "next/server";
 import { AUTH } from "@/constants/app";
+import { PERMISSIONS } from "@/constants/rbac";
 
-export async function GET(
+// GET /api/users/[id] - Get a single user
+export const GET = withAuth(async (
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+  session,
+  { params }
+) => {
   try {
     const { id: userId } = await params;
     const [user] = await db
       .select({
         id: users.id,
         username: users.username,
-        full_name: users.full_name,
-        role: users.role,
-        created_at: users.created_at,
+        fullName: users.full_name,
+        email: users.email,
+        phone: users.phone,
+        isActive: users.is_active,
+        createdAt: users.created_at,
       })
       .from(users)
       .where(eq(users.id, userId));
@@ -42,25 +47,29 @@ export async function GET(
     console.error("Error fetching user:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: [PERMISSIONS.USERS_VIEW] });
 
-export async function PATCH(
+// PATCH /api/users/[id] - Update a user
+export const PATCH = withAuth(async (
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+  session,
+  { params }
+) => {
   try {
     const { id: userId } = await params;
     const body = await request.json();
-    const { username, password, full_name, role, roleIds } = body;
+    const { username, password, fullName, email, phone, roleIds } = body;
 
     const updatedUser = await db.transaction(async (tx) => {
       const updateData: any = {};
       if (username) updateData.username = username;
-      if (full_name !== undefined) updateData.full_name = full_name;
-      if (role) updateData.role = role;
+      if (fullName !== undefined) updateData.full_name = fullName;
+      if (email !== undefined) updateData.email = email;
+      if (phone !== undefined) updateData.phone = phone;
       if (password) {
         updateData.password = await bcrypt.hash(password, AUTH.BCRYPT_SALT_ROUNDS);
       }
+      updateData.updated_at = new Date();
 
       const [user] = await tx
         .update(users)
@@ -69,8 +78,9 @@ export async function PATCH(
         .returning({
           id: users.id,
           username: users.username,
-          full_name: users.full_name,
-          role: users.role,
+          fullName: users.full_name,
+          email: users.email,
+          phone: users.phone,
         });
 
       if (!user) throw new Error("User not found");
@@ -95,21 +105,17 @@ export async function PATCH(
     console.error("Error updating user:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: [PERMISSIONS.USERS_UPDATE] });
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+// DELETE /api/users/[id] - Delete a user
+export const DELETE = withAuth(async (
+  request: Request,
+  session,
+  { params }
+) => {
   try {
     const { id: userId } = await params;
     
-    // Get current user from session
-    const session = await verifyAuth(request);
-    if (!session) {
-      return apiError("Unauthorized", 401);
-    }
-
     // Prevent self-deletion
     if (userId === session.user.id) {
       return apiError("Bạn không thể xóa chính tài khoản của mình", 400);
@@ -127,4 +133,4 @@ export async function DELETE(
     console.error("Error deleting user:", error);
     return apiError("Internal Server Error", 500);
   }
-}
+}, { requiredPermissions: [PERMISSIONS.USERS_DELETE] });

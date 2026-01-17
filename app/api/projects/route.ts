@@ -133,4 +133,4 @@ export const POST = withAuth(async (request) => {
     console.error("Error creating project:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.PROJECTS_WRITE] });
+}, { requiredPermissions: [PERMISSIONS.PROJECTS_CREATE] });

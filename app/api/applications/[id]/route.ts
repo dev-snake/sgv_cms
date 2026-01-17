@@ -36,7 +36,7 @@ export const GET = withAuth(async (request: NextRequest, session, { params }) =>
     console.error("Error fetching application:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.APPLICATIONS_READ] });
+}, { requiredPermissions: [PERMISSIONS.RECRUITMENT_VIEW] });
 
 // PATCH /api/applications/[id] - Update application status
 export const PATCH = withAuth(async (request: NextRequest, session, { params }) => {
@@ -62,7 +62,7 @@ export const PATCH = withAuth(async (request: NextRequest, session, { params }) 
     console.error("Error updating application:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.APPLICATIONS_WRITE] });
+}, { requiredPermissions: [PERMISSIONS.RECRUITMENT_UPDATE] });
 
 // DELETE /api/applications/[id] - Delete an application
 export const DELETE = withAuth(async (request: NextRequest, session, { params }) => {
@@ -81,4 +81,4 @@ export const DELETE = withAuth(async (request: NextRequest, session, { params })
     console.error("Error deleting application:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.APPLICATIONS_DELETE] });
+}, { requiredPermissions: [PERMISSIONS.RECRUITMENT_DELETE] });

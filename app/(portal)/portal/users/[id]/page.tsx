@@ -33,8 +33,9 @@ export default function EditUserPage() {
   const [formData, setFormData] = React.useState({
     username: "",
     password: "", // Optional for edit
-    full_name: "",
-    role: "admin",
+    fullName: "",
+    email: "",
+    phone: "",
     roleIds: [] as string[],
   });
   const [availableRoles, setAvailableRoles] = React.useState<Role[]>([]);
@@ -54,8 +55,9 @@ export default function EditUserPage() {
         setFormData({
           username: user.username,
           password: "",
-          full_name: user.full_name || "",
-          role: user.role || "admin",
+          fullName: user.fullName || user.full_name || "",
+          email: user.email || "",
+          phone: user.phone || "",
           roleIds: user.roles?.map((r: any) => r.id) || [],
         });
       } catch (error) {
@@ -69,6 +71,7 @@ export default function EditUserPage() {
 
     fetchData();
   }, [userId, router]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,11 +160,35 @@ export default function EditUserPage() {
                 <Input 
                   placeholder="VD: NGUYỄN VĂN A"
                   className="h-16 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-fbbf24/20 rounded-none transition-all"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                   disabled={isSubmitting}
                 />
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Email liên hệ</Label>
+                  <Input 
+                    placeholder="example@saigonvalve.vn"
+                    className="h-16 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-fbbf24/20 rounded-none transition-all"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Số điện thoại</Label>
+                  <Input 
+                    placeholder="09xx xxx xxx"
+                    className="h-16 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-fbbf24/20 rounded-none transition-all"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+
 
               <div className="pt-6 border-t border-slate-50 space-y-6">
                  <div>

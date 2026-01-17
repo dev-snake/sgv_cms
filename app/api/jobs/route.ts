@@ -107,4 +107,4 @@ export const POST = withAuth(async (request) => {
     }
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.JOBS_WRITE] });
+}, { requiredPermissions: [PERMISSIONS.RECRUITMENT_CREATE] });

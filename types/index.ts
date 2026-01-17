@@ -71,27 +71,56 @@ export interface Contact {
 export interface User {
   id: string;
   username: string;
+  email?: string;
   full_name?: string;
-  role: string; // Legacy field
+  fullName?: string; // CamelCase from API
+  phone?: string;
+  is_active?: boolean;
+  isActive?: boolean; // CamelCase from API
+  is_locked?: boolean;
+  isLocked?: boolean; // CamelCase from API
+  role?: string; // Legacy field
   roles?: Role[]; // For list/detail views
-  permissions?: string[]; // For checking permissions
+  permissions?: string[]; // Flattened permission strings
   created_at?: string;
+  createdAt?: string; // CamelCase from API
   updated_at?: string;
+  updatedAt?: string; // CamelCase from API
+  deleted_at?: string | null;
+  deletedAt?: string | null; // CamelCase from API
+}
+
+export interface Module {
+  id: string;
+  code: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 export interface Permission {
   id: string;
-  name: string;
-  description: string;
-  module: string;
-  created_at?: string;
+  moduleId: string;
+  roleId: string;
+  module?: Module;
+  canView: boolean;
+  canCreate: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 export interface Role {
   id: string;
+  code: string;
   name: string;
   description: string;
   permissions?: Permission[];
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
+

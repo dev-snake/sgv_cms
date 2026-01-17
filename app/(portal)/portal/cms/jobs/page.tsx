@@ -30,6 +30,8 @@ import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { useAuth } from "@/hooks/use-auth";
+import { PERMISSIONS } from "@/constants/rbac";
 
 interface JobPosting {
   id: string;
@@ -54,6 +56,7 @@ const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
 };
 
 export default function JobsManagementPage() {
+  const { hasPermission } = useAuth();
   const [jobs, setJobs] = React.useState<JobPosting[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -134,11 +137,13 @@ export default function JobsManagementPage() {
           <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900">Quản lý Tuyển dụng</h1>
           <p className="text-sm text-muted-foreground font-medium">Quản lý các tin tuyển dụng của công ty.</p>
         </div>
-        <Link href={PORTAL_ROUTES.cms.jobs.add}>
-          <Button className="h-14 px-8 bg-brand-primary hover:bg-brand-secondary text-white rounded-none text-[10px] font-black uppercase tracking-widest shadow-lg">
-            <Plus size={18} className="mr-3" /> Thêm tin tuyển dụng
-          </Button>
-        </Link>
+        {hasPermission(PERMISSIONS.RECRUITMENT_CREATE) && (
+          <Link href={PORTAL_ROUTES.cms.jobs.add}>
+            <Button className="h-14 px-8 bg-brand-primary hover:bg-brand-secondary text-white rounded-none text-[10px] font-black uppercase tracking-widest shadow-lg">
+              <Plus size={18} className="mr-3" /> Thêm tin tuyển dụng
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Filters */}
@@ -221,20 +226,24 @@ export default function JobsManagementPage() {
                       <DropdownMenuContent align="end" className="rounded-none">
                         <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest">Thao tác</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href={PORTAL_ROUTES.cms.jobs.edit(job.id)} className="flex items-center gap-2 text-xs font-bold">
-                            <Edit2 size={14} /> Chỉnh sửa
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setItemToDelete(job);
-                            setDeleteDialogOpen(true);
-                          }}
-                          className="text-red-600 flex items-center gap-2 text-xs font-bold"
-                        >
-                          <Trash2 size={14} /> Xóa
-                        </DropdownMenuItem>
+                        {hasPermission(PERMISSIONS.RECRUITMENT_UPDATE) && (
+                          <DropdownMenuItem asChild>
+                            <Link href={PORTAL_ROUTES.cms.jobs.edit(job.id)} className="flex items-center gap-2 text-xs font-bold">
+                              <Edit2 size={14} /> Chỉnh sửa
+                            </Link>
+                          </DropdownMenuItem>
+                        )}
+                        {hasPermission(PERMISSIONS.RECRUITMENT_DELETE) && (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setItemToDelete(job);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="text-red-600 flex items-center gap-2 text-xs font-bold"
+                          >
+                            <Trash2 size={14} /> Xóa
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
