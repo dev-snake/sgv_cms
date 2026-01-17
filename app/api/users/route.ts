@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { users, user_roles, roles } from "@/db/schema";
 import { apiResponse, apiError } from "@/utils/api-response";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 // @ts-ignore
 import bcrypt from "bcryptjs";
 import { withAuth } from "@/middlewares/middleware";
@@ -12,32 +12,28 @@ import { AUTH } from "@/constants/app";
 // GET /api/users - List all users with their roles
 export const GET = withAuth(async () => {
   try {
-    const allUsers = await db
+    // Get all users with their roles in a single query using aggregation
+    const usersWithRoles = await db
       .select({
         id: users.id,
         username: users.username,
         full_name: users.full_name,
         role: users.role,
         created_at: users.created_at,
+        roles: sql<any[]>`
+          COALESCE(
+            json_agg(
+              json_build_object('id', ${roles.id}, 'name', ${roles.name})
+            ) FILTER (WHERE ${roles.id} IS NOT NULL),
+            '[]'
+          )
+        `,
       })
       .from(users)
+      .leftJoin(user_roles, eq(user_roles.user_id, users.id))
+      .leftJoin(roles, eq(user_roles.role_id, roles.id))
+      .groupBy(users.id)
       .orderBy(desc(users.created_at));
-
-    // Fetch roles for each user
-    const usersWithRoles = await Promise.all(
-      allUsers.map(async (user) => {
-        const userRoles = await db
-          .select({
-            id: roles.id,
-            name: roles.name,
-          })
-          .from(user_roles)
-          .innerJoin(roles, eq(user_roles.role_id, roles.id))
-          .where(eq(user_roles.user_id, user.id));
-        
-        return { ...user, roles: userRoles };
-      })
-    );
 
     return apiResponse(usersWithRoles);
   } catch (error) {
