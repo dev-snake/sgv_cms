@@ -94,6 +94,12 @@ const data = {
             requiredPermission: PERMISSIONS.CONTACTS_VIEW,
         },
         {
+            title: 'Quản lý Bình luận',
+            url: PORTAL_ROUTES.cms.comments.list,
+            icon: ClipboardList,
+            requiredPermission: PERMISSIONS.COMMENTS_VIEW,
+        },
+        {
             title: 'Quản lý Tuyển dụng',
             url: PORTAL_ROUTES.cms.jobs.list,
             icon: UserRoundSearch,
