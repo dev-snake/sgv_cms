@@ -51,4 +51,4 @@ export const POST = withAuth(async (request) => {
     console.error("Error creating module:", error);
     return apiError("Internal Server Error", 500);
   }
-}, { requiredPermissions: [PERMISSIONS.SYSTEM_VIEW] });
+}, { requiredPermissions: [PERMISSIONS.ROLES_VIEW] });

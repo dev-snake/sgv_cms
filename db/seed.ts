@@ -8,15 +8,18 @@ import { AUTH, SEED_DEFAULTS, COMPANY } from '@/constants/app';
 async function main() {
   console.log('Seeding database...');
 
-  // 1. Seed Modules
+  // 1. Seed Modules - Must match PERMISSION_MODULES in constants/rbac.ts
   const appModules = [
+    { code: 'DASHBOARD', name: 'Dashboard' },
     { code: 'BLOG', name: 'Blog Management' },
     { code: 'CMS', name: 'CMS Management' },
-    { code: 'CONTACT', name: 'Contact Management' },
-    { code: 'MEDIA', name: 'Media Management' },
+    { code: 'PRODUCTS', name: 'Products Management' },
     { code: 'PROJECTS', name: 'Projects Management' },
-    { code: 'ROLES', name: 'Roles Management' },
+    { code: 'MEDIA', name: 'Media Management' },
+    { code: 'RECRUITMENT', name: 'Recruitment Management' },
+    { code: 'CONTACTS', name: 'Contacts Management' },
     { code: 'USERS', name: 'Users Management' },
+    { code: 'ROLES', name: 'Roles Management' },
   ];
 
   for (const moduleData of appModules) {

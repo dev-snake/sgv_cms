@@ -86,7 +86,7 @@ const data = {
       title: "Cài đặt hệ thống",
       url: PORTAL_ROUTES.settings,
       icon: Settings,
-      requiredPermission: PERMISSIONS.SYSTEM_VIEW,
+      requiredPermission: PERMISSIONS.ROLES_VIEW,
     },
     {
        title: "Quản lý Liên hệ",
@@ -122,7 +122,7 @@ const data = {
       title: "Quản lý Module",
       url: PORTAL_ROUTES.users.modules.list,
       icon: Layers,
-      requiredPermission: PERMISSIONS.SYSTEM_VIEW,
+      requiredPermission: PERMISSIONS.ROLES_VIEW,
     },
   ],
 };

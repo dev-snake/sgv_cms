@@ -41,7 +41,6 @@ export const PERMISSION_MODULES = {
   CONTACTS: 'CONTACTS',
   USERS: 'USERS',
   ROLES: 'ROLES',
-  SYSTEM: 'SYSTEM',
 } as const;
 
 // Modules that cannot be deleted
@@ -100,17 +99,10 @@ export const PERMISSIONS = {
   USERS_UPDATE: 'USERS:UPDATE',
   USERS_DELETE: 'USERS:DELETE',
   
-  // Roles
   ROLES_VIEW: 'ROLES:VIEW',
   ROLES_CREATE: 'ROLES:CREATE',
   ROLES_UPDATE: 'ROLES:UPDATE',
   ROLES_DELETE: 'ROLES:DELETE',
-  
-  // System
-  SYSTEM_VIEW: 'SYSTEM:VIEW',
-  SYSTEM_CREATE: 'SYSTEM:CREATE',
-  SYSTEM_UPDATE: 'SYSTEM:UPDATE',
-  SYSTEM_DELETE: 'SYSTEM:DELETE',
 } as const;
 
 // Helper to build permission string
