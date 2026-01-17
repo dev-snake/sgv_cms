@@ -13,11 +13,9 @@ async function main() {
     { code: 'BLOG', name: 'Blog Management' },
     { code: 'CMS', name: 'CMS Management' },
     { code: 'CONTACT', name: 'Contact Management' },
-    { code: 'LOGS', name: 'Logs Management' },
     { code: 'MEDIA', name: 'Media Management' },
     { code: 'PROJECTS', name: 'Projects Management' },
     { code: 'ROLES', name: 'Roles Management' },
-    { code: 'SERVICES', name: 'Services Management' },
     { code: 'USERS', name: 'Users Management' },
   ];
 

@@ -42,7 +42,6 @@ export const PERMISSION_MODULES = {
   USERS: 'USERS',
   ROLES: 'ROLES',
   SYSTEM: 'SYSTEM',
-  SERVICES: 'SERVICES',
 } as const;
 
 // Modules that cannot be deleted

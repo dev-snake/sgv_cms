@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { modules, permissions } from "@/db/schema";
+import { modules } from "@/db/schema";
 import { apiResponse, apiError } from "@/utils/api-response";
 import { PERMISSIONS, PROTECTED_MODULES } from "@/constants/rbac";
 import { eq } from "drizzle-orm";
@@ -7,7 +7,7 @@ import { withAuth } from "@/middlewares/middleware";
 
 export const GET = withAuth(async (request, session, { params }) => {
   try {
-    const { id } = params;
+    const { id } = await params;
     const [module] = await db
       .select()
       .from(modules)
@@ -26,7 +26,7 @@ export const GET = withAuth(async (request, session, { params }) => {
 
 export const PATCH = withAuth(async (request, session, { params }) => {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { name, code } = body;
 
@@ -53,7 +53,7 @@ export const PATCH = withAuth(async (request, session, { params }) => {
 
 export const DELETE = withAuth(async (request, session, { params }) => {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     // Fetch module info
     const [module] = await db
@@ -65,20 +65,9 @@ export const DELETE = withAuth(async (request, session, { params }) => {
       return apiError("Không tìm thấy module", 404);
     }
 
-    // Protection 1: Check if it's a hardcoded protected module
+    // Protection: Check if it's a hardcoded protected module (System Module)
     if (PROTECTED_MODULES.includes(module.code)) {
       return apiError("Đây là module hệ thống, không thể xóa", 403);
-    }
-
-    // Protection 2: Check if it has any permissions assigned (in-use)
-    const inUse = await db
-      .select()
-      .from(permissions)
-      .where(eq(permissions.module_id, id))
-      .limit(1);
-
-    if (inUse.length > 0) {
-      return apiError("Module này đang được sử dụng trong ma trận phân quyền, không thể xóa", 403);
     }
 
     const [deletedModule] = await db
