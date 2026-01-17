@@ -3,7 +3,6 @@ import { jobPostings } from '@/db/schema';
 import { eq, desc, ilike, and, SQL, isNull } from 'drizzle-orm';
 import { apiResponse, apiError } from '@/utils/api-response';
 import { withAuth, withHybridAuth, hasPermission, isAdmin } from '@/middlewares/middleware';
-import { NextRequest } from 'next/server';
 import { PERMISSIONS } from '@/constants/rbac';
 
 // GET /api/jobs - List all job postings (Public/Protected Hybrid)
@@ -118,10 +117,10 @@ export const POST = withAuth(
                 .returning();
 
             return apiResponse(newJob, { status: 201 });
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error creating job:', error);
-            if (error.code === '23505') {
-                return apiError('A job with this slug already exists', 400);
+            if ((error as { code?: string }).code === '23505') {
+                return apiError('Tin tuyển dụng với slug này đã tồn tại', 400);
             }
             return apiError('Internal Server Error', 500);
         }

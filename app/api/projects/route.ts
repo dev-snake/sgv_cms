@@ -4,7 +4,6 @@ import { eq, desc, sql, and, or, ilike, gte, lte, isNull } from 'drizzle-orm';
 import { apiResponse, apiError } from '@/utils/api-response';
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from '@/utils/pagination';
 import { withAuth, withHybridAuth, hasPermission, isAdmin } from '@/middlewares/middleware';
-import { NextRequest } from 'next/server';
 import { PERMISSIONS } from '@/constants/rbac';
 import { PAGINATION } from '@/constants/app';
 
@@ -14,7 +13,7 @@ export const GET = withHybridAuth(
         try {
             const { searchParams } = new URL(request.url);
             const categoryId = searchParams.get('categoryId');
-            let status = searchParams.get('status') as 'ongoing' | 'completed' | null;
+            const status = searchParams.get('status') as 'ongoing' | 'completed' | null;
             const search = searchParams.get('search');
             const startDate = searchParams.get('startDate');
             const endDate = searchParams.get('endDate');
@@ -92,7 +91,7 @@ export const GET = withHybridAuth(
                 .offset(offset);
 
             if (conditions.length > 0) {
-                // @ts-ignore - Drizzle type issue with dynamic conditions
+                // @ts-expect-error - Drizzle type issue with dynamic conditions
                 query = query.where(and(...conditions));
             }
 
@@ -150,6 +149,9 @@ export const POST = withAuth(
             return apiResponse(newProject, { status: 201 });
         } catch (error) {
             console.error('Error creating project:', error);
+            if ((error as { code?: string }).code === '23505') {
+                return apiError('Dự án với slug này đã tồn tại', 400);
+            }
             return apiError('Internal Server Error', 500);
         }
     },

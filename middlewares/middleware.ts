@@ -3,7 +3,7 @@
  * Helper functions for authentication, authorization, and input validation
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { decrypt } from '@/services/auth';
 import { ZodSchema, ZodError } from 'zod';
 import { apiError } from '@/utils/api-response';
@@ -37,7 +37,7 @@ export async function verifyAuth(request: NextRequest): Promise<UserSession | nu
     try {
         const sessionData = await decrypt(session);
         return sessionData as UserSession;
-    } catch (error) {
+    } catch {
         return null;
     }
 }
@@ -198,13 +198,13 @@ export async function getUserOrError(
  * Wrapper for API route handlers with auth and validation
  */
 export function withAuth(
-    handler: (request: NextRequest, session: UserSession, context?: any) => Promise<Response>,
+    handler: (request: NextRequest, session: UserSession, context?: unknown) => Promise<Response>,
     options?: {
         allowedRoles?: string[];
         requiredPermissions?: string[];
     },
 ) {
-    return async (request: NextRequest, context?: any) => {
+    return async (request: NextRequest, context?: unknown) => {
         let sessionOrError: UserSession | Response;
 
         if (options?.allowedRoles) {
@@ -217,11 +217,11 @@ export function withAuth(
             return sessionOrError;
         }
 
+        const session = sessionOrError as UserSession;
+
         if (options?.requiredPermissions && options.requiredPermissions.length > 0) {
-            const hasAll = options.requiredPermissions.every((p) =>
-                hasPermission(sessionOrError.user, p),
-            );
-            if (!hasAll && !isAdmin(sessionOrError.user)) {
+            const hasAll = options.requiredPermissions.every((p) => hasPermission(session.user, p));
+            if (!hasAll && !isAdmin(session.user)) {
                 return apiError(
                     `Forbidden - Required permissions: ${options.requiredPermissions.join(', ')}`,
                     403,
@@ -229,7 +229,7 @@ export function withAuth(
             }
         }
 
-        return handler(request, sessionOrError, context);
+        return handler(request, session, context);
     };
 }
 
@@ -237,10 +237,10 @@ export function withAuth(
  * Wrapper for API route handlers with validation
  */
 export function withValidation<T>(
-    handler: (request: NextRequest, data: T, context?: any) => Promise<Response>,
+    handler: (request: NextRequest, data: T, context?: unknown) => Promise<Response>,
     schema: ZodSchema<T>,
 ) {
-    return async (request: NextRequest, context?: any) => {
+    return async (request: NextRequest, context?: unknown) => {
         const dataOrError = await validateBody(request, schema);
 
         if (dataOrError instanceof Response) {
@@ -260,14 +260,14 @@ export function withHybridAuth(
     handler: (
         request: NextRequest,
         session: UserSession | null,
-        context?: any,
+        context?: unknown,
     ) => Promise<Response>,
     options?: {
         requiredPermissions?: string[];
         publicStatuses?: string[];
     },
 ) {
-    return async (request: NextRequest, context?: any) => {
+    return async (request: NextRequest, context?: unknown) => {
         const session = await verifyAuth(request);
         const { searchParams } = new URL(request.url);
         const requestedStatus = searchParams.get('status');

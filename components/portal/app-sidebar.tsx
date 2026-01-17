@@ -12,7 +12,6 @@ import {
     LogOut,
     Lock,
     Mail,
-    Users,
     Images,
     UserRoundSearch,
     ClipboardList,
@@ -130,7 +129,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const pathname = usePathname();
     const router = useRouter();
-    const { user, hasPermission, isAdmin } = useAuth();
+    const { user, hasPermission } = useAuth();
     const [isMounted, setIsMounted] = React.useState(false);
 
     // Prevent hydration mismatch with Radix UI DropdownMenu
@@ -203,7 +202,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarContent className="scrollbar-hide bg-[#002d6b] py-2 overflow-x-hidden">
                 <SidebarGroup className="p-0">
                     <SidebarMenu className="gap-0 group-data-[collapsible=icon]:items-center">
-                        {data.navMain.map((item: any) => {
+                        {data.navMain.map((item) => {
                             // Strictly hide unauthorized items (lm đúng rồi)
                             if (
                                 item.requiredPermission &&

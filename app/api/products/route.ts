@@ -2,7 +2,7 @@ import { db } from '@/db';
 import { products, categories } from '@/db/schema';
 import { eq, desc, sql, and, or, ilike, gte, lte, isNull } from 'drizzle-orm';
 import { apiResponse, apiError } from '@/utils/api-response';
-import { parsePaginationParams, calculateOffset, createPaginationMeta } from '@/utils/pagination';
+import { calculateOffset, createPaginationMeta } from '@/utils/pagination';
 import { createProductSchema, productFilterSchema } from '@/validations/product.schema';
 import {
     validateQuery,
@@ -13,9 +13,7 @@ import {
     isAdmin,
 } from '@/middlewares/middleware';
 import { ZodError } from 'zod';
-import { NextRequest } from 'next/server';
 import { PERMISSIONS } from '@/constants/rbac';
-import { PAGINATION } from '@/constants/app';
 
 // GET /api/products - List products with pagination (Public/Protected Hybrid)
 export const GET = withHybridAuth(
@@ -29,17 +27,17 @@ export const GET = withHybridAuth(
                 return filterValidation;
             }
 
-            let {
+            const {
                 categoryId,
-                status,
                 isFeatured,
                 search,
                 startDate,
                 endDate,
-                includeDeleted,
                 page = 1,
                 limit = 12,
             } = filterValidation;
+
+            let { status, includeDeleted } = filterValidation;
 
             // Authorization protection
             const isAuthorized =
@@ -119,7 +117,7 @@ export const GET = withHybridAuth(
                 .offset(offset);
 
             if (conditions.length > 0) {
-                // @ts-ignore - Drizzle type issue with dynamic conditions
+                // @ts-expect-error - Drizzle type issue with dynamic conditions
                 query = query.where(and(...conditions));
             }
 
@@ -188,11 +186,11 @@ export const POST = withAuth(
             }
 
             // Handle database constraint errors
-            if ((error as any).code === '23505') {
+            if ((error as { code?: string }).code === '23505') {
                 // Unique violation
                 return apiError('Duplicate value - SKU or Slug already exists', 409);
             }
-            if ((error as any).code === '23503') {
+            if ((error as { code?: string }).code === '23503') {
                 // Foreign key violation
                 return apiError('Invalid category_id', 404);
             }
