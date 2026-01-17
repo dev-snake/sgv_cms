@@ -132,10 +132,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const handleLogout = async () => {
     try {
       await api.post("/api/auth/logout");
-      // LocalStorage cleanup is now optional as we use cookies, 
-      // but let's keep it clean if anything was left.
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      // Cookies are cleared by the server, no need to clear localStorage
       toast.success("Đã đăng xuất");
       router.push("/login");
       router.refresh();

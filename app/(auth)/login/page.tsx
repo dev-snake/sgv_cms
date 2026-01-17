@@ -25,9 +25,8 @@ export default function LoginPage() {
 
     try {
       const res = await api.post(API_ROUTES.AUTH.LOGIN, formData);
-      const { accessToken, refreshToken } = res.data.data;
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+      // Tokens are now stored in httpOnly cookies by the server
+      // No need to manually store them in localStorage
 
       toast.success("Đăng nhập thành công! Đang chuyển hướng...");
       router.push(ADMIN_ROUTES.DASHBOARD);
