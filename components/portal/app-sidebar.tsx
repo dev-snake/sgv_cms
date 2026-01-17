@@ -116,11 +116,6 @@ const data = {
       requiredPermission: "rbac:manage",
     },
   ],
-  user: {
-    name: "Quản trị viên",
-    email: "admin@saigonvalve.vn",
-    avatar: "AD",
-  },
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -239,7 +234,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter className="p-0 bg-[#002d6b] gap-0 border-t border-white/5 shrink-0 overflow-hidden flex flex-col group-data-[collapsible=icon]:items-center">
-        {isMounted ? (
+        {!isMounted || !user ? (
+          // Skeleton loading state
+          <div className="w-full h-14 flex items-center gap-3 px-4 bg-[#001d4a] text-white group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+            <div className="flex h-8 w-8 items-center justify-center rounded-none bg-white/20 animate-pulse shrink-0" />
+            <div className="flex flex-col items-start leading-none group-data-[collapsible=icon]:hidden overflow-hidden ms-1 gap-1.5">
+              <div className="h-2.5 w-20 bg-white/20 rounded animate-pulse" />
+              <div className="h-2 w-28 bg-white/10 rounded animate-pulse" />
+            </div>
+          </div>
+        ) : (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
@@ -247,11 +251,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 className="w-full h-14 items-center gap-3 px-4 bg-[#001d4a] hover:bg-[#001d4a] text-white rounded-none group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer"
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-none bg-[#fbbf24] text-[10px] font-black text-[#002d6b] shrink-0">
-                  {data.user.avatar}
+                  {(user.full_name || user.username || "?").substring(0, 2).toUpperCase()}
                 </div>
                 <div className="flex flex-col items-start leading-none group-data-[collapsible=icon]:hidden overflow-hidden ms-1">
-                  <span className="text-[10px] font-black uppercase tracking-tight truncate w-full">{user?.full_name || user?.username || "Guest"}</span>
-                  <span className="text-[8px] font-medium text-white/30 lowercase mt-0.5 truncate w-full">{user?.username}@saigonvalve.vn</span>
+                  <span className="text-[10px] font-black uppercase tracking-tight truncate w-full">{user.full_name || user.username}</span>
+                  <span className="text-[8px] font-medium text-white/30 lowercase mt-0.5 truncate w-full">{user.username}@saigonvalve.vn</span>
                 </div>
                 <ChevronRight className="ml-auto size-3 text-white/20 group-data-[collapsible=icon]:hidden" />
               </SidebarMenuButton>
@@ -279,16 +283,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
-          <div className="w-full h-14 flex items-center gap-3 px-4 bg-[#001d4a] text-white group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
-            <div className="flex h-8 w-8 items-center justify-center rounded-none bg-[#fbbf24] text-[10px] font-black text-[#002d6b] shrink-0">
-              {data.user.avatar}
-            </div>
-            <div className="flex flex-col items-start leading-none group-data-[collapsible=icon]:hidden overflow-hidden ms-1">
-              <span className="text-[10px] font-black uppercase tracking-tight truncate w-full">{data.user.name}</span>
-              <span className="text-[8px] font-medium text-white/30 lowercase mt-0.5 truncate w-full">{data.user.email}</span>
-            </div>
-          </div>
         )}
       </SidebarFooter>
 
