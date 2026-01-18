@@ -17,6 +17,7 @@ import {
     ClipboardList,
     ShieldCheck,
     Layers,
+    MessageCircle,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -98,6 +99,11 @@ const data = {
             url: PORTAL_ROUTES.cms.comments.list,
             icon: ClipboardList,
             requiredPermission: PERMISSIONS.COMMENTS_VIEW,
+        },
+        {
+            title: 'Hỗ trợ trực tuyến',
+            url: PORTAL_ROUTES.cms.chat,
+            icon: MessageCircle,
         },
         {
             title: 'Quản lý Tuyển dụng',

@@ -253,3 +253,29 @@ export const productComments = pgTable('product_comments', {
     updated_at: timestamp('updated_at').defaultNow().notNull(),
     deleted_at: timestamp('deleted_at'),
 });
+
+// Real-time Chat System
+export const chatSessions = pgTable('chat_sessions', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    guest_id: varchar('guest_id', { length: 255 }).notNull(), // Client-side generated ID
+    guest_name: varchar('guest_name', { length: 255 }),
+    last_message_at: timestamp('last_message_at').defaultNow().notNull(),
+    is_active: boolean('is_active').default(true).notNull(),
+    admin_last_seen_at: timestamp('admin_last_seen_at'),
+    guest_last_seen_at: timestamp('guest_last_seen_at'),
+    created_at: timestamp('created_at').defaultNow().notNull(),
+    updated_at: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const chatMessages = pgTable('chat_messages', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    session_id: uuid('session_id')
+        .references(() => chatSessions.id, { onDelete: 'cascade' })
+        .notNull(),
+    sender_type: varchar('sender_type', { length: 20 }).notNull(), // 'guest' or 'admin'
+    sender_id: uuid('sender_id'), // User ID if admin, null if guest
+    content: text('content').notNull(),
+    reply_to_id: uuid('reply_to_id'), // Self-reference for replies
+    is_deleted: boolean('is_deleted').default(false).notNull(),
+    created_at: timestamp('created_at').defaultNow().notNull(),
+});

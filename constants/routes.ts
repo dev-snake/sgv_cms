@@ -67,6 +67,7 @@ export const PORTAL_ROUTES = {
         comments: {
             list: '/portal/cms/comments',
         },
+        chat: '/portal/cms/chat',
         media: '/portal/cms/media',
     },
 
