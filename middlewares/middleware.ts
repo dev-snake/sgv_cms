@@ -198,13 +198,13 @@ export async function getUserOrError(
  * Wrapper for API route handlers with auth and validation
  */
 export function withAuth(
-    handler: (request: NextRequest, session: UserSession, context?: unknown) => Promise<Response>,
+    handler: (request: NextRequest, session: UserSession, context?: any) => Promise<Response>,
     options?: {
         allowedRoles?: string[];
         requiredPermissions?: string[];
     },
 ) {
-    return async (request: NextRequest, context?: unknown) => {
+    return async (request: NextRequest, context?: any) => {
         let sessionOrError: UserSession | Response;
 
         if (options?.allowedRoles) {
@@ -260,14 +260,14 @@ export function withHybridAuth(
     handler: (
         request: NextRequest,
         session: UserSession | null,
-        context?: unknown,
+        context?: any,
     ) => Promise<Response>,
     options?: {
         requiredPermissions?: string[];
         publicStatuses?: string[];
     },
 ) {
-    return async (request: NextRequest, context?: unknown) => {
+    return async (request: NextRequest, context?: any) => {
         const session = await verifyAuth(request);
         const { searchParams } = new URL(request.url);
         const requestedStatus = searchParams.get('status');
