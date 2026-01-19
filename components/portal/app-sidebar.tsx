@@ -18,6 +18,7 @@ import {
     ShieldCheck,
     Layers,
     MessageCircle,
+    LucideIcon,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -43,108 +44,41 @@ import {
 import { usePathname, useRouter } from 'next/navigation';
 import api from '@/services/axios';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth, SidebarModule } from '@/hooks/use-auth';
 
 import { cn } from '@/lib/utils';
 import { PORTAL_ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 
-import { PERMISSIONS } from '@/constants/rbac';
+const ICON_MAP: Record<string, LucideIcon> = {
+    LayoutDashboard,
+    FileText,
+    Briefcase,
+    Box,
+    Images,
+    Settings,
+    Mail,
+    ClipboardList,
+    MessageCircle,
+    UserRoundSearch,
+    ShieldCheck,
+    Lock,
+    Layers,
+    User,
+};
+const DEFAULT_ICON = FileText;
 
-const data = {
-    navMain: [
-        {
-            title: 'Dashboard',
-            url: PORTAL_ROUTES.dashboard,
-            icon: LayoutDashboard,
-        },
-        {
-            title: 'Quản lý Tin tức',
-            url: PORTAL_ROUTES.cms.news.list,
-            icon: FileText,
-            requiredPermission: PERMISSIONS.BLOG_VIEW,
-        },
-        {
-            title: 'Quản lý Dự án',
-            url: PORTAL_ROUTES.cms.projects.list,
-            icon: Briefcase,
-            requiredPermission: PERMISSIONS.PROJECTS_VIEW,
-        },
-        {
-            title: 'Quản lý Sản phẩm',
-            url: PORTAL_ROUTES.cms.products.list,
-            icon: Box,
-            requiredPermission: PERMISSIONS.PRODUCTS_VIEW,
-        },
-        {
-            title: 'Thư viện Media',
-            url: PORTAL_ROUTES.cms.media,
-            icon: Images,
-            requiredPermission: PERMISSIONS.MEDIA_VIEW,
-        },
-        {
-            title: 'Cài đặt hệ thống',
-            url: PORTAL_ROUTES.settings,
-            icon: Settings,
-            requiredPermission: PERMISSIONS.ROLES_VIEW,
-        },
-        {
-            title: 'Quản lý Liên hệ',
-            url: PORTAL_ROUTES.contacts,
-            icon: Mail,
-            requiredPermission: PERMISSIONS.CONTACTS_VIEW,
-        },
-        {
-            title: 'Quản lý Bình luận',
-            url: PORTAL_ROUTES.cms.comments.list,
-            icon: ClipboardList,
-            requiredPermission: PERMISSIONS.COMMENTS_VIEW,
-        },
-        {
-            title: 'Hỗ trợ trực tuyến',
-            url: PORTAL_ROUTES.cms.chat,
-            icon: MessageCircle,
-        },
-        {
-            title: 'Quản lý Tuyển dụng',
-            url: PORTAL_ROUTES.cms.jobs.list,
-            icon: UserRoundSearch,
-            requiredPermission: PERMISSIONS.RECRUITMENT_VIEW,
-        },
-        {
-            title: 'Danh sách Ứng viên',
-            url: PORTAL_ROUTES.cms.applications.list,
-            icon: ClipboardList,
-            requiredPermission: PERMISSIONS.RECRUITMENT_VIEW,
-        },
-        {
-            title: 'Tài khoản Admin',
-            url: PORTAL_ROUTES.users.list,
-            icon: ShieldCheck,
-            requiredPermission: PERMISSIONS.USERS_VIEW,
-        },
-        {
-            title: 'Phân quyền & Vai trò',
-            url: PORTAL_ROUTES.users.roles.list,
-            icon: Lock,
-            requiredPermission: PERMISSIONS.ROLES_VIEW,
-        },
-        {
-            title: 'Quản lý Module',
-            url: PORTAL_ROUTES.users.modules.list,
-            icon: Layers,
-            requiredPermission: PERMISSIONS.ROLES_VIEW,
-        },
-    ],
+const getIconComponent = (iconName: string | null): LucideIcon => {
+    if (!iconName) return DEFAULT_ICON;
+    return ICON_MAP[iconName] || DEFAULT_ICON;
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const pathname = usePathname();
     const router = useRouter();
-    const { user, hasPermission } = useAuth();
+    const { user, isSuperAdmin } = useAuth();
     const [isMounted, setIsMounted] = React.useState(false);
 
-    // Prevent hydration mismatch with Radix UI DropdownMenu
     React.useEffect(() => {
         setIsMounted(true);
     }, []);
@@ -152,7 +86,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const handleLogout = async () => {
         try {
             await api.post('/api/auth/logout');
-            // Cookies are cleared by the server, no need to clear localStorage
             toast.success('Đã đăng xuất');
             router.push('/login');
             router.refresh();
@@ -160,6 +93,44 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             console.error('Logout failed', error);
             toast.error('Lỗi khi đăng xuất');
         }
+    };
+
+    // Build navigation items from user modules
+    const navItems = React.useMemo(() => {
+        if (!user?.modules) return [];
+
+        // Map modules from user permissions
+        return user.modules
+            .filter((module: SidebarModule) => !!module.route)
+            .map((module: SidebarModule) => ({
+                title: module.name,
+                url: module.route as string,
+                icon: getIconComponent(module.icon),
+                code: module.code,
+            }));
+    }, [user?.modules]);
+
+    const isPathActive = (url: string) => {
+        if (!url) return false;
+
+        // Nếu path khớp hoàn toàn
+        if (pathname === url) return true;
+
+        // Nếu path bắt đầu bằng url/ (để active cho các trang con)
+        if (pathname.startsWith(url + '/')) {
+            // Kiểm tra xem có item nào khác trong menu có URL dài hơn và cũng khớp không
+            // Nếu có, thì item hiện tại (ngắn hơn) sẽ không được coi là active chủ đạo
+            const hasBetterMatch = navItems.some(
+                (item) =>
+                    item.url !== url &&
+                    item.url.length > url.length &&
+                    (pathname === item.url || pathname.startsWith(item.url + '/')),
+            );
+
+            return !hasBetterMatch;
+        }
+
+        return false;
     };
 
     return (
@@ -214,33 +185,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarContent className="scrollbar-hide bg-[#002d6b] py-2 overflow-x-hidden">
                 <SidebarGroup className="p-0">
                     <SidebarMenu className="gap-0 group-data-[collapsible=icon]:items-center">
-                        {data.navMain.map((item) => {
-                            // Strictly hide unauthorized items (lm đúng rồi)
-                            if (
-                                item.requiredPermission &&
-                                !hasPermission(item.requiredPermission)
-                            ) {
-                                return null;
-                            }
-
-                            const isActive = (() => {
-                                if (item.url === PORTAL_ROUTES.dashboard) {
-                                    return pathname === PORTAL_ROUTES.dashboard;
-                                }
-                                if (item.url === PORTAL_ROUTES.users.list) {
-                                    return (
-                                        pathname === PORTAL_ROUTES.users.list ||
-                                        (pathname.startsWith(PORTAL_ROUTES.users.list) &&
-                                            !pathname.startsWith(PORTAL_ROUTES.users.roles.list) &&
-                                            !pathname.startsWith(PORTAL_ROUTES.users.modules.list))
-                                    );
-                                }
-                                return pathname.startsWith(item.url);
-                            })();
+                        {navItems.map((item) => {
+                            const isActive = isPathActive(item.url);
 
                             return (
                                 <SidebarMenuItem
-                                    key={item.title}
+                                    key={item.url}
                                     className="w-full flex justify-center"
                                 >
                                     <SidebarMenuButton
