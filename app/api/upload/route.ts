@@ -51,9 +51,11 @@ export const GET = withAuth(
                             '.docx',
                         ];
                         if (allowedExtensions.some((ext) => file.toLowerCase().endsWith(ext))) {
+                            // Normalize path to use forward slashes for URL
+                            const normalizedUrlPath = relativePublic.split(path.sep).join('/');
                             results.push({
-                                filename: relativeFromUploads,
-                                url: `/${relativePublic}`,
+                                filename: relativeFromUploads.split(path.sep).join('/'),
+                                url: `/${normalizedUrlPath}`,
                                 size: fileStat.size,
                                 createdAt: fileStat.birthtime,
                             });
@@ -146,7 +148,9 @@ export const DELETE = withAuth(
 
             // Prevent path traversal attacks
             const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-            const filepath = path.join(uploadsDir, filename);
+            // Normalize filename back to OS-specific path if it contains forward slashes
+            const safeFilename = filename.split('/').join(path.sep);
+            const filepath = path.join(uploadsDir, safeFilename);
 
             // Security check: Ensure the resolved path is inside the uploads directory
             if (!filepath.startsWith(uploadsDir)) {
