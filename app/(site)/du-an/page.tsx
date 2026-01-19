@@ -84,7 +84,7 @@ export default function ProjectsPage() {
             <section className="relative pt-40 pb-20 bg-slate-900 overflow-hidden">
                 <div className="absolute inset-0 z-0 opacity-40">
                     <Image
-                        src="https://images.unsplash.com/photo-1541888941259-712398670bc7?auto=format&fit=crop&q=80&w=2000"
+                        src="/uploads/images/2026/01/19/1768814857344-hfho0c.png"
                         alt="Projects Background"
                         fill
                         className="object-cover"
