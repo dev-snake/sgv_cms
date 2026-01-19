@@ -26,11 +26,12 @@ import {
 } from '@/components/ui/accordion';
 import { toast } from 'sonner';
 import api from '@/services/axios';
+import { COMPANY_INFO } from '@/constants/site-info';
 
 const FAQS = [
     {
         q: 'LÀM THẾ NÀO ĐỂ NHẬN BÁO GIÁ CHO DỰ ÁN?',
-        a: 'Quý khách có thể gửi yêu cầu trực tiếp qua form liên hệ bên dưới, hoặc gọi hotline (028) 3535 8739. Đội ngũ kỹ thuật sẽ phản hồi và gửi báo giá chi tiết trong vòng 2-4 giờ làm việc.',
+        a: `Quý khách có thể gửi yêu cầu trực tiếp qua form liên hệ bên dưới, hoặc gọi hotline ${COMPANY_INFO.phone}. Đội ngũ kỹ thuật sẽ phản hồi và gửi báo giá chi tiết trong vòng 2-4 giờ làm việc.`,
     },
     {
         q: 'SÀI GÒN VALVE CÓ CUNG CẤP DỊCH VỤ LẮP ĐẶT TẬN NƠI KHÔNG?',
@@ -140,26 +141,26 @@ export default function ContactPage() {
                                     {
                                         icon: Phone,
                                         label: 'HOTLINE KINH DOANH',
-                                        value: '(028) 3535 8739',
+                                        value: COMPANY_INFO.phone,
                                         sub: 'Tư vấn báo giá',
                                     },
                                     {
                                         icon: Headset,
                                         label: 'HỖ TRỢ KỸ THUẬT',
-                                        value: '0901 234 567',
+                                        value: COMPANY_INFO.hotline,
                                         sub: 'Zalo / Viber 24/7',
                                     },
                                     {
                                         icon: Mail,
                                         label: 'VĂN PHÒNG ĐIỆN TỬ',
-                                        value: 'info@saigonvalve.vn',
+                                        value: COMPANY_INFO.email,
                                         sub: 'Phản hồi chính thức',
                                     },
                                     {
                                         icon: MapPin,
                                         label: 'TRỤ SỞ CHÍNH',
-                                        value: 'TP. Thủ Đức, TP. HCM',
-                                        sub: '124/16-18 Võ Văn Hát',
+                                        value: COMPANY_INFO.address,
+                                        sub: 'Văn phòng chính',
                                     },
                                 ].map((item, i) => (
                                     <div key={i} className="space-y-4">
