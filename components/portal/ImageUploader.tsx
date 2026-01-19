@@ -232,7 +232,7 @@ export function ImageUploader({
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveGalleryImage(index)}
-                                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-none opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                                 >
                                     <X size={12} />
                                 </button>
@@ -312,7 +312,7 @@ export function ImageUploader({
                                             />
                                             {(value === image.url ||
                                                 gallery.includes(image.url)) && (
-                                                <div className="absolute top-1 right-1 p-1 bg-brand-primary text-white rounded-full">
+                                                <div className="absolute top-1 right-1 p-1 bg-brand-primary text-white rounded-none">
                                                     <Check size={10} />
                                                 </div>
                                             )}

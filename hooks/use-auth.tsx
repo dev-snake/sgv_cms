@@ -23,6 +23,8 @@ export interface AuthUser {
     email?: string;
     isActive?: boolean;
     is_super?: boolean; // New flag for system-wide super access
+    avatarUrl?: string; // Image URL for profile
+    phone?: string;
     roles: string[]; // Role codes
     permissions: string[]; // Permission strings
     modules: SidebarModule[]; // Modules for sidebar
@@ -102,6 +104,8 @@ export function useAuth() {
                     email: profileData.email,
                     isActive: profileData.isActive,
                     is_super: isSystemSuper,
+                    avatarUrl: profileData.avatarUrl,
+                    phone: profileData.phone,
                     roles: roleCodes,
                     permissions: Array.from(new Set(permissionStrings)), // Unique permissions
                     modules: sidebarModules,

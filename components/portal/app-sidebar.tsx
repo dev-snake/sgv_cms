@@ -247,10 +247,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 size="lg"
                                 className="w-full h-14 items-center gap-3 px-4   bg-[#001d4a] hover:bg-[#001d4a] text-white rounded-none group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer"
                             >
-                                <div className="flex h-8 w-8  items-center justify-center rounded-none  bg-[#fbbf24] text-[10px] font-black text-[#002d6b] shrink-0">
-                                    {(user.fullName || user.username || '?')
-                                        .substring(0, 2)
-                                        .toUpperCase()}
+                                <div className="flex h-8 w-8  items-center justify-center rounded-none  bg-[#fbbf24] text-[10px] font-black text-[#002d6b] shrink-0 overflow-hidden">
+                                    {user.avatarUrl ? (
+                                        <Image
+                                            src={user.avatarUrl}
+                                            alt={user.fullName || user.username}
+                                            width={32}
+                                            height={32}
+                                            className="object-cover w-full h-full"
+                                        />
+                                    ) : (
+                                        (user.fullName || user.username || '?')
+                                            .substring(0, 2)
+                                            .toUpperCase()
+                                    )}
                                 </div>
                                 <div className="flex flex-col items-start leading-none group-data-[collapsible=icon]:hidden overflow-hidden ms-1">
                                     <span className="text-[10px] font-black uppercase tracking-tight truncate w-full">
@@ -275,11 +285,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 </p>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator className="bg-white/5 m-0" />
-                            <DropdownMenuItem className="px-5 py-3 focus:bg-white/10 focus:text-white cursor-pointer rounded-none group border-none outline-none">
-                                <User className="size-4 text-[#fbbf24] mr-3" />
-                                <span className="text-[10px] font-black uppercase tracking-widest">
-                                    Hồ sơ
-                                </span>
+                            <DropdownMenuItem
+                                asChild
+                                className="px-5 py-3 focus:bg-white/10 focus:text-white cursor-pointer rounded-none group border-none outline-none"
+                            >
+                                <Link
+                                    href={PORTAL_ROUTES.settings}
+                                    className="flex items-center w-full"
+                                >
+                                    <User className="size-4 text-[#fbbf24] mr-3" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">
+                                        Hồ sơ
+                                    </span>
+                                </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-white/5 m-0" />
                             <DropdownMenuItem

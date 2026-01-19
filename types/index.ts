@@ -79,6 +79,7 @@ export interface User {
     isActive?: boolean; // CamelCase from API
     is_locked?: boolean;
     isLocked?: boolean; // CamelCase from API
+    avatarUrl?: string; // Image URL for profile
     role?: string; // Legacy field
     roles?: Role[]; // For list/detail views
     permissions?: string[]; // Flattened permission strings

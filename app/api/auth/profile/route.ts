@@ -25,6 +25,7 @@ export async function GET() {
                 phone: users.phone,
                 isActive: users.is_active,
                 isLocked: users.is_locked,
+                avatarUrl: users.avatar_url,
             })
             .from(users)
             .where(eq(users.id, userId));
@@ -99,6 +100,47 @@ export async function GET() {
         });
     } catch (error) {
         console.error('Profile Error:', error);
+        return apiError('Internal Server Error', 500);
+    }
+}
+
+export async function PATCH(request: Request) {
+    try {
+        const session = await getSession();
+        if (!session || !session.user) {
+            return apiError('Unauthorized', 401);
+        }
+
+        const userId = session.user.id;
+        const body = await request.json();
+        const { fullName, phone, avatarUrl } = body;
+
+        const [updatedUser] = await db
+            .update(users)
+            .set({
+                full_name: fullName,
+                phone: phone,
+                avatar_url: avatarUrl,
+                updated_at: new Date(),
+            })
+            .where(eq(users.id, userId))
+            .returning();
+
+        if (!updatedUser) {
+            return apiError('User not found', 404);
+        }
+
+        return apiResponse({
+            id: updatedUser.id,
+            email: updatedUser.email,
+            fullName: updatedUser.full_name,
+            phone: updatedUser.phone,
+            avatarUrl: updatedUser.avatar_url,
+            isActive: updatedUser.is_active,
+            isLocked: updatedUser.is_locked,
+        });
+    } catch (error) {
+        console.error('Update Profile Error:', error);
         return apiError('Internal Server Error', 500);
     }
 }

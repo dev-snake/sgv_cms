@@ -130,6 +130,7 @@ export const users = pgTable('users', {
     phone: varchar('phone', { length: 20 }),
     is_active: boolean('is_active').default(true).notNull(),
     is_locked: boolean('is_locked').default(false).notNull(),
+    avatar_url: varchar('avatar_url', { length: 255 }),
     created_at: timestamp('created_at').defaultNow().notNull(),
     updated_at: timestamp('updated_at').defaultNow().notNull(),
     deleted_at: timestamp('deleted_at'),
