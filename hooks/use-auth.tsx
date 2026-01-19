@@ -1,111 +1,150 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import Cookies from "js-cookie";
-import { decodeJwt } from "jose";
-import { SUPER_ADMIN_ROLE, RBAC_ROLES } from "@/constants/rbac";
-import api from "@/services/axios";
-import axios from "axios";
-import { API_ROUTES } from "@/constants/routes";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import Cookies from 'js-cookie';
+import { decodeJwt } from 'jose';
+import { SUPER_ADMIN_ROLE, RBAC_ROLES } from '@/constants/rbac';
+import api from '@/services/axios';
+import axios from 'axios';
+import { API_ROUTES } from '@/constants/routes';
 
 export interface AuthUser {
-  id: string;
-  username: string;
-  fullName?: string;
-  email?: string;
-  isActive?: boolean;
-  roles: string[]; // Role codes
-  permissions: string[]; // Permission strings
+    id: string;
+    username: string;
+    fullName?: string;
+    email?: string;
+    isActive?: boolean;
+    roles: string[]; // Role codes
+    permissions: string[]; // Permission strings
+    modules?: Array<{
+        code: string;
+        name: string;
+        routePath: string;
+        icon: string;
+        sortOrder: number;
+        canView: boolean;
+    }>;
 }
 
 export function useAuth() {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const isInitialized = useRef(false);
+    const [user, setUser] = useState<AuthUser | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const isInitialized = useRef(false);
 
-  const refreshUser = useCallback(async () => {
-    setIsLoading(true);
-    
-    // 1. First try to get initial state from JWT for immediate UI feedback
-    const token = Cookies.get("accessToken");
-    if (token && !isInitialized.current) {
-      try {
-        const decoded = decodeJwt(token) as { user: AuthUser };
-        setUser(decoded.user);
-      } catch (error) {
-        console.error("Failed to decode token", error);
-      }
-    }
+    const refreshUser = useCallback(async () => {
+        setIsLoading(true);
 
-    // 2. Fetch fresh data from server to ensure accuracy
-    try {
-      const response = await api.get(API_ROUTES.AUTH.PROFILE);
-      if (response.data.success) {
-        const profileData = response.data.data;
-        
-        // Flatten roles and permissions from the nested structure
-        const roleCodes = profileData.roles.map((r: any) => r.code);
-        const permissionStrings = profileData.roles.flatMap((r: any) => 
-          r.permissions.map((p: any) => `${p.module.code}:${p.canView ? 'VIEW' : ''}${p.canCreate ? ',CREATE' : ''}${p.canUpdate ? ',UPDATE' : ''}${p.canDelete ? ',DELETE' : ''}`)
-            .flatMap((s: string) => {
-              const [mod, perms] = s.split(':');
-              return perms.split(',').filter(Boolean).map(p => `${mod}:${p}`);
-            })
-        );
+        // 1. First try to get initial state from JWT for immediate UI feedback
+        const token = Cookies.get('accessToken');
+        if (token && !isInitialized.current) {
+            try {
+                const decoded = decodeJwt(token) as { user: AuthUser };
+                setUser(decoded.user);
+            } catch (error) {
+                console.error('Failed to decode token', error);
+            }
+        }
 
-        const synchronizedUser: AuthUser = {
-          id: profileData.id,
-          username: profileData.username || profileData.email.split('@')[0],
-          fullName: profileData.fullName,
-          email: profileData.email,
-          isActive: profileData.isActive,
-          roles: roleCodes,
-          permissions: Array.from(new Set(permissionStrings)), // Unique permissions
-        };
+        // 2. Fetch fresh data from server to ensure accuracy
+        try {
+            const response = await api.get(API_ROUTES.AUTH.PROFILE);
+            if (response.data.success) {
+                const profileData = response.data.data;
 
-        setUser(synchronizedUser);
-      } else {
-        setUser(null);
-      }
-    } catch (error: any) {
-      console.error("Failed to fetch profile", error);
-      // Only clear user if it's a 401/403
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        setUser(null);
-      }
-    } finally {
-      setIsLoading(false);
-      isInitialized.current = true;
-    }
-  }, []);
+                // Flatten roles and permissions from the nested structure
+                const roleCodes = profileData.roles.map((r: any) => r.code);
 
-  useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+                // Map modules and their view status
+                const moduleMap = new Map<string, any>();
+                profileData.roles.forEach((r: any) => {
+                    r.permissions.forEach((p: any) => {
+                        if (p.canView) {
+                            const mod = p.module;
+                            if (mod.routePath) {
+                                // Only include modules with routes in the menu
+                                moduleMap.set(mod.code, {
+                                    code: mod.code,
+                                    name: mod.name,
+                                    routePath: mod.routePath,
+                                    icon: mod.icon,
+                                    sortOrder: mod.sortOrder,
+                                    canView: true,
+                                });
+                            }
+                        }
+                    });
+                });
 
-  const hasPermission = (permission: string) => {
-    if (!user) return false;
-    // Super admins have all permissions
-    if (user.roles?.includes(SUPER_ADMIN_ROLE)) return true;
-    return user.permissions?.includes(permission) || false;
-  };
+                const permissionStrings = profileData.roles.flatMap((r: any) =>
+                    r.permissions
+                        .map(
+                            (p: any) =>
+                                `${p.module.code}:${p.canView ? 'VIEW' : ''}${p.canCreate ? ',CREATE' : ''}${p.canUpdate ? ',UPDATE' : ''}${p.canDelete ? ',DELETE' : ''}`,
+                        )
+                        .flatMap((s: string) => {
+                            const [mod, perms] = s.split(':');
+                            return perms
+                                .split(',')
+                                .filter(Boolean)
+                                .map((p) => `${mod}:${p}`);
+                        }),
+                );
 
-  const hasRole = (roleCode: string) => {
-    if (!user) return false;
-    return user.roles?.includes(roleCode) || false;
-  };
+                const synchronizedUser: AuthUser = {
+                    id: profileData.id,
+                    username: profileData.username || profileData.email.split('@')[0],
+                    fullName: profileData.fullName,
+                    email: profileData.email,
+                    isActive: profileData.isActive,
+                    roles: roleCodes,
+                    permissions: Array.from(new Set(permissionStrings)), // Unique permissions
+                    modules: Array.from(moduleMap.values()).sort(
+                        (a, b) => a.sortOrder - b.sortOrder,
+                    ),
+                };
 
-  // isAdmin only checks if user has 'SUPER_ADMIN' role in RBAC system
-  const isSuperAdmin = user?.roles?.includes(SUPER_ADMIN_ROLE) || false;
+                setUser(synchronizedUser);
+            } else {
+                setUser(null);
+            }
+        } catch (error: any) {
+            console.error('Failed to fetch profile', error);
+            // Only clear user if it's a 401/403
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                setUser(null);
+            }
+        } finally {
+            setIsLoading(false);
+            isInitialized.current = true;
+        }
+    }, []);
 
-  return {
-    user,
-    isLoading,
-    hasPermission,
-    hasRole,
-    refreshUser,
-    isSuperAdmin,
-    isAdmin: isSuperAdmin || user?.roles?.includes(RBAC_ROLES.ADMIN) || false,
-  };
+    useEffect(() => {
+        refreshUser();
+    }, [refreshUser]);
+
+    const hasPermission = (permission: string) => {
+        if (!user) return false;
+        // Super admins have all permissions
+        if (user.roles?.includes(SUPER_ADMIN_ROLE)) return true;
+        return user.permissions?.includes(permission) || false;
+    };
+
+    const hasRole = (roleCode: string) => {
+        if (!user) return false;
+        return user.roles?.includes(roleCode) || false;
+    };
+
+    // isAdmin only checks if user has 'SUPER_ADMIN' role in RBAC system
+    const isSuperAdmin = user?.roles?.includes(SUPER_ADMIN_ROLE) || false;
+
+    return {
+        user,
+        isLoading,
+        hasPermission,
+        hasRole,
+        refreshUser,
+        isSuperAdmin,
+        isAdmin: isSuperAdmin || user?.roles?.includes(RBAC_ROLES.ADMIN) || false,
+    };
 }
-

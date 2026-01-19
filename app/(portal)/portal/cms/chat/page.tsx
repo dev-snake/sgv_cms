@@ -65,7 +65,7 @@ export default function ChatAdminPage() {
         setIsLoadingSessions(true);
         try {
             const res = await axios.get('/api/chat/sessions/admin');
-            setSessions(res.data);
+            setSessions(res.data.data || []);
         } catch (error) {
             console.error('Failed to fetch sessions:', error);
         } finally {
@@ -85,7 +85,7 @@ export default function ChatAdminPage() {
             setIsLoadingMessages(true);
             try {
                 const res = await axios.get(`/api/chat/messages?sessionId=${selectedSession.id}`);
-                setMessages(res.data);
+                setMessages(res.data.data || []);
                 // Mark as seen when opening
                 handleUpdateSeen(selectedSession.id);
             } catch (error) {

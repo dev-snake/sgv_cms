@@ -1,48 +1,60 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { db } from '@/db';
-import { chatSessions, chatMessages } from '@/db/schema';
+import { chatSessions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { getSession } from '@/services/auth';
+import { withAuth, withHybridAuth } from '@/middlewares/middleware';
 import { chatStreamManager } from '@/services/chat-stream';
+import { PERMISSIONS } from '@/constants/rbac';
+import { apiResponse, apiError } from '@/utils/api-response';
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    try {
-        const { id } = await params;
-        const { adminLastSeen, guestLastSeen } = await req.json();
+export const PATCH = withHybridAuth(
+    async (req: NextRequest, session, context) => {
+        try {
+            const { id } = await (context as any).params;
+            const { adminLastSeen, guestLastSeen } = await req.json();
 
-        const updateData: any = { updated_at: new Date() };
-        if (adminLastSeen) updateData.admin_last_seen_at = new Date();
-        if (guestLastSeen) updateData.guest_last_seen_at = new Date();
+            const updateData: any = { updated_at: new Date() };
+            if (adminLastSeen) updateData.admin_last_seen_at = new Date();
+            if (guestLastSeen) updateData.guest_last_seen_at = new Date();
 
-        const [updatedSession] = await db
-            .update(chatSessions)
-            .set(updateData)
-            .where(eq(chatSessions.id, id))
-            .returning();
+            const [updatedSession] = await db
+                .update(chatSessions)
+                .set(updateData)
+                .where(eq(chatSessions.id, id))
+                .returning();
 
-        // Broadcast session update if needed (e.g., seen status)
-        chatStreamManager.broadcastSessionUpdate(updatedSession);
+            if (!updatedSession) {
+                return apiError('Session not found', 404);
+            }
 
-        return NextResponse.json(updatedSession);
-    } catch (error) {
-        console.error('Update Session Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-    }
-}
+            // Broadcast session update if needed (e.g., seen status)
+            chatStreamManager.broadcastSessionUpdate(updatedSession);
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    try {
-        const { id } = await params;
+            return apiResponse(updatedSession);
+        } catch (error) {
+            console.error('Update Session Error:', error);
+            return apiError('Internal Server Error', 500);
+        }
+    },
+    { requiredPermissions: [PERMISSIONS.CHAT_VIEW] },
+);
 
-        // Hard delete the session (messages are deleted via cascade reference)
-        await db.delete(chatSessions).where(eq(chatSessions.id, id));
+export const DELETE = withAuth(
+    async (_req: NextRequest, _session, context) => {
+        try {
+            const { id } = await (context as any).params;
 
-        // Notify admins about session removal
-        chatStreamManager.broadcastSessionRemoval(id);
+            // Hard delete the session (messages are deleted via cascade reference)
+            await db.delete(chatSessions).where(eq(chatSessions.id, id));
 
-        return NextResponse.json({ success: true });
-    } catch (error) {
-        console.error('Delete Session Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-    }
-}
+            // Notify admins about session removal
+            chatStreamManager.broadcastSessionRemoval(id);
+
+            return apiResponse({ success: true });
+        } catch (error) {
+            console.error('Delete Session Error:', error);
+            return apiError('Internal Server Error', 500);
+        }
+    },
+    { requiredPermissions: [PERMISSIONS.CHAT_DELETE] },
+);

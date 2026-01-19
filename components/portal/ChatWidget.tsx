@@ -61,12 +61,13 @@ export default function ChatWidget() {
         const initSession = async () => {
             try {
                 const res = await axios.post('/api/chat/sessions', { guestId });
-                setSessionId(res.data.id);
-                setSessionData(res.data);
+                const sessionPayload = res.data.data;
+                setSessionId(sessionPayload.id);
+                setSessionData(sessionPayload);
 
-                const msgRes = await axios.get(`/api/chat/messages?sessionId=${res.data.id}`);
-                setMessages(msgRes.data);
-                handleUpdateSeen(res.data.id);
+                const msgRes = await axios.get(`/api/chat/messages?sessionId=${sessionPayload.id}`);
+                setMessages(msgRes.data.data || []);
+                handleUpdateSeen(sessionPayload.id);
             } catch (error) {
                 console.error('Failed to init chat session:', error);
             }
@@ -168,10 +169,11 @@ export default function ChatWidget() {
                 replyToId: replyId,
             });
 
-            if (res.data && res.data.id) {
+            const newMessage = res.data.data;
+            if (newMessage && newMessage.id) {
                 setMessages((prev) => {
-                    if (prev.find((m) => m.id === res.data.id)) return prev;
-                    return [...prev, res.data];
+                    if (prev.find((m) => m.id === newMessage.id)) return prev;
+                    return [...prev, newMessage];
                 });
             }
         } catch (error) {

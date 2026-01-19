@@ -9,27 +9,12 @@ import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-// Map of route prefixes to required permissions
-const ROUTE_PERMISSIONS: Record<string, string> = {
-    [PORTAL_ROUTES.cms.news.list]: PERMISSIONS.BLOG_VIEW,
-    [PORTAL_ROUTES.cms.projects.list]: PERMISSIONS.PROJECTS_VIEW,
-    [PORTAL_ROUTES.cms.products.list]: PERMISSIONS.PRODUCTS_VIEW,
-    [PORTAL_ROUTES.cms.media]: PERMISSIONS.MEDIA_VIEW,
-    [PORTAL_ROUTES.settings]: PERMISSIONS.ROLES_VIEW,
-    [PORTAL_ROUTES.contacts]: PERMISSIONS.CONTACTS_VIEW,
-    [PORTAL_ROUTES.cms.jobs.list]: PERMISSIONS.RECRUITMENT_VIEW,
-    [PORTAL_ROUTES.cms.applications.list]: PERMISSIONS.RECRUITMENT_VIEW,
-    [PORTAL_ROUTES.users.list]: PERMISSIONS.USERS_VIEW,
-    [PORTAL_ROUTES.users.roles.list]: PERMISSIONS.ROLES_VIEW,
-    [PORTAL_ROUTES.users.modules.list]: PERMISSIONS.ROLES_VIEW,
-};
-
 interface RouteGuardProps {
     children: ReactNode;
 }
 
 export function RouteGuard({ children }: RouteGuardProps) {
-    const { user, isLoading, hasPermission, isAdmin } = useAuth();
+    const { user, isLoading, isAdmin } = useAuth();
     const pathname = usePathname();
 
     // If loading, show spinner
@@ -41,13 +26,24 @@ export function RouteGuard({ children }: RouteGuardProps) {
         );
     }
 
-    // Find the required permission for the current route
-    const matchingRoute = Object.keys(ROUTE_PERMISSIONS)
-        .sort((a, b) => b.length - a.length) // Most specific match first
-        .find((route) => pathname.startsWith(route));
+    // Determine authorization dynamically based on modules in DB
+    const isAuthorized = (() => {
+        if (isAdmin) return true;
+        if (!user) return false;
 
-    const isAuthorized =
-        !matchingRoute || (user && (hasPermission(ROUTE_PERMISSIONS[matchingRoute]) || isAdmin));
+        // Exact dashboard match is always allowed for logged-in users?
+        // Or check if DASHBOARD module exists for user
+        if (pathname === PORTAL_ROUTES.dashboard) return true;
+
+        // Find if any allowed module path contains the current path
+        const allowedModules = user.modules || [];
+        const matchingModule = allowedModules
+            .filter((m) => m.routePath)
+            .sort((a, b) => b.routePath.length - a.routePath.length)
+            .find((m) => pathname.startsWith(m.routePath));
+
+        return !!matchingModule;
+    })();
 
     // If not authorized, show inline Permission Denied UI instead of redirecting
     if (!isAuthorized) {

@@ -45,7 +45,7 @@ export const PATCH = withAuth(
             return apiError('Internal Server Error', 500);
         }
     },
-    { requiredPermissions: [PERMISSIONS.COMMENTS_REPLY] },
+    { requiredPermissions: [PERMISSIONS.COMMENTS_UPDATE] },
 );
 
 // DELETE /api/portal/comments/[id] - Soft delete comment
