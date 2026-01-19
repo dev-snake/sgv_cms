@@ -161,7 +161,7 @@ export default function CommentsManagementPage() {
     };
 
     return (
-        <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex-1 space-y-4 py-8 pt-6">
             <div className="flex items-center justify-between space-y-2">
                 <div>
                     <h2 className="text-3xl font-black tracking-tighter uppercase italic text-[#002d6b]">
@@ -174,7 +174,7 @@ export default function CommentsManagementPage() {
             </div>
 
             <div className="grid gap-4">
-                <Card className="rounded-none border-none shadow-sm">
+                <Card className="rounded-none border-none">
                     <CardHeader className="bg-slate-50/50 pb-4">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div className="flex items-center gap-2 flex-1 max-w-md">
@@ -275,7 +275,7 @@ export default function CommentsManagementPage() {
                                                 </div>
 
                                                 {/* Content */}
-                                                <div className="bg-white border border-slate-100 p-4 rounded-xl text-sm text-slate-700 shadow-sm leading-relaxed">
+                                                <div className="bg-white border border-slate-100 p-4 text-sm text-slate-700 border-l-2 border-l-blue-800 leading-relaxed">
                                                     {comment.content}
                                                 </div>
 

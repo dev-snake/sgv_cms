@@ -89,6 +89,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
             })
             .returning();
 
+        // 3. Trigger Notification (Admin)
+        try {
+            const { notificationService } = await import('@/services/notification-service');
+            await notificationService.createNotification({
+                type: 'comment',
+                title: 'Bình luận mới',
+                content: `${guest_name} đã bình luận về sản phẩm.`,
+                link: '/portal/cms/comments',
+            });
+        } catch (error) {
+            console.error('Failed to trigger notification:', error);
+        }
+
         return apiResponse(newComment, { status: 201 });
     } catch (error) {
         console.error('Error posting comment:', error);

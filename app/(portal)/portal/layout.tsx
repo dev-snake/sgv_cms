@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Search, Bell, HelpCircle } from 'lucide-react';
 import { PORTAL_ROUTES } from '@/constants/routes';
+import { NotificationDropdown } from '@/components/portal/notification-dropdown';
 
 import { RouteGuard } from '@/components/portal/route-guard';
 
@@ -52,10 +53,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                             />
                         </div>
                         <div className="flex items-center gap-2 border-l border-slate-100 pl-6 ml-2">
-                            <button className="p-2 text-slate-400 hover:text-brand-primary hover:bg-slate-50 rounded-none transition-all relative">
-                                <Bell size={18} />
-                                <span className="absolute top-2 right-2 h-1.5 w-1.5 bg-rose-500 rounded-none border border-white"></span>
-                            </button>
+                            <NotificationDropdown />
                             <button className="p-2 text-slate-400 hover:text-brand-primary hover:bg-slate-50 rounded-none transition-all">
                                 <HelpCircle size={18} />
                             </button>

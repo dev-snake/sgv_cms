@@ -3,6 +3,7 @@ import { parse } from 'node:url';
 import next from 'next';
 import { Server } from 'socket.io';
 import { chatStreamManager } from './services/chat-stream';
+import { notificationService } from './services/notification-service';
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
@@ -34,6 +35,7 @@ app.prepare().then(() => {
 
     // Attach io instance to the chatStreamManager singleton
     chatStreamManager.setIo(io);
+    notificationService.setIo(io);
 
     io.on('connection', (socket) => {
         const sessionId = socket.handshake.query.sessionId as string;
@@ -46,9 +48,11 @@ app.prepare().then(() => {
 
         // Special room for admins to receive ALL updates (session list updates, etc.)
         const isAdmin = socket.handshake.query.isAdmin === 'true';
+        console.log(`[Socket] New connection: ${socket.id}, isAdmin: ${isAdmin}`);
+
         if (isAdmin) {
             socket.join('admins');
-            console.log(`Socket ${socket.id} joined admins room`);
+            console.log(`[Socket] Socket ${socket.id} successfully joined 'admins' room`);
         }
 
         socket.on('disconnect', () => {

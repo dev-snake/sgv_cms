@@ -279,3 +279,14 @@ export const chatMessages = pgTable('chat_messages', {
     is_deleted: boolean('is_deleted').default(false).notNull(),
     created_at: timestamp('created_at').defaultNow().notNull(),
 });
+
+// Admin Notification System
+export const notifications = pgTable('notifications', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    type: varchar('type', { length: 50 }).notNull(), // 'comment', 'contact', 'application'
+    title: varchar('title', { length: 255 }).notNull(),
+    content: text('content').notNull(),
+    link: varchar('link', { length: 255 }),
+    is_read: boolean('is_read').default(false).notNull(),
+    created_at: timestamp('created_at').defaultNow().notNull(),
+});
