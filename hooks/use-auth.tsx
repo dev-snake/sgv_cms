@@ -22,11 +22,11 @@ export interface AuthUser {
     fullName?: string;
     email?: string;
     isActive?: boolean;
-    is_super?: boolean; // New flag for system-wide super access
-    avatarUrl?: string; // Image URL for profile
+    is_super?: boolean; 
+    avatarUrl?: string; 
     phone?: string;
-    roles: string[]; // Role codes
-    permissions: string[]; // Permission strings
+    roles: string[]; 
+    permissions: string[]; 
     modules: SidebarModule[]; // Modules for sidebar
 }
 
