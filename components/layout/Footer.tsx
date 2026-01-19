@@ -73,7 +73,7 @@ export default function Footer() {
                                     >
                                         <ArrowRight
                                             size={12}
-                                            className="text-brand-primary group-hover:text-brand-accent transition-colors"
+                                            className="text-white group-hover:text-brand-accent transition-colors"
                                         />{' '}
                                         {item.label}
                                     </Link>
@@ -90,7 +90,7 @@ export default function Footer() {
                         <ul className="space-y-6">
                             <li className="flex gap-4 group">
                                 <MapPin
-                                    className="text-brand-primary shrink-0 group-hover:text-brand-accent transition-colors"
+                                    className="text-white shrink-0 group-hover:text-brand-accent transition-colors"
                                     size={20}
                                 />
                                 <span className="text-[11px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
@@ -99,7 +99,7 @@ export default function Footer() {
                             </li>
                             <li className="flex gap-4 items-center group">
                                 <Phone
-                                    className="text-brand-primary shrink-0 group-hover:text-brand-accent transition-colors"
+                                    className="text-white shrink-0 group-hover:text-brand-accent transition-colors"
                                     size={20}
                                 />
                                 <a
@@ -111,7 +111,7 @@ export default function Footer() {
                             </li>
                             <li className="flex gap-4 items-center group">
                                 <Mail
-                                    className="text-brand-primary shrink-0 group-hover:text-brand-accent transition-colors"
+                                    className="text-white shrink-0 group-hover:text-brand-accent transition-colors"
                                     size={20}
                                 />
                                 <a
@@ -124,21 +124,7 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* CTA / Apps */}
-                    <div className="space-y-8">
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-accent border-b border-white/10 pb-4">
-                            Hồ sơ năng lực
-                        </h4>
-                        <div className="bg-white/5 p-6 border border-white/10 space-y-6">
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed italic">
-                                "Tải về trọn bộ Catalogue và Hồ sơ năng lực (Profile) mới nhất của
-                                Sài Gòn Valve."
-                            </p>
-                            <button className="w-full py-4 bg-brand-primary text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-slate-900 transition-all flex items-center justify-center gap-3 shadow-xl shadow-brand-primary/20">
-                                TẢI PROFILE (PDF) <Download size={14} />
-                            </button>
-                        </div>
-                    </div>
+
                 </div>
 
                 <div className="pt-12 flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
