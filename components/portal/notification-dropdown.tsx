@@ -34,7 +34,12 @@ export function NotificationDropdown() {
     const [notifications, setNotifications] = React.useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = React.useState(0);
     const [isOpen, setIsOpen] = React.useState(false);
+    const [isMounted, setIsMounted] = React.useState(false);
     const socketRef = React.useRef<Socket | null>(null);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const fetchNotifications = React.useCallback(async () => {
         try {
@@ -122,6 +127,8 @@ export function NotificationDropdown() {
                 return <Bell size={16} />;
         }
     };
+
+    if (!isMounted) return null;
 
     return (
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
