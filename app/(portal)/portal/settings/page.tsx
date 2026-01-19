@@ -120,6 +120,7 @@ export default function SettingsPage() {
                                         onChange={(url) =>
                                             setFormData({ ...formData, avatarUrl: url })
                                         }
+                                        aspectRatio="square"
                                         className="avatar-uploader-portal"
                                     />
                                 </div>

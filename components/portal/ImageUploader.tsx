@@ -29,6 +29,7 @@ interface ImageUploaderProps {
     gallery?: string[];
     onGalleryChange?: (urls: string[]) => void;
     className?: string;
+    aspectRatio?: 'video' | 'square';
 }
 
 export function ImageUploader({
@@ -37,6 +38,7 @@ export function ImageUploader({
     gallery = [],
     onGalleryChange,
     className,
+    aspectRatio = 'video',
 }: ImageUploaderProps) {
     const [isUploading, setIsUploading] = React.useState(false);
     const [isDragging, setIsDragging] = React.useState(false);
@@ -164,13 +166,21 @@ export function ImageUploader({
                     Ảnh đại diện
                 </label>
                 {value ? (
-                    <div className="relative aspect-video w-full group border border-slate-100">
+                    <div
+                        className={cn(
+                            'relative w-full group border border-slate-100 rounded-none',
+                            aspectRatio === 'video' ? 'aspect-video' : 'aspect-square',
+                        )}
+                    >
                         <Image
                             src={value}
-                            alt="Product image"
+                            alt="Preview image"
                             fill
                             unoptimized
-                            className="object-contain"
+                            className={cn(
+                                'rounded-none',
+                                aspectRatio === 'video' ? 'object-contain' : 'object-cover',
+                            )}
                         />
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                             <Button

@@ -133,7 +133,6 @@ export function useAuth() {
 
     const hasPermission = (permission: string) => {
         if (!user) return false;
-        // Check is_super flag instead of hardcoded role name
         if (user.is_super) return true;
         return user.permissions?.includes(permission) || false;
     };

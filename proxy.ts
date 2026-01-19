@@ -4,7 +4,6 @@ import { decrypt } from '@/services/auth';
 import { checkRateLimit, RATE_LIMITS } from '@/middlewares/rate-limit';
 
 import { SITE_ROUTES, ADMIN_ROUTES, API_ROUTES } from '@/constants/routes';
-import { RBAC_ROLES } from '@/constants/rbac';
 
 // Add paths that don't require authentication
 const publicPaths = [
@@ -93,42 +92,10 @@ export default async function proxy(request: NextRequest) {
         }
 
         try {
-            const sessionData = await decrypt(session);
-            const user = sessionData?.user;
-            const isSuperAdmin = user?.is_super || false;
-            const isAdmin = user?.roles?.includes(RBAC_ROLES.ADMIN) || isSuperAdmin;
-            const isEditor = user?.roles?.includes(RBAC_ROLES.EDITOR) || isAdmin;
-
+            await decrypt(session);
             // In the new RBAC system, we let the individual route handlers (using withAuth)
             // handle granular permission checks. The global proxy should only ensure:
             // 1. User is authenticated (done above)
-            // 2. Fundamental safety (like only admins can DELETE)
-            if (isProtectedApi) {
-                // DELETE operations are still globally restricted to Admins for safety
-                if (method === 'DELETE' && !isAdmin) {
-                    return NextResponse.json(
-                        {
-                            success: false,
-                            error: 'Forbidden - Admin role required for delete operations',
-                        },
-                        { status: 403 },
-                    );
-                }
-
-                // User management (API) still restricted to Admin
-                if (pathname.startsWith('/api/users') && !isAdmin) {
-                    return NextResponse.json(
-                        {
-                            success: false,
-                            error: 'Forbidden - Admin role required for user management',
-                        },
-                        { status: 403 },
-                    );
-                }
-
-                // For POST/PATCH/PUT on other resources, we allow any authenticated user
-                // to pass the proxy, and withAuth in the route will check for specific permissions.
-            }
 
             return NextResponse.next();
         } catch (error) {
