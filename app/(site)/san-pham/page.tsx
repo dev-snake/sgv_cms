@@ -48,9 +48,20 @@ export default function ProductArchive() {
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('Tất cả');
     const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+    // Debounce search query
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+            setCurrentPage(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
     const fetchProducts = async (page: number = 1) => {
         setLoading(true);
@@ -60,6 +71,16 @@ export default function ProductArchive() {
                 page: String(page),
                 limit: String(ITEMS_PER_PAGE),
             });
+
+            // Add search query to API params
+            if (debouncedSearch) {
+                params.append('search', debouncedSearch);
+            }
+
+            // Add category filter to API params
+            if (selectedCategory !== 'Tất cả') {
+                params.append('category', selectedCategory);
+            }
 
             const response = await api.get(`/api/products?${params.toString()}`);
             if (response.data.success) {
@@ -71,15 +92,6 @@ export default function ProductArchive() {
                     setTotalPages(response.data.meta.totalPages || 1);
                     setTotal(response.data.meta.total || 0);
                 }
-
-                // Extract unique categories (only on first load)
-                if (page === 1) {
-                    const uniqueCategories = [
-                        'Tất cả',
-                        ...new Set(data.map((p: Product) => p.category).filter(Boolean)),
-                    ];
-                    setCategories(uniqueCategories as string[]);
-                }
             }
         } catch (error) {
             console.error('Error fetching products:', error);
@@ -88,9 +100,29 @@ export default function ProductArchive() {
         }
     };
 
+    // Fetch categories once on mount
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await api.get('/api/products?status=active&limit=100');
+                if (response.data.success) {
+                    const data = response.data.data || [];
+                    const uniqueCategories = [
+                        'Tất cả',
+                        ...new Set(data.map((p: Product) => p.category).filter(Boolean)),
+                    ];
+                    setCategories(uniqueCategories as string[]);
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+        fetchCategories();
+    }, []);
+
     useEffect(() => {
         fetchProducts(currentPage);
-    }, [currentPage]);
+    }, [currentPage, debouncedSearch, selectedCategory]);
 
     if (loading && products.length === 0) {
         return (
@@ -99,13 +131,6 @@ export default function ProductArchive() {
             </div>
         );
     }
-
-    // Client-side filtering for category and search (since API already returned paginated data)
-    const filteredProducts = products.filter(
-        (p) =>
-            (selectedCategory === 'Tất cả' || p.category === selectedCategory) &&
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
 
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -118,10 +143,10 @@ export default function ProductArchive() {
         setSearchQuery(query);
     };
 
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    // const handlePageChange = (page: number) => {
+    //     setCurrentPage(page);
+    //     window.scrollTo({ top: 0, behavior: 'smooth' });
+    // };
 
     return (
         <div className="flex flex-col min-h-screen bg-white pt-24">
@@ -225,67 +250,137 @@ export default function ProductArchive() {
                         <div className="flex-1 space-y-10">
                             <div className="flex items-center justify-between border-b border-slate-100 pb-8">
                                 <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest italic">
-                                    Hiển thị {startIndex + 1} -{' '}
-                                    {Math.min(startIndex + ITEMS_PER_PAGE, filteredProducts.length)}{' '}
-                                    trong {filteredProducts.length} kết quả
+                                    Hiển thị {products.length > 0 ? startIndex + 1 : 0} -{' '}
+                                    {Math.min(startIndex + ITEMS_PER_PAGE, total)} trong {total} kết
+                                    quả
                                 </div>
                                 <div className="flex items-center gap-6">
                                     <div className="flex border border-slate-100">
-                                        <button className="p-2 bg-slate-100 text-brand-primary">
+                                        <button
+                                            onClick={() => setViewMode('grid')}
+                                            className={cn(
+                                                'p-2 transition-colors',
+                                                viewMode === 'grid'
+                                                    ? 'bg-slate-100 text-brand-primary'
+                                                    : 'text-slate-300 hover:text-brand-primary',
+                                            )}
+                                        >
                                             <LayoutGrid size={16} />
                                         </button>
-                                        <button className="p-2 text-slate-300 hover:text-brand-primary">
+                                        <button
+                                            onClick={() => setViewMode('list')}
+                                            className={cn(
+                                                'p-2 transition-colors',
+                                                viewMode === 'list'
+                                                    ? 'bg-slate-100 text-brand-primary'
+                                                    : 'text-slate-300 hover:text-brand-primary',
+                                            )}
+                                        >
                                             <List size={16} />
                                         </button>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-px bg-slate-100 border border-slate-100">
-                                <AnimatePresence mode="popLayout">
-                                    {filteredProducts.map((product) => (
-                                        <motion.div
-                                            layout
-                                            key={product.id}
-                                            initial={{ opacity: 0, scale: 0.9 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 0.9 }}
-                                            className="group bg-white p-8 space-y-8 flex flex-col justify-between hover:z-10 hover:shadow-2xl transition-all h-full"
-                                        >
-                                            <div className="relative aspect-square w-full overflow-hidden transition-all duration-500">
-                                                <Image
-                                                    src={
-                                                        product.image_url ||
-                                                        'https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png'
-                                                    }
-                                                    alt={product.name}
-                                                    fill
-                                                    className="object-contain p-4 group-hover:scale-110 transition-transform duration-1000"
-                                                />
-                                            </div>
-                                            <div className="space-y-4">
-                                                <div className="text-[9px] font-black uppercase tracking-widest text-brand-primary flex items-center gap-2">
-                                                    <Shield size={10} /> {product.category}
+                            {/* Grid View */}
+                            {viewMode === 'grid' && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-px bg-slate-100 border border-slate-100">
+                                    <AnimatePresence mode="popLayout">
+                                        {products.map((product) => (
+                                            <motion.div
+                                                layout
+                                                key={product.id}
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.9 }}
+                                                className="group bg-white p-8 space-y-8 flex flex-col justify-between hover:z-10 hover:shadow-2xl transition-all h-full"
+                                            >
+                                                <div className="relative aspect-square w-full overflow-hidden transition-all duration-500">
+                                                    <Image
+                                                        src={
+                                                            product.image_url ||
+                                                            'https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png'
+                                                        }
+                                                        alt={product.name}
+                                                        fill
+                                                        className="object-contain p-4 group-hover:scale-110 transition-transform duration-1000"
+                                                    />
                                                 </div>
-                                                <h3 className="text-sm font-bold text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-2 uppercase min-h-10">
-                                                    {product.name}
-                                                </h3>
-                                                <p className="text-[11px] text-muted-foreground font-medium line-clamp-2">
-                                                    {product.tech_summary ||
-                                                        'Thiết bị chuyên dụng ngành nước và công nghiệp.'}
-                                                </p>
+                                                <div className="space-y-4">
+                                                    <div className="text-[9px] font-black uppercase tracking-widest text-brand-primary flex items-center gap-2">
+                                                        <Shield size={10} /> {product.category}
+                                                    </div>
+                                                    <h3 className="text-sm font-bold text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-2 uppercase min-h-10">
+                                                        {product.name}
+                                                    </h3>
+                                                    <p className="text-[11px] text-muted-foreground font-medium line-clamp-2">
+                                                        {product.tech_summary ||
+                                                            'Thiết bị chuyên dụng ngành nước và công nghiệp.'}
+                                                    </p>
+                                                    <Link
+                                                        href={`/san-pham/${product.slug}`}
+                                                        className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-brand-secondary transition-colors pt-4 border-t border-slate-50 w-full"
+                                                    >
+                                                        CHI TIẾT SẢN PHẨM{' '}
+                                                        <ArrowRight size={12} className="ml-auto" />
+                                                    </Link>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
+                                </div>
+                            )}
+
+                            {/* List View */}
+                            {viewMode === 'list' && (
+                                <div className="space-y-4">
+                                    <AnimatePresence mode="popLayout">
+                                        {products.map((product) => (
+                                            <motion.div
+                                                layout
+                                                key={product.id}
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: -20 }}
+                                                className="group bg-white border border-slate-100 hover:shadow-xl transition-all"
+                                            >
                                                 <Link
                                                     href={`/san-pham/${product.slug}`}
-                                                    className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-brand-secondary transition-colors pt-4 border-t border-slate-50 w-full"
+                                                    className="flex flex-col sm:flex-row gap-6 p-6"
                                                 >
-                                                    CHI TIẾT SẢN PHẨM{' '}
-                                                    <ArrowRight size={12} className="ml-auto" />
+                                                    <div className="relative w-full sm:w-48 h-48 sm:h-32 shrink-0 overflow-hidden bg-slate-50">
+                                                        <Image
+                                                            src={
+                                                                product.image_url ||
+                                                                'https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png'
+                                                            }
+                                                            alt={product.name}
+                                                            fill
+                                                            className="object-contain p-2 group-hover:scale-110 transition-transform duration-500"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 space-y-3">
+                                                        <div className="text-[9px] font-black uppercase tracking-widest text-brand-primary flex items-center gap-2">
+                                                            <Shield size={10} /> {product.category}
+                                                        </div>
+                                                        <h3 className="text-base font-bold text-slate-900 group-hover:text-brand-primary transition-colors uppercase">
+                                                            {product.name}
+                                                        </h3>
+                                                        <p className="text-xs text-muted-foreground font-medium line-clamp-2">
+                                                            {product.tech_summary ||
+                                                                'Thiết bị chuyên dụng ngành nước và công nghiệp.'}
+                                                        </p>
+                                                        <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-brand-secondary transition-colors pt-2">
+                                                            CHI TIẾT SẢN PHẨM{' '}
+                                                            <ArrowRight size={12} />
+                                                        </div>
+                                                    </div>
                                                 </Link>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
-                            </div>
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
+                                </div>
+                            )}
 
                             {/* Pagination */}
                             {totalPages > 1 && (
@@ -347,12 +442,18 @@ export default function ProductArchive() {
                                 </div>
                             )}
 
-                            {filteredProducts.length === 0 && (
+                            {products.length === 0 && !loading && (
                                 <div className="py-20 text-center space-y-4">
                                     <Info className="mx-auto text-slate-200" size={64} />
                                     <p className="text-muted-foreground font-bold uppercase tracking-widest">
                                         Không tìm thấy sản phẩm nào.
                                     </p>
+                                </div>
+                            )}
+
+                            {loading && products.length > 0 && (
+                                <div className="py-10 text-center">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary mx-auto"></div>
                                 </div>
                             )}
                         </div>
