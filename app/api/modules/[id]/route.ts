@@ -15,7 +15,7 @@ export const GET = withAuth(
                 return apiError('Không tìm thấy module', 404);
             }
 
-            return apiResponse(module);
+          return apiResponse(module);
         } catch (error) {
             console.error('Error fetching module:', error);
             return apiError('Internal Server Error', 500);
