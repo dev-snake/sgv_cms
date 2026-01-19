@@ -43,7 +43,7 @@ export const GET = withAuth(
             return apiError('Internal Server Error', 500);
         }
     },
-    { requiredPermissions: [PERMISSIONS.DASHBOARD_VIEW] },
+    { requiredPermissions: [] },
 );
 
 // PATCH /api/portal/notifications - Mark as read
@@ -73,5 +73,5 @@ export const PATCH = withAuth(
             return apiError('Internal Server Error', 500);
         }
     },
-    { requiredPermissions: [PERMISSIONS.DASHBOARD_VIEW] },
+    { requiredPermissions: [] },
 );
