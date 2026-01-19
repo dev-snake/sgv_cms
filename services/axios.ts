@@ -38,16 +38,12 @@ axiosInstance.interceptors.response.use(
       }
 
       try {
-        // Try to refresh session - refreshToken is HttpOnly cookie, so we don't need body
         const refreshRes = await axios.post(API_ROUTES.AUTH.REFRESH);
         
         if (refreshRes.data.success) {
-          // The new accessToken is already in the cookies (set by server)
-          // Retry the original request
           return axiosInstance(originalRequest);
         }
       } catch (refreshError) {
-        // If refresh fails, redirect to login if we are in the portal
         if (typeof window !== "undefined") {
           const isPortal = window.location.pathname.startsWith("/portal");
           if (isPortal) {
