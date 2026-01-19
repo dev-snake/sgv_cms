@@ -199,9 +199,6 @@ export const modules = pgTable('modules', {
     id: uuid('id').primaryKey().defaultRandom(),
     code: varchar('code', { length: 50 }).notNull().unique(),
     name: varchar('name', { length: 255 }).notNull(),
-    route_path: varchar('route_path', { length: 255 }), // Standard route for this module
-    icon: varchar('icon', { length: 50 }), // Lucide icon name
-    sort_order: integer('sort_order').default(0),
     created_at: timestamp('created_at').defaultNow().notNull(),
     updated_at: timestamp('updated_at').defaultNow().notNull(),
     deleted_at: timestamp('deleted_at'),

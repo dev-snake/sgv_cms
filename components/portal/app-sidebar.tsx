@@ -51,27 +51,98 @@ import Link from 'next/link';
 
 import { PERMISSIONS } from '@/constants/rbac';
 
-import * as LucideIcons from 'lucide-react';
+const data = {
+    navMain: [
+        {
+            title: 'Dashboard',
+            url: PORTAL_ROUTES.dashboard,
+            icon: LayoutDashboard,
+        },
+        {
+            title: 'Quản lý Tin tức',
+            url: PORTAL_ROUTES.cms.news.list,
+            icon: FileText,
+            requiredPermission: PERMISSIONS.BLOG_VIEW,
+        },
+        {
+            title: 'Quản lý Dự án',
+            url: PORTAL_ROUTES.cms.projects.list,
+            icon: Briefcase,
+            requiredPermission: PERMISSIONS.PROJECTS_VIEW,
+        },
+        {
+            title: 'Quản lý Sản phẩm',
+            url: PORTAL_ROUTES.cms.products.list,
+            icon: Box,
+            requiredPermission: PERMISSIONS.PRODUCTS_VIEW,
+        },
+        {
+            title: 'Thư viện Media',
+            url: PORTAL_ROUTES.cms.media,
+            icon: Images,
+            requiredPermission: PERMISSIONS.MEDIA_VIEW,
+        },
+        {
+            title: 'Cài đặt hệ thống',
+            url: PORTAL_ROUTES.settings,
+            icon: Settings,
+            requiredPermission: PERMISSIONS.ROLES_VIEW,
+        },
+        {
+            title: 'Quản lý Liên hệ',
+            url: PORTAL_ROUTES.contacts,
+            icon: Mail,
+            requiredPermission: PERMISSIONS.CONTACTS_VIEW,
+        },
+        {
+            title: 'Quản lý Bình luận',
+            url: PORTAL_ROUTES.cms.comments.list,
+            icon: ClipboardList,
+            requiredPermission: PERMISSIONS.COMMENTS_VIEW,
+        },
+        {
+            title: 'Hỗ trợ trực tuyến',
+            url: PORTAL_ROUTES.cms.chat,
+            icon: MessageCircle,
+        },
+        {
+            title: 'Quản lý Tuyển dụng',
+            url: PORTAL_ROUTES.cms.jobs.list,
+            icon: UserRoundSearch,
+            requiredPermission: PERMISSIONS.RECRUITMENT_VIEW,
+        },
+        {
+            title: 'Danh sách Ứng viên',
+            url: PORTAL_ROUTES.cms.applications.list,
+            icon: ClipboardList,
+            requiredPermission: PERMISSIONS.RECRUITMENT_VIEW,
+        },
+        {
+            title: 'Tài khoản Admin',
+            url: PORTAL_ROUTES.users.list,
+            icon: ShieldCheck,
+            requiredPermission: PERMISSIONS.USERS_VIEW,
+        },
+        {
+            title: 'Phân quyền & Vai trò',
+            url: PORTAL_ROUTES.users.roles.list,
+            icon: Lock,
+            requiredPermission: PERMISSIONS.ROLES_VIEW,
+        },
+        {
+            title: 'Quản lý Module',
+            url: PORTAL_ROUTES.users.modules.list,
+            icon: Layers,
+            requiredPermission: PERMISSIONS.ROLES_VIEW,
+        },
+    ],
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const pathname = usePathname();
     const router = useRouter();
     const { user, hasPermission } = useAuth();
     const [isMounted, setIsMounted] = React.useState(false);
-
-    // Build dynamic nav main
-    const navMain = React.useMemo(() => {
-        if (!user?.modules) return [];
-        return user.modules.map((mod) => {
-            const IconComponent = (LucideIcons as any)[mod.icon] || LucideIcons.HelpCircle;
-            return {
-                title: mod.name,
-                url: mod.routePath,
-                icon: IconComponent,
-                code: mod.code,
-            };
-        });
-    }, [user?.modules]);
 
     // Prevent hydration mismatch with Radix UI DropdownMenu
     React.useEffect(() => {
@@ -143,7 +214,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarContent className="scrollbar-hide bg-[#002d6b] py-2 overflow-x-hidden">
                 <SidebarGroup className="p-0">
                     <SidebarMenu className="gap-0 group-data-[collapsible=icon]:items-center">
-                        {navMain.map((item) => {
+                        {data.navMain.map((item) => {
+                            // Strictly hide unauthorized items (lm đúng rồi)
+                            if (
+                                item.requiredPermission &&
+                                !hasPermission(item.requiredPermission)
+                            ) {
+                                return null;
+                            }
+
                             const isActive = (() => {
                                 if (item.url === PORTAL_ROUTES.dashboard) {
                                     return pathname === PORTAL_ROUTES.dashboard;

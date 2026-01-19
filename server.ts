@@ -55,6 +55,13 @@ app.prepare().then(() => {
             console.log(`[Socket] Socket ${socket.id} successfully joined 'admins' room`);
         }
 
+        socket.on(
+            'typing',
+            (data: { sessionId: string; senderType: 'guest' | 'admin'; isTyping: boolean }) => {
+                chatStreamManager.broadcastTyping(data.sessionId, data.senderType, data.isTyping);
+            },
+        );
+
         socket.on('disconnect', () => {
             console.log(`Socket ${socket.id} disconnected`);
         });

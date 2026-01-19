@@ -41,6 +41,7 @@ export default function ChatWidget() {
     const [isClearDialogOpen, setIsClearDialogOpen] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const socketRef = useRef<Socket | null>(null);
 
     // Initialize Guest ID
     useEffect(() => {
@@ -97,6 +98,8 @@ export default function ChatWidget() {
             transports: ['websocket'],
         });
 
+        socketRef.current = socket;
+
         socket.on('message', (data: any) => {
             if (data.id && data.session_id === sessionId) {
                 setMessages((prev) => {
@@ -140,6 +143,7 @@ export default function ChatWidget() {
 
         return () => {
             socket.disconnect();
+            socketRef.current = null;
         };
     }, [sessionId, isOpen]);
 
@@ -198,17 +202,13 @@ export default function ChatWidget() {
         }
     };
 
-    const sendTypingStatus = async (isTyping: boolean) => {
-        if (!sessionId) return;
-        try {
-            await axios.post('/api/chat/typing', {
-                sessionId,
-                senderType: 'guest',
-                isTyping,
-            });
-        } catch (error) {
-            // Silently fail
-        }
+    const sendTypingStatus = (isTyping: boolean) => {
+        if (!sessionId || !socketRef.current) return;
+        socketRef.current.emit('typing', {
+            sessionId,
+            senderType: 'guest',
+            isTyping,
+        });
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

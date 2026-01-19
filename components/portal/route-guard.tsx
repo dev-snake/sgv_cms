@@ -14,7 +14,7 @@ interface RouteGuardProps {
 }
 
 export function RouteGuard({ children }: RouteGuardProps) {
-    const { user, isLoading, isAdmin } = useAuth();
+    const { user, isLoading, isAdmin, hasPermission } = useAuth();
     const pathname = usePathname();
 
     // If loading, show spinner
@@ -26,23 +26,38 @@ export function RouteGuard({ children }: RouteGuardProps) {
         );
     }
 
-    // Determine authorization dynamically based on modules in DB
+    // Determine authorization based on static route mapping
     const isAuthorized = (() => {
         if (isAdmin) return true;
         if (!user) return false;
 
-        // Exact dashboard match is always allowed for logged-in users?
-        // Or check if DASHBOARD module exists for user
+        // Dashboard is always accessible for logged-in users
         if (pathname === PORTAL_ROUTES.dashboard) return true;
 
-        // Find if any allowed module path contains the current path
-        const allowedModules = user.modules || [];
-        const matchingModule = allowedModules
-            .filter((m) => m.routePath)
-            .sort((a, b) => b.routePath.length - a.routePath.length)
-            .find((m) => pathname.startsWith(m.routePath));
+        // Static route-to-permission mapping
+        const routePermissions: { path: string; permission: string }[] = [
+            { path: PORTAL_ROUTES.cms.news.list, permission: PERMISSIONS.BLOG_VIEW },
+            { path: PORTAL_ROUTES.cms.projects.list, permission: PERMISSIONS.PROJECTS_VIEW },
+            { path: PORTAL_ROUTES.cms.products.list, permission: PERMISSIONS.PRODUCTS_VIEW },
+            { path: PORTAL_ROUTES.cms.jobs.list, permission: PERMISSIONS.RECRUITMENT_VIEW },
+            { path: PORTAL_ROUTES.cms.applications.list, permission: PERMISSIONS.RECRUITMENT_VIEW },
+            { path: PORTAL_ROUTES.cms.comments.list, permission: PERMISSIONS.COMMENTS_VIEW },
+            { path: PORTAL_ROUTES.cms.chat, permission: PERMISSIONS.CHAT_VIEW },
+            { path: PORTAL_ROUTES.cms.media, permission: PERMISSIONS.MEDIA_VIEW },
+            { path: PORTAL_ROUTES.contacts, permission: PERMISSIONS.CONTACTS_VIEW },
+            { path: PORTAL_ROUTES.users.list, permission: PERMISSIONS.USERS_VIEW },
+            { path: PORTAL_ROUTES.users.roles.list, permission: PERMISSIONS.ROLES_VIEW },
+            { path: PORTAL_ROUTES.users.modules.list, permission: PERMISSIONS.ROLES_VIEW },
+            { path: PORTAL_ROUTES.settings, permission: PERMISSIONS.ROLES_VIEW },
+        ];
 
-        return !!matchingModule;
+        // Find matching route (longest path first)
+        const matchingRoute = routePermissions
+            .sort((a, b) => b.path.length - a.path.length)
+            .find((r) => pathname.startsWith(r.path));
+
+        if (!matchingRoute) return true; // Allow routes not in the list
+        return hasPermission(matchingRoute.permission);
     })();
 
     // If not authorized, show inline Permission Denied UI instead of redirecting

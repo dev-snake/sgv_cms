@@ -56,6 +56,7 @@ export default function ChatAdminPage() {
     const [replyingTo, setReplyingTo] = useState<Message | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const socketRef = useRef<any>(null);
     const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
     const [isDeletingSession, setIsDeletingSession] = useState(false);
     const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
@@ -116,6 +117,8 @@ export default function ChatAdminPage() {
             },
             transports: ['websocket'], // Force websocket for reliability in dev
         });
+
+        socketRef.current = socket;
 
         socket.on('message', (data: any) => {
             // Update session list order/last message
@@ -186,6 +189,7 @@ export default function ChatAdminPage() {
 
         return () => {
             socket.disconnect();
+            socketRef.current = null;
         };
     }, [selectedSession?.id]);
 
@@ -262,17 +266,13 @@ export default function ChatAdminPage() {
         }
     };
 
-    const sendTypingStatus = async (isTyping: boolean) => {
-        if (!selectedSession) return;
-        try {
-            await axios.post('/api/chat/typing', {
-                sessionId: selectedSession.id,
-                senderType: 'admin',
-                isTyping,
-            });
-        } catch (error) {
-            // Silently fail
-        }
+    const sendTypingStatus = (isTyping: boolean) => {
+        if (!selectedSession || !socketRef.current) return;
+        socketRef.current.emit('typing', {
+            sessionId: selectedSession.id,
+            senderType: 'admin',
+            isTyping,
+        });
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

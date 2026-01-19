@@ -16,14 +16,6 @@ export interface AuthUser {
     isActive?: boolean;
     roles: string[]; // Role codes
     permissions: string[]; // Permission strings
-    modules?: Array<{
-        code: string;
-        name: string;
-        routePath: string;
-        icon: string;
-        sortOrder: number;
-        canView: boolean;
-    }>;
 }
 
 export function useAuth() {
@@ -54,27 +46,6 @@ export function useAuth() {
                 // Flatten roles and permissions from the nested structure
                 const roleCodes = profileData.roles.map((r: any) => r.code);
 
-                // Map modules and their view status
-                const moduleMap = new Map<string, any>();
-                profileData.roles.forEach((r: any) => {
-                    r.permissions.forEach((p: any) => {
-                        if (p.canView) {
-                            const mod = p.module;
-                            if (mod.routePath) {
-                                // Only include modules with routes in the menu
-                                moduleMap.set(mod.code, {
-                                    code: mod.code,
-                                    name: mod.name,
-                                    routePath: mod.routePath,
-                                    icon: mod.icon,
-                                    sortOrder: mod.sortOrder,
-                                    canView: true,
-                                });
-                            }
-                        }
-                    });
-                });
-
                 const permissionStrings = profileData.roles.flatMap((r: any) =>
                     r.permissions
                         .map(
@@ -98,9 +69,6 @@ export function useAuth() {
                     isActive: profileData.isActive,
                     roles: roleCodes,
                     permissions: Array.from(new Set(permissionStrings)), // Unique permissions
-                    modules: Array.from(moduleMap.values()).sort(
-                        (a, b) => a.sortOrder - b.sortOrder,
-                    ),
                 };
 
                 setUser(synchronizedUser);
