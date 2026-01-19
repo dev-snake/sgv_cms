@@ -49,6 +49,7 @@ import api from '@/services/axios';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { SimpleConfirmDialog } from '@/components/shared/simple-confirm-dialog';
 
 interface Comment {
     id: string;
@@ -74,6 +75,9 @@ export default function CommentsManagementPage() {
     const [replyingTo, setReplyingTo] = React.useState<Comment | null>(null);
     const [replyContent, setReplyContent] = React.useState('');
     const [isSubmittingReply, setIsSubmittingReply] = React.useState(false);
+
+    // Delete confirmation state
+    const [commentToDelete, setCommentToDelete] = React.useState<string | null>(null);
 
     const fetchComments = React.useCallback(async () => {
         setIsLoading(true);
@@ -116,16 +120,22 @@ export default function CommentsManagementPage() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Bạn có chắc chắn muốn xóa bình luận này?')) return;
+    const handleDelete = (id: string) => {
+        setCommentToDelete(id);
+    };
+
+    const confirmDeleteComment = async () => {
+        if (!commentToDelete) return;
         try {
-            const response = await api.delete(`/api/portal/comments/${id}`);
+            const response = await api.delete(`/api/portal/comments/${commentToDelete}`);
             if (response.data.success) {
                 toast.success('Đã xóa bình luận');
                 fetchComments();
             }
         } catch (error) {
             toast.error('Xóa thất bại');
+        } finally {
+            setCommentToDelete(null);
         }
     };
 
@@ -452,6 +462,16 @@ export default function CommentsManagementPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            <SimpleConfirmDialog
+                open={!!commentToDelete}
+                onOpenChange={(open) => !open && setCommentToDelete(null)}
+                onConfirm={confirmDeleteComment}
+                title="Xác nhận xóa bình luận?"
+                description="Bạn có chắc chắn muốn xóa bình luận này? Hành động này không thể hoàn tác."
+                confirmText="Xác nhận xóa"
+                variant="destructive"
+            />
         </div>
     );
 }

@@ -3,7 +3,7 @@ import { db } from '@/db';
 import { chatSessions, chatMessages } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getSession } from '@/services/auth';
-import { chatStreamManager } from '@/lib/chat-stream';
+import { chatStreamManager } from '@/services/chat-stream';
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {

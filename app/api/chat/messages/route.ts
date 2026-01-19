@@ -3,7 +3,7 @@ import { db } from '@/db';
 import { chatMessages, chatSessions } from '@/db/schema';
 import { eq, asc } from 'drizzle-orm';
 import { getSession } from '@/services/auth';
-import { chatStreamManager } from '@/lib/chat-stream';
+import { chatStreamManager } from '@/services/chat-stream';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);

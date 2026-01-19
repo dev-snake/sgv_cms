@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
 import { io, Socket } from 'socket.io-client';
+import { SimpleConfirmDialog } from '@/components/shared/simple-confirm-dialog';
 
 interface Message {
     id: string;
@@ -37,6 +38,7 @@ export default function ChatWidget() {
     const [isAdminTyping, setIsAdminTyping] = useState(false);
     const [showEmojis, setShowEmojis] = useState(false);
     const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+    const [isClearDialogOpen, setIsClearDialogOpen] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -179,13 +181,16 @@ export default function ChatWidget() {
         }
     };
 
-    const handleClearHistory = async () => {
+    const handleClearHistory = () => {
         if (!sessionId) return;
-        if (!confirm('Xóa toàn bộ lịch sử trò chuyện?')) return;
+        setIsClearDialogOpen(true);
+    };
 
+    const confirmClearHistory = async () => {
+        if (!sessionId) return;
         try {
             await axios.delete(`/api/chat/sessions/${sessionId}`);
-            // Success response will be handled by SSE (session_removed)
+            setIsClearDialogOpen(false);
         } catch (error) {
             console.error('Failed to clear history:', error);
         }
@@ -474,6 +479,16 @@ export default function ChatWidget() {
             >
                 {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
             </Button>
+
+            <SimpleConfirmDialog
+                open={isClearDialogOpen}
+                onOpenChange={setIsClearDialogOpen}
+                onConfirm={confirmClearHistory}
+                title="Xóa lịch sử trò chuyện?"
+                description="Bạn sắp xóa toàn bộ nội dung cuộc trò chuyện này. Hành động này không thể hoàn tác và dữ liệu sẽ mất mãi mãi."
+                confirmText="Xác nhận xóa"
+                variant="destructive"
+            />
         </div>
     );
 }

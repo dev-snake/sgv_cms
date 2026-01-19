@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { parse } from 'node:url';
 import next from 'next';
 import { Server } from 'socket.io';
-import { chatStreamManager } from './lib/chat-stream';
+import { chatStreamManager } from './services/chat-stream';
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';

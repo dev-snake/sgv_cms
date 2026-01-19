@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { io } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConfirmationDialog } from '@/components/portal/delete-confirmation-dialog';
+import { SimpleConfirmDialog } from '@/components/shared/simple-confirm-dialog';
 
 interface ChatSession {
     id: string;
@@ -57,6 +58,7 @@ export default function ChatAdminPage() {
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
     const [isDeletingSession, setIsDeletingSession] = useState(false);
+    const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
 
     // Fetch sessions
     const fetchSessions = async () => {
@@ -245,12 +247,18 @@ export default function ChatAdminPage() {
         }
     };
 
-    const handleDeleteMessage = async (messageId: string) => {
-        if (!confirm('Gỡ tin nhắn này?')) return;
+    const handleDeleteMessage = (messageId: string) => {
+        setMessageToDelete(messageId);
+    };
+
+    const confirmDeleteMessage = async () => {
+        if (!messageToDelete) return;
         try {
-            await axios.delete(`/api/chat/messages/${messageId}`);
+            await axios.delete(`/api/chat/messages/${messageToDelete}`);
+            setMessageToDelete(null);
         } catch (error) {
             console.error('Failed to delete message:', error);
+            toast.error('Không thể gỡ tin nhắn');
         }
     };
 
@@ -627,6 +635,16 @@ export default function ChatAdminPage() {
                 itemLabel="Cuộc hội thoại"
                 itemName={sessions.find((s) => s.id === sessionToDelete)?.guest_name || 'Khách'}
                 loading={isDeletingSession}
+            />
+
+            <SimpleConfirmDialog
+                open={!!messageToDelete}
+                onOpenChange={(open) => !open && setMessageToDelete(null)}
+                onConfirm={confirmDeleteMessage}
+                title="Gỡ tin nhắn?"
+                description="Tin nhắn này sẽ được gỡ bỏ đối với cả bạn và khách hàng."
+                confirmText="Gỡ tin nhắn"
+                variant="destructive"
             />
         </div>
     );
