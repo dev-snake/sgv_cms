@@ -8,6 +8,14 @@ import api from '@/services/axios';
 import axios from 'axios';
 import { API_ROUTES } from '@/constants/routes';
 
+export interface SidebarModule {
+    code: string;
+    name: string;
+    icon: string | null;
+    route: string | null;
+    order: number;
+}
+
 export interface AuthUser {
     id: string;
     username: string;
@@ -16,6 +24,7 @@ export interface AuthUser {
     isActive?: boolean;
     roles: string[]; // Role codes
     permissions: string[]; // Permission strings
+    modules: SidebarModule[]; // Modules for sidebar
 }
 
 export function useAuth() {
@@ -61,6 +70,26 @@ export function useAuth() {
                         }),
                 );
 
+                // Extract unique modules with VIEW permission for sidebar
+                const moduleMap = new Map<string, SidebarModule>();
+                profileData.roles.forEach((r: any) => {
+                    r.permissions.forEach((p: any) => {
+                        if (p.canView && p.module && !moduleMap.has(p.module.code)) {
+                            moduleMap.set(p.module.code, {
+                                code: p.module.code,
+                                name: p.module.name,
+                                icon: p.module.icon,
+                                route: p.module.route,
+                                order: p.module.order ?? 0,
+                            });
+                        }
+                    });
+                });
+
+                const sidebarModules = Array.from(moduleMap.values()).sort(
+                    (a, b) => a.order - b.order,
+                );
+
                 const synchronizedUser: AuthUser = {
                     id: profileData.id,
                     username: profileData.username || profileData.email.split('@')[0],
@@ -69,6 +98,7 @@ export function useAuth() {
                     isActive: profileData.isActive,
                     roles: roleCodes,
                     permissions: Array.from(new Set(permissionStrings)), // Unique permissions
+                    modules: sidebarModules,
                 };
 
                 setUser(synchronizedUser);

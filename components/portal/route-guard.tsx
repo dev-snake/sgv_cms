@@ -43,6 +43,7 @@ export function RouteGuard({ children }: RouteGuardProps) {
             { path: PORTAL_ROUTES.cms.applications.list, permission: PERMISSIONS.RECRUITMENT_VIEW },
             { path: PORTAL_ROUTES.cms.comments.list, permission: PERMISSIONS.COMMENTS_VIEW },
             { path: PORTAL_ROUTES.cms.chat, permission: PERMISSIONS.CHAT_VIEW },
+            { path: PORTAL_ROUTES.cms.chat, permission: PERMISSIONS.CHAT_MANAGEMENT_VIEW },
             { path: PORTAL_ROUTES.cms.media, permission: PERMISSIONS.MEDIA_VIEW },
             { path: PORTAL_ROUTES.contacts, permission: PERMISSIONS.CONTACTS_VIEW },
             { path: PORTAL_ROUTES.users.list, permission: PERMISSIONS.USERS_VIEW },
@@ -51,13 +52,23 @@ export function RouteGuard({ children }: RouteGuardProps) {
             { path: PORTAL_ROUTES.settings, permission: PERMISSIONS.ROLES_VIEW },
         ];
 
-        // Find matching route (longest path first)
-        const matchingRoute = routePermissions
-            .sort((a, b) => b.path.length - a.path.length)
-            .find((r) => pathname.startsWith(r.path));
+        // Find ALL matching routes (longest path first)
+        const matchingRoutes = routePermissions
+            .filter((r) => pathname.startsWith(r.path))
+            .sort((a, b) => b.path.length - a.path.length);
 
-        if (!matchingRoute) return true; // Allow routes not in the list
-        return hasPermission(matchingRoute.permission);
+        if (matchingRoutes.length === 0) return true; // Allow routes not in the list
+
+        // Get the longest matching path
+        const longestPathLength = matchingRoutes[0].path.length;
+
+        // Check if user has ANY of the permissions for this route
+        // (support multiple permission codes for same route)
+        const permissionsForRoute = matchingRoutes
+            .filter((r) => r.path.length === longestPathLength)
+            .map((r) => r.permission);
+
+        return permissionsForRoute.some((perm) => hasPermission(perm));
     })();
 
     // If not authorized, show inline Permission Denied UI instead of redirecting

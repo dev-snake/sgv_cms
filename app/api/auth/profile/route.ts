@@ -72,6 +72,9 @@ export async function GET() {
                         deletedAt: modules.deleted_at,
                         code: modules.code,
                         name: modules.name,
+                        icon: modules.icon,
+                        route: modules.route,
+                        order: modules.order,
                     },
                 })
                 .from(permissions)
