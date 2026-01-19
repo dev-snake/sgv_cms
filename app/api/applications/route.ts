@@ -1,10 +1,9 @@
 import { db } from '@/db';
 import { jobApplications, jobPostings } from '@/db/schema';
 import { apiResponse, apiError } from '@/utils/api-response';
-import { desc, ilike, or, gte, lte, and, sql, eq } from 'drizzle-orm';
+import { desc, ilike, or, and, sql, eq } from 'drizzle-orm';
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from '@/utils/pagination';
 import { sanitizeHtml, withAuth } from '@/middlewares/middleware';
-import { NextRequest } from 'next/server';
 import { PERMISSIONS } from '@/constants/rbac';
 import { PAGINATION } from '@/constants/app';
 import { PORTAL_ROUTES } from '@/constants/routes';
