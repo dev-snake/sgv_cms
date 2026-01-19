@@ -277,7 +277,7 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
                         {isLoadingMatrix ? (
                             <div className="flex items-center justify-center py-20">
                                 <Loader2
-                                    className="animate-spin text-brand-primary opacity-20"
+                                    className="animate-spin text-amber-500 opacity-20"
                                     size={32}
                                 />
                             </div>
@@ -301,7 +301,7 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
                                                     !isSuperRole && toggleGlobal()
                                                 }
                                                 disabled={isSuperRole}
-                                                className="mx-auto border-slate-300 data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary rounded-none"
+                                                className="mx-auto border-slate-300 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500 rounded-none"
                                             />
                                         </th>
                                         <th className="pb-4 text-[9px] font-black uppercase tracking-widest text-slate-400">
@@ -326,7 +326,7 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
                                                             !isSuperRole && toggleColumn(col.field)
                                                         }
                                                         disabled={isSuperRole}
-                                                        className="border-slate-300 data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary rounded-none"
+                                                        className="border-slate-300 data-[state=checked]:bg-amber-500  data-[state=checked]:border-amber-500 rounded-none"
                                                     />
                                                     <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
                                                         {col.label}
@@ -357,7 +357,7 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
                                                             toggleModuleAll(module.id)
                                                         }
                                                         disabled={isSuperRole}
-                                                        className="mx-auto border-slate-200 data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary rounded-none"
+                                                        className="mx-auto border-slate-200 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500 rounded-none"
                                                     />
                                                 </td>
                                                 <td className="py-4">
@@ -404,7 +404,7 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
                                                             className={cn(
                                                                 'size-5 mx-auto border-slate-200 rounded-none transition-all',
                                                                 color,
-                                                                'data-[state=checked]:border-amber-600 shadow-sm',
+                                                                'data-[state=checked]:border-amber-500 shadow-sm',
                                                             )}
                                                         />
                                                     </td>
