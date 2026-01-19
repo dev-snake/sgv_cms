@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { decodeJwt } from 'jose';
-import { SUPER_ADMIN_ROLE, RBAC_ROLES } from '@/constants/rbac';
+import { RBAC_ROLES } from '@/constants/rbac';
 import api from '@/services/axios';
 import axios from 'axios';
 import { API_ROUTES } from '@/constants/routes';
@@ -22,6 +22,7 @@ export interface AuthUser {
     fullName?: string;
     email?: string;
     isActive?: boolean;
+    is_super?: boolean; // New flag for system-wide super access
     roles: string[]; // Role codes
     permissions: string[]; // Permission strings
     modules: SidebarModule[]; // Modules for sidebar
@@ -72,7 +73,11 @@ export function useAuth() {
 
                 // Extract unique modules with VIEW permission for sidebar
                 const moduleMap = new Map<string, SidebarModule>();
+                let isSystemSuper = false; // Flag to track if any role is super
+
                 profileData.roles.forEach((r: any) => {
+                    if (r.is_super) isSystemSuper = true;
+
                     r.permissions.forEach((p: any) => {
                         if (p.canView && p.module && !moduleMap.has(p.module.code)) {
                             moduleMap.set(p.module.code, {
@@ -96,6 +101,7 @@ export function useAuth() {
                     fullName: profileData.fullName,
                     email: profileData.email,
                     isActive: profileData.isActive,
+                    is_super: isSystemSuper,
                     roles: roleCodes,
                     permissions: Array.from(new Set(permissionStrings)), // Unique permissions
                     modules: sidebarModules,
@@ -123,8 +129,8 @@ export function useAuth() {
 
     const hasPermission = (permission: string) => {
         if (!user) return false;
-        // Super admins have all permissions
-        if (user.roles?.includes(SUPER_ADMIN_ROLE)) return true;
+        // Check is_super flag instead of hardcoded role name
+        if (user.is_super) return true;
         return user.permissions?.includes(permission) || false;
     };
 
@@ -133,8 +139,8 @@ export function useAuth() {
         return user.roles?.includes(roleCode) || false;
     };
 
-    // isAdmin only checks if user has 'SUPER_ADMIN' role in RBAC system
-    const isSuperAdmin = user?.roles?.includes(SUPER_ADMIN_ROLE) || false;
+    // isSuperAdmin checks the new is_super flag
+    const isSuperAdmin = user?.is_super || false;
 
     return {
         user,

@@ -5,20 +5,13 @@
 
 // System Role Names - These are the reserved role names in the RBAC system
 export const RBAC_ROLES = {
-    SUPER_ADMIN: 'SUPER_ADMIN',
     ADMIN: 'ADMIN',
     EDITOR: 'EDITOR',
     VIEWER: 'VIEWER',
 } as const;
 
-// Role that has all permissions (superuser)
-export const SUPER_ADMIN_ROLE = RBAC_ROLES.SUPER_ADMIN;
-
-// Roles that can manage RBAC settings
-export const RBAC_MANAGEMENT_ROLES = [RBAC_ROLES.SUPER_ADMIN];
-
 // Roles that cannot be deleted
-export const PROTECTED_ROLES: string[] = [RBAC_ROLES.SUPER_ADMIN];
+export const PROTECTED_ROLES: string[] = [RBAC_ROLES.ADMIN];
 
 // Permission action types
 export const PERMISSION_ACTIONS = {

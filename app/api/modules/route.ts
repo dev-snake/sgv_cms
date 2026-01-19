@@ -1,7 +1,7 @@
 import { db } from '@/db';
 import { modules } from '@/db/schema';
 import { apiResponse, apiError } from '@/utils/api-response';
-import { RBAC_MANAGEMENT_ROLES, PERMISSIONS } from '@/constants/rbac';
+import {  PERMISSIONS } from '@/constants/rbac';
 import { sql, asc } from 'drizzle-orm';
 import { withAuth } from '@/middlewares/middleware';
 

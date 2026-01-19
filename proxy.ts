@@ -94,10 +94,10 @@ export default async function proxy(request: NextRequest) {
 
         try {
             const sessionData = await decrypt(session);
-            const userRoles = sessionData?.user?.roles || [];
-            const isSuperAdmin = userRoles.includes(RBAC_ROLES.SUPER_ADMIN);
-            const isAdmin = userRoles.includes(RBAC_ROLES.ADMIN) || isSuperAdmin;
-            const isEditor = userRoles.includes(RBAC_ROLES.EDITOR) || isAdmin;
+            const user = sessionData?.user;
+            const isSuperAdmin = user?.is_super || false;
+            const isAdmin = user?.roles?.includes(RBAC_ROLES.ADMIN) || isSuperAdmin;
+            const isEditor = user?.roles?.includes(RBAC_ROLES.EDITOR) || isAdmin;
 
             // In the new RBAC system, we let the individual route handlers (using withAuth)
             // handle granular permission checks. The global proxy should only ensure:
