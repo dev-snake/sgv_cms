@@ -1,28 +1,29 @@
-import { db } from "@/db";
-import { users, user_roles, roles } from "@/db/schema";
-import { apiResponse, apiError } from "@/utils/api-response";
-import { desc, eq, sql } from "drizzle-orm";
+import { db } from '@/db';
+import { users, user_roles, roles } from '@/db/schema';
+import { apiResponse, apiError } from '@/utils/api-response';
+import { desc, eq, sql } from 'drizzle-orm';
 // @ts-ignore
-import bcrypt from "bcryptjs";
-import { withAuth } from "@/middlewares/middleware";
-import { NextRequest } from "next/server";
-import { PERMISSIONS } from "@/constants/rbac";
-import { AUTH } from "@/constants/app";
+import bcrypt from 'bcryptjs';
+import { withAuth } from '@/middlewares/middleware';
+import { NextRequest } from 'next/server';
+import { PERMISSIONS } from '@/constants/rbac';
+import { AUTH } from '@/constants/app';
 
 // GET /api/users - List all users with their roles
-export const GET = withAuth(async () => {
-  try {
-    // Get all users with their roles in a single query using aggregation
-    const usersWithRoles = await db
-      .select({
-        id: users.id,
-        username: users.username,
-        fullName: users.full_name,
-        email: users.email,
-        phone: users.phone,
-        isActive: users.is_active,
-        createdAt: users.created_at,
-        roles: sql<any[]>`
+export const GET = withAuth(
+    async () => {
+        try {
+            // Get all users with their roles in a single query using aggregation
+            const usersWithRoles = await db
+                .select({
+                    id: users.id,
+                    username: users.username,
+                    fullName: users.full_name,
+                    email: users.email,
+                    phone: users.phone,
+                    isActive: users.is_active,
+                    createdAt: users.created_at,
+                    roles: sql<any[]>`
           COALESCE(
             json_agg(
               json_build_object('id', ${roles.id}, 'name', ${roles.name}, 'code', ${roles.code})
@@ -30,66 +31,87 @@ export const GET = withAuth(async () => {
             '[]'
           )
         `,
-      })
-      .from(users)
-      .leftJoin(user_roles, eq(user_roles.user_id, users.id))
-      .leftJoin(roles, eq(user_roles.role_id, roles.id))
-      .groupBy(users.id)
-      .orderBy(desc(users.created_at));
+                })
+                .from(users)
+                .leftJoin(user_roles, eq(user_roles.user_id, users.id))
+                .leftJoin(roles, eq(user_roles.role_id, roles.id))
+                .groupBy(users.id)
+                .orderBy(desc(users.created_at));
 
-    return apiResponse(usersWithRoles);
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    return apiError("Internal Server Error", 500);
-  }
-}, { requiredPermissions: [PERMISSIONS.USERS_VIEW] });
+            return apiResponse(usersWithRoles);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            return apiError('Internal Server Error', 500);
+        }
+    },
+    { requiredPermissions: [PERMISSIONS.USERS_VIEW] },
+);
 
 // POST /api/users - Create a new user
-export const POST = withAuth(async (request: NextRequest) => {
-  try {
-    const { username, password, fullName, email, phone, roleIds } = await request.json();
+export const POST = withAuth(
+    async (request: NextRequest) => {
+        try {
+            const { username, password, fullName, email, phone, roleIds } = await request.json();
 
-    if (!username || !password) {
-      return apiError("Username and password are required", 400);
-    }
+            if (!username || !password) {
+                return apiError('Username and password are required', 400);
+            }
 
-    const hashedPassword = await bcrypt.hash(password, AUTH.BCRYPT_SALT_ROUNDS);
+            const hashedPassword = await bcrypt.hash(password, AUTH.BCRYPT_SALT_ROUNDS);
 
-    const newUser = await db.transaction(async (tx) => {
-      const [user] = await tx
-        .insert(users)
-        .values({
-          username,
-          password: hashedPassword,
-          full_name: fullName,
-          email,
-          phone,
-        })
-        .returning({
-          id: users.id,
-          username: users.username,
-          fullName: users.full_name,
-        });
+            const newUser = await db.transaction(async (tx) => {
+                const [user] = await tx
+                    .insert(users)
+                    .values({
+                        username,
+                        password: hashedPassword,
+                        full_name: fullName,
+                        email,
+                        phone,
+                    })
+                    .returning({
+                        id: users.id,
+                        username: users.username,
+                        fullName: users.full_name,
+                    });
 
-      if (roleIds && Array.isArray(roleIds) && roleIds.length > 0) {
-        await tx.insert(user_roles).values(
-          roleIds.map((rId: string) => ({
-            user_id: user.id,
-            role_id: rId,
-          }))
-        );
-      }
+                if (roleIds && Array.isArray(roleIds) && roleIds.length > 0) {
+                    await tx.insert(user_roles).values(
+                        roleIds.map((rId: string) => ({
+                            user_id: user.id,
+                            role_id: rId,
+                        })),
+                    );
+                }
 
-      return user;
-    });
+                return user;
+            });
 
+            return apiResponse(newUser, { status: 201 });
+        } catch (error: any) {
+            console.error('Error creating user:', error);
 
-    return apiResponse(newUser, { status: 201 });
-  } catch (error) {
-    console.error("Error creating user:", error);
-    if (error instanceof Error && error.message.includes("unique constraint")) {
-      return apiError("Username already exists", 400);
-    }
-    return apiError("Internal Server Error", 500);
-  }
-}, { requiredPermissions: [PERMISSIONS.USERS_CREATE] });
+            // Handle PostgreSQL unique constraint violations
+            if (error?.code === '23505') {
+                const detail = error?.detail || '';
+                if (detail.includes('email')) {
+                    return apiError('Email này đã được sử dụng', 400);
+                }
+                if (detail.includes('username')) {
+                    return apiError('Tên đăng nhập đã tồn tại', 400);
+                }
+                return apiError('Dữ liệu đã tồn tại (trùng lặp)', 400);
+            }
+
+            if (error instanceof Error && error.message.includes('unique constraint')) {
+                if (error.message.includes('email')) {
+                    return apiError('Email này đã được sử dụng', 400);
+                }
+                return apiError('Tên đăng nhập đã tồn tại', 400);
+            }
+
+            return apiError('Lỗi máy chủ nội bộ', 500);
+        }
+    },
+    { requiredPermissions: [PERMISSIONS.USERS_CREATE] },
+);
