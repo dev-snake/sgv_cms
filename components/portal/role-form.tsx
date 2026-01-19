@@ -193,7 +193,7 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
                 <Button
                     onClick={handleSubmit}
                     className="bg-brand-primary hover:bg-[#002d6b] text-[10px] font-black uppercase tracking-[0.2em] px-8 py-6 h-auto shadow-lg transition-all rounded-none hover:-translate-y-0.5 active:scale-95 border-b-4 border-b-brand-secondary"
-                    disabled={isSubmitting || isSuperRole}
+                    disabled={isSubmitting}
                 >
                     {isSubmitting ? (
                         <Loader2 className="mr-2 size-4 animate-spin" />
@@ -227,7 +227,7 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
                                             name: e.target.value.toUpperCase(),
                                         })
                                     }
-                                    disabled={isSubmitting || isSuperRole}
+                                    disabled={isSubmitting}
                                 />
                             </div>
 
@@ -260,7 +260,7 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
                                     onChange={(e) =>
                                         setFormData({ ...formData, description: e.target.value })
                                     }
-                                    disabled={isSubmitting || isSuperRole}
+                                    disabled={isSubmitting}
                                 />
                             </div>
                         </div>
