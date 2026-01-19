@@ -66,7 +66,7 @@ export default function RecruitmentPage() {
             <section className="relative pt-40 pb-20 bg-slate-900 overflow-hidden">
                 <div className="absolute inset-0 z-0 opacity-40">
                     <Image
-                        src="/images/banners/recruitment-banner.png"
+                        src="/uploads/images/2026/01/19/1768814857344-hfho0c.png"
                         alt="Recruitment Background"
                         fill
                         className="object-cover"

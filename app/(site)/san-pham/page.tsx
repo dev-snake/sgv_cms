@@ -127,7 +127,16 @@ export default function ProductArchive() {
         <div className="flex flex-col min-h-screen bg-white pt-24">
             {/* Page Header */}
             <section className="relative py-20 bg-slate-950 overflow-hidden">
-                <div className="absolute inset-0 bg-carbon opacity-30"></div>
+                <div className="absolute inset-0 z-0 opacity-40">
+                    <Image
+                        src="/uploads/images/2026/01/19/1768814857344-hfho0c.png"
+                        alt="Projects Background"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-linear-to-b from-slate-950/80 via-slate-950/40 to-white/0"></div>
+                </div>
                 <div className="container relative z-10 mx-auto px-4 lg:px-8">
                     <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
                         <div className="space-y-6 max-w-2xl">
