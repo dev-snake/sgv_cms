@@ -18,6 +18,7 @@ import { vi } from 'date-fns/locale';
 import api from '@/services/axios';
 import { io, Socket } from 'socket.io-client';
 import Link from 'next/link';
+import { API_ROUTES, PORTAL_ROUTES } from '@/constants/routes';
 
 interface Notification {
     id: string;
@@ -37,7 +38,7 @@ export function NotificationDropdown() {
 
     const fetchNotifications = React.useCallback(async () => {
         try {
-            const response = await api.get('/api/portal/notifications');
+            const response = await api.get(API_ROUTES.NOTIFICATIONS);
             if (response.data.success) {
                 setNotifications(response.data.data);
                 setUnreadCount(response.data.meta.unreadCount);
@@ -45,7 +46,7 @@ export function NotificationDropdown() {
         } catch (error) {
             console.error('Error fetching notifications:', error);
         }
-    }, []);
+    }, [API_ROUTES.NOTIFICATIONS]);
 
     React.useEffect(() => {
         fetchNotifications();
@@ -89,7 +90,7 @@ export function NotificationDropdown() {
 
     const markAsRead = async (id: string) => {
         try {
-            await api.patch('/api/portal/notifications', { id });
+            await api.patch(API_ROUTES.NOTIFICATIONS, { id });
             setNotifications((prev) =>
                 prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
             );
@@ -101,7 +102,7 @@ export function NotificationDropdown() {
 
     const markAllAsRead = async () => {
         try {
-            await api.patch('/api/portal/notifications', { all: true });
+            await api.patch(API_ROUTES.NOTIFICATIONS, { all: true });
             setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
             setUnreadCount(0);
         } catch (error) {
@@ -221,7 +222,7 @@ export function NotificationDropdown() {
                 <DropdownMenuSeparator className="m-0" />
                 <div className="p-3 bg-slate-50 text-center">
                     <Link
-                        href="/portal/notifications"
+                        href={PORTAL_ROUTES.notifications}
                         className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-brand-primary transition-colors"
                         onClick={() => setIsOpen(false)}
                     >

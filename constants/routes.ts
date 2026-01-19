@@ -91,6 +91,9 @@ export const PORTAL_ROUTES = {
     // Contacts
     contacts: '/portal/contacts',
 
+    // Notifications
+    notifications: '/portal/notifications',
+
     // Settings
     settings: '/portal/settings',
 } as const;
@@ -122,6 +125,7 @@ export const API_ROUTES = {
     PERMISSIONS: '/api/permissions',
     MODULES: '/api/modules',
     COMMENTS: '/api/portal/comments',
+    NOTIFICATIONS: '/api/portal/notifications',
 } as const;
 
 export type PortalRoute = typeof PORTAL_ROUTES;

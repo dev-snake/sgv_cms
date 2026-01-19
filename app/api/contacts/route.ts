@@ -7,6 +7,7 @@ import { parsePaginationParams, calculateOffset, createPaginationMeta } from '@/
 import { withAuth } from '@/middlewares/middleware';
 import { NextRequest } from 'next/server';
 import { PERMISSIONS } from '@/constants/rbac';
+import { PORTAL_ROUTES } from '@/constants/routes';
 import { PAGINATION } from '@/constants/app';
 import { validateBody, sanitizeHtml } from '@/middlewares/middleware';
 import { contactSchema } from '@/validations/contact.schema';
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
                     type: 'contact',
                     title: 'Liên hệ mới',
                     content: `Khách hàng ${newContact.name} vừa gửi yêu cầu liên hệ.`,
-                    link: '/portal/crm/contacts',
+                    link: PORTAL_ROUTES.contacts,
                 }),
             ),
         ]).catch((error) => {

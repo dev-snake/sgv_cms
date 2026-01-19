@@ -7,6 +7,7 @@ import { sanitizeHtml, withAuth } from '@/middlewares/middleware';
 import { NextRequest } from 'next/server';
 import { PERMISSIONS } from '@/constants/rbac';
 import { PAGINATION } from '@/constants/app';
+import { PORTAL_ROUTES } from '@/constants/routes';
 import { jobApplicationSchema } from '@/validations/application.schema';
 import { sendApplicationConfirmationEmail } from '@/services/mail';
 import { writeFile, mkdir } from 'fs/promises';
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
                         type: 'application',
                         title: 'Ứng tuyển mới',
                         content: `Ứng viên ${sanitizedData.full_name} đã ứng tuyển vị trí ${job.title}.`,
-                        link: '/portal/hr/applications',
+                        link: PORTAL_ROUTES.cms.applications.list,
                     }),
                 ),
             ]).catch((err) => {

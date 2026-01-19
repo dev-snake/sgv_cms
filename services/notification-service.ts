@@ -29,7 +29,6 @@ class NotificationService {
         try {
             console.log(`[NotificationService] Creating ${type} notification: ${title}`);
             // 1. Save to database
-            // 1. Save to database
             const [newNotification] = await db
                 .insert(notifications)
                 .values({
