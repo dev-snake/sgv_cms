@@ -74,7 +74,6 @@ export async function generateTokens(user: any) {
         ...user,
         is_super: isSuperUser,
         roles: userRoles.map((r) => r.code), // Use code for consistency
-        role: userRoles[0]?.code || 'VIEWER', // Legacy role field for compatibility
         permissions: userPermissions,
     };
 

@@ -10,9 +10,6 @@ export const RBAC_ROLES = {
     VIEWER: 'VIEWER',
 } as const;
 
-// Roles that cannot be deleted
-export const PROTECTED_ROLES: string[] = [RBAC_ROLES.ADMIN];
-
 // Permission action types
 export const PERMISSION_ACTIONS = {
     VIEW: 'VIEW',

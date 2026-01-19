@@ -3,7 +3,7 @@ import { roles, permissions, modules } from '@/db/schema';
 import { apiResponse, apiError } from '@/utils/api-response';
 import { eq, sql } from 'drizzle-orm';
 import { withAuth } from '@/middlewares/middleware';
-import { PROTECTED_ROLES, PERMISSIONS } from '@/constants/rbac';
+import { PERMISSIONS } from '@/constants/rbac';
 
 export const GET = withAuth(
     async (request, session, { params }) => {

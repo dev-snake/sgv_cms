@@ -14,7 +14,6 @@ import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import { toast } from 'sonner';
 import { Permission, Role } from '@/types';
 import { cn } from '@/lib/utils';
-import { PROTECTED_ROLES } from '@/constants/rbac';
 
 interface RoleFormProps {
     initialData?: Role;

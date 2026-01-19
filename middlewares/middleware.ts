@@ -17,7 +17,6 @@ export interface UserSession {
         id: string;
         username: string;
         full_name?: string | null;
-        role: string; // Legacy role string
         is_super?: boolean;
         roles: string[];
         permissions: string[];
@@ -177,7 +176,7 @@ export function isAdmin(user: UserSession['user']): boolean {
  */
 export function canEdit(user: UserSession['user']): boolean {
     if (isAdmin(user)) return true;
-    return ['editor'].includes(user.role) || user.roles?.includes('editor');
+    return user.roles?.some((r) => r.toLowerCase() === 'editor') || false;
 }
 
 /**

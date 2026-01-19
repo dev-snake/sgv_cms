@@ -27,7 +27,6 @@ import { Badge } from '@/components/ui/badge';
 import { DeleteConfirmationDialog } from '@/components/portal/delete-confirmation-dialog';
 import { toast } from 'sonner';
 import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
-import { PROTECTED_ROLES } from '@/constants/rbac';
 
 export default function RolesManagementPage() {
     const [roles, setRoles] = React.useState<Role[]>([]);
