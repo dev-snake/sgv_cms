@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { chatMessages } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { chatStreamManager } from '@/lib/chat-stream';
+import { chatStreamManager } from '@/services/chat-stream';
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
