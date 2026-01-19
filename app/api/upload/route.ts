@@ -105,10 +105,21 @@ export const POST = withAuth(
                 return apiError(`File size exceeds ${UPLOAD.MAX_FILE_SIZE_MB}MB limit`, 400);
             }
 
-            // Determine target directory
+            // Determine target directory with date-based organization
             const category = isDoc ? 'cvs' : 'images';
-            const year = new Date().getFullYear().toString();
-            const uploadsDir = path.join(process.cwd(), 'public', 'uploads', category, year);
+            const now = new Date();
+            const year = now.getFullYear().toString();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // 01-12
+            const day = String(now.getDate()).padStart(2, '0'); // 01-31
+            const uploadsDir = path.join(
+                process.cwd(),
+                'public',
+                'uploads',
+                category,
+                year,
+                month,
+                day,
+            );
             await mkdir(uploadsDir, { recursive: true });
 
             // Generate unique filename
@@ -124,7 +135,7 @@ export const POST = withAuth(
             await writeFile(filepath, buffer);
 
             // Return public URL
-            const publicUrl = `/uploads/${category}/${year}/${filename}`;
+            const publicUrl = `/uploads/${category}/${year}/${month}/${day}/${filename}`;
 
             return apiResponse({ url: publicUrl, filename }, { status: 201 });
         } catch (error) {
