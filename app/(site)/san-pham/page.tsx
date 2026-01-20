@@ -21,7 +21,6 @@ import { cn } from '@/lib/utils';
 import {
     Pagination,
     PaginationContent,
-    PaginationEllipsis,
     PaginationItem,
     PaginationLink,
     PaginationNext,
@@ -255,7 +254,7 @@ export default function ProductArchive() {
                                     quả
                                 </div>
                                 <div className="flex items-center gap-6">
-                                    <div className="flex border border-slate-100">
+                                    <div className="flex border border-slate-100 ">
                                         <button
                                             onClick={() => setViewMode('grid')}
                                             className={cn(
@@ -265,7 +264,7 @@ export default function ProductArchive() {
                                                     : 'text-slate-300 hover:text-brand-primary',
                                             )}
                                         >
-                                            <LayoutGrid size={16} />
+                                            <LayoutGrid size={16} className='hover:cursor-pointer' />
                                         </button>
                                         <button
                                             onClick={() => setViewMode('list')}
@@ -276,7 +275,7 @@ export default function ProductArchive() {
                                                     : 'text-slate-300 hover:text-brand-primary',
                                             )}
                                         >
-                                            <List size={16} />
+                                            <List size={16} className='hover:cursor-pointer' />
                                         </button>
                                     </div>
                                 </div>

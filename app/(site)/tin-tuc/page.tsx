@@ -14,7 +14,6 @@ import {
     PaginationPrevious,
 } from '@/components/ui/pagination';
 import { cn } from '@/lib/utils';
-import { SITE_ROUTES } from '@/constants/routes';
 import api from '@/services/axios';
 
 interface NewsArticle {
@@ -85,8 +84,7 @@ export default function NewsPage() {
         );
     }
 
-    const featuredNews = news[0];
-    const otherNews = news.slice(1);
+
 
     return (
         <div className="flex flex-col min-h-screen bg-white">

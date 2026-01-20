@@ -28,7 +28,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-
+import Image from 'next/image';
 interface JobPosting {
     id: string;
     title: string;
@@ -102,7 +102,7 @@ export default function JobDetailPage() {
                         Tin tuyển dụng bạn đang tìm kiếm có thể đã hết hạn hoặc đã bị gỡ bỏ.
                     </p>
                     <Link href={SITE_ROUTES.RECRUITMENT} className="block">
-                        <Button className="w-full bg-brand-primary hover:bg-brand-secondary rounded-xl h-12">
+                        <Button className="w-full bg-brand-primary hover:bg-brand-secondary  h-12">
                             Quay lại trang tuyển dụng
                         </Button>
                     </Link>
@@ -116,7 +116,16 @@ export default function JobDetailPage() {
             {/* Hero Section */}
             <section className="bg-brand-primary py-12 sm:py-20 relative overflow-hidden">
                 {/* Decorative elements */}
-                <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-brand-secondary/50 to-transparent"></div>
+                <div className="absolute inset-0 z-0 opacity-40">
+                    <Image
+                        src="/uploads/images/2026/01/19/1768814857344-hfho0c.png"
+                        alt="News Background"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-linear-to-b from-slate-950/80 via-slate-950/40 to-white/0"></div>
+                </div>
                 <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-brand-accent/10 rounded-full blur-3xl"></div>
 
                 <div className="container relative z-10 mx-auto px-4 lg:px-8">
@@ -467,7 +476,7 @@ function ApplyForm({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
                     required
                     value={formData.full_name}
                     onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    className="bg-slate-50 border-slate-200 rounded-xl h-11 focus:ring-brand-primary placeholder:text-slate-400 text-sm"
+                    className="bg-slate-50 border-slate-200 h-11 focus:ring-brand-primary placeholder:text-slate-400 text-sm"
                     placeholder="Ví dụ: Nguyễn Văn A"
                 />
             </div>
@@ -480,7 +489,7 @@ function ApplyForm({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="bg-slate-50 border-slate-200 rounded-xl h-11 focus:ring-brand-primary placeholder:text-slate-400 text-sm"
+                        className="bg-slate-50 border-slate-200  h-11 focus:ring-brand-primary placeholder:text-slate-400 text-sm"
                         placeholder="example@mail.com"
                     />
                 </div>
@@ -490,7 +499,7 @@ function ApplyForm({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
                         required
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="bg-slate-50 border-slate-200 rounded-xl h-11 focus:ring-brand-primary placeholder:text-slate-400 text-sm"
+                        className="bg-slate-50 border-slate-200  h-11 focus:ring-brand-primary placeholder:text-slate-400 text-sm"
                         placeholder="09xx xxx xxx"
                     />
                 </div>
@@ -503,7 +512,7 @@ function ApplyForm({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
                 <Textarea
                     value={formData.cover_letter}
                     onChange={(e) => setFormData({ ...formData, cover_letter: e.target.value })}
-                    className="bg-slate-50 border-slate-200 rounded-xl min-h-[100px] focus:ring-brand-primary placeholder:text-slate-400 text-sm py-3"
+                    className="bg-slate-50 border-slate-200  min-h-[100px] focus:ring-brand-primary placeholder:text-slate-400 text-sm py-3"
                     placeholder="Giới thiệu ngắn gọn sở trường của bạn..."
                 />
             </div>
@@ -513,7 +522,7 @@ function ApplyForm({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
                 <div
                     onClick={() => fileInputRef.current?.click()}
                     className={cn(
-                        'border-2 border-dashed border-slate-200 rounded-xl p-6 text-center cursor-pointer transition-all group flex flex-col items-center justify-center',
+                        'border-2 border-dashed border-slate-200  p-6 text-center cursor-pointer transition-all group flex flex-col items-center justify-center',
                         cvFile
                             ? 'bg-brand-primary/5 border-brand-primary'
                             : 'hover:border-brand-primary/50 hover:bg-slate-50',
@@ -555,7 +564,7 @@ function ApplyForm({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
             <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-brand-primary hover:bg-brand-secondary text-white h-12 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-brand-primary/20 disabled:opacity-50 transition-all active:scale-[0.98]"
+                className="w-full bg-brand-primary hover:bg-brand-secondary text-white h-12  text-xs font-bold uppercase tracking-widest shadow-lg shadow-brand-primary/20 disabled:opacity-50 transition-all active:scale-[0.98]"
             >
                 {isSubmitting ? (
                     <>

@@ -29,12 +29,12 @@ export default function AboutPage() {
     return (
         <div className="flex flex-col min-h-screen bg-white pt-24">
             {/* Hero Section */}
-            <section className="relative h-[65vh] min-h-[550px] w-full bg-slate-900 overflow-hidden">
+            <section className="relative h-[60vh] min-h-[550px] w-full bg-slate-900 overflow-hidden">
                 <Image
-                    src="https://saigonvalve.vn/uploads/files/2024/06/11/Blue-Modern-Dance-Channel-Youtube-Banner.png"
-                    alt="Về Sài Gòn Valve"
+                    src="/uploads/images/2026/01/19/1768814857344-hfho0c.png"
+                    alt="Introduce Background"
                     fill
-                    className="object-cover opacity-50"
+                    className="object-cover"
                     priority
                 />
                 <div className="absolute inset-0 bg-linear-to-b from-slate-900/40 via-slate-900/60 to-slate-900"></div>
@@ -50,7 +50,7 @@ export default function AboutPage() {
                         <motion.h1
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="text-6xl sm:text-8xl font-bold text-white tracking-tighter uppercase leading-[0.9]"
+                            className="text-6xl sm:text-7xl font-bold text-white tracking-tighter uppercase"
                         >
                             SÀI GÒN VALVE <br />
                             <span className="text-brand-primary">LẬP TINH CÔNG NGHỆ</span>
