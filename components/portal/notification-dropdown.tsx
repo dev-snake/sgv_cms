@@ -228,13 +228,13 @@ export function NotificationDropdown() {
                 </ScrollArea>
                 <DropdownMenuSeparator className="m-0" />
                 <div className="p-3 bg-slate-50 text-center">
-                    <Link
+                    {/* <Link
                         href={PORTAL_ROUTES.notifications}
                         className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-brand-primary transition-colors"
                         onClick={() => setIsOpen(false)}
                     >
                         Xem tất cả thông báo
-                    </Link>
+                    </Link> */}
                 </div>
             </DropdownMenuContent>
         </DropdownMenu>

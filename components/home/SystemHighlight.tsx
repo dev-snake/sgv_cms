@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { Button } from "../ui/button";
 
 const BANNERS = [
   {
@@ -57,12 +58,17 @@ export default function SystemHighlight() {
               </div>
               
               <div className="pt-4">
-                <Link
+                {/* <Link
                   href={banner.url}
                   className="inline-flex items-center px-8 py-3 bg-brand-primary text-white text-[10px] font-black uppercase tracking-widest hover:bg-brand-primary/90 transition-colors"
                 >
                   {banner.btnText}
-                </Link>
+                </Link> */}
+                <Button
+                  className="inline-flex items-center px-8 py-3 bg-brand-primary hover:cursor-pointer  text-white text-[10px] font-black uppercase tracking-widest hover:bg-brand-primary/90 transition-colors"
+                >
+                  {banner.btnText}
+                </Button>
               </div>
             </div>
           </motion.div>
