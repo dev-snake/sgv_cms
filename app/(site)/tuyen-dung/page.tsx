@@ -5,6 +5,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { MapPin, Briefcase, Clock, DollarSign, ChevronRight, MoveRight, Users } from 'lucide-react';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
+import { cn } from '@/lib/utils';
 import { SITE_ROUTES } from '@/constants/routes';
 import api from '@/services/axios';
 import { format } from 'date-fns';
@@ -35,22 +44,44 @@ const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
 export default function RecruitmentPage() {
     const [jobs, setJobs] = React.useState<JobPosting[]>([]);
     const [loading, setLoading] = React.useState(true);
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const [totalPages, setTotalPages] = React.useState(1);
+    const [total, setTotal] = React.useState(0);
+    const jobsListRef = React.useRef<HTMLDivElement>(null);
+
+    const fetchJobs = async (page: number = 1) => {
+        setLoading(true);
+        try {
+            const params = new URLSearchParams({
+                status: 'open',
+                page: String(page),
+                limit: '10',
+            });
+            const response = await api.get(`/api/jobs?${params.toString()}`);
+            if (response.data.success) {
+                setJobs(response.data.data || []);
+                if (response.data.meta) {
+                    setTotalPages(response.data.meta.totalPages || 1);
+                    setTotal(response.data.meta.total || 0);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching jobs:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     React.useEffect(() => {
-        const fetchJobs = async () => {
-            try {
-                const response = await api.get('/api/jobs?status=open');
-                if (response.data.success) {
-                    setJobs(response.data.data || []);
-                }
-            } catch (error) {
-                console.error('Error fetching jobs:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchJobs();
-    }, []);
+        fetchJobs(currentPage);
+    }, [currentPage]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        if (jobsListRef.current) {
+            jobsListRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
 
     if (loading) {
         return (
@@ -93,7 +124,7 @@ export default function RecruitmentPage() {
             </section>
 
             {/* Jobs List */}
-            <section className="py-20 bg-slate-50">
+            <section className="py-20 bg-slate-50" ref={jobsListRef}>
                 <div className="container mx-auto px-4 lg:px-8">
                     <div className="flex items-center justify-between mb-12">
                         <div className="space-y-2">
@@ -101,7 +132,7 @@ export default function RecruitmentPage() {
                                 Vị trí đang tuyển
                             </h2>
                             <p className="text-sm text-muted-foreground font-medium">
-                                {jobs.length} vị trí đang mở
+                                {total} vị trí đang mở
                             </p>
                         </div>
                     </div>
@@ -198,6 +229,62 @@ export default function RecruitmentPage() {
                                     </Link>
                                 </motion.div>
                             ))}
+                        </div>
+                    )}
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="mt-16 pt-10 border-t border-slate-200">
+                            <Pagination>
+                                <PaginationContent>
+                                    <PaginationItem>
+                                        <PaginationPrevious
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                if (currentPage > 1)
+                                                    handlePageChange(currentPage - 1);
+                                            }}
+                                            className={cn(
+                                                currentPage === 1 &&
+                                                    'pointer-events-none opacity-50',
+                                            )}
+                                        />
+                                    </PaginationItem>
+
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                                        (page) => (
+                                            <PaginationItem key={page}>
+                                                <PaginationLink
+                                                    href="#"
+                                                    isActive={currentPage === page}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handlePageChange(page);
+                                                    }}
+                                                >
+                                                    {page}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        ),
+                                    )}
+
+                                    <PaginationItem>
+                                        <PaginationNext
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                if (currentPage < totalPages)
+                                                    handlePageChange(currentPage + 1);
+                                            }}
+                                            className={cn(
+                                                currentPage === totalPages &&
+                                                    'pointer-events-none opacity-50',
+                                            )}
+                                        />
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
                         </div>
                     )}
                 </div>
