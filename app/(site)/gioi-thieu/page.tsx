@@ -43,7 +43,7 @@ export default function AboutPage() {
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-brand-accent bg-slate-900/80 px-4 py-2 border border-white/10"
+                            className="inline-flex items-center gap-3  border-accent text-white  border bg-amber-600/10  px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em]  backdrop-blur-md"
                         >
                             GIẢI PHÁP CÔNG NGHIỆP THÔNG MINH
                         </motion.div>
@@ -53,13 +53,13 @@ export default function AboutPage() {
                             className="text-6xl sm:text-7xl font-bold text-white tracking-tighter uppercase"
                         >
                             SÀI GÒN VALVE <br />
-                            <span className="text-brand-primary">LẬP TINH CÔNG NGHỆ</span>
+                            <span className="text-accent">LẬP TINH CÔNG NGHỆ</span>
                         </motion.h1>
                         <motion.p
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.3 }}
-                            className="text-lg text-slate-300 font-medium max-w-2xl leading-relaxed italic border-l-4 border-brand-primary pl-8"
+                            className="text-lg text-slate-300 font-medium max-w-2xl leading-relaxed italic border-l-4 border-accent pl-8"
                         >
                             "Giải pháp đáng tin cậy cho cấp thoát nước và xử lý nước thải từ SG-VAL.
                             Kiến tạo hạ tầng ngành nước hiện đại và bền vững."
