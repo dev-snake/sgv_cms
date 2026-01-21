@@ -460,33 +460,7 @@ export default function ProductArchive() {
                 </div>
             </section>
 
-            {/* Tech Support Banner */}
-            <section className="bg-brand-secondary py-16 text-white overflow-hidden relative">
-                <div className="absolute top-0 right-0 h-full w-1/3 bg-white/5 -skew-x-12 translate-x-20"></div>
-                <div className="container relative z-10 mx-auto px-4 lg:px-8">
-                    <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
-                        <div className="space-y-4 text-center lg:text-left">
-                            <h4 className="text-2xl font-bold uppercase tracking-tight">
-                                Cần tài liệu kỹ thuật Catalogue?
-                            </h4>
-                            <p className="text-white/60 text-sm font-medium">
-                                Nhận ngay bộ tài liệu đầy đủ thông số kỹ thuật của chúng tôi qua
-                                Email.
-                            </p>
-                        </div>
-                        <div className="flex w-full max-w-md bg-white p-2">
-                            <input
-                                type="email"
-                                placeholder="Email của bạn..."
-                                className="flex-1 px-4 text-slate-900 font-bold text-sm focus:outline-none"
-                            />
-                            <button className="bg-brand-primary px-8 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-brand-secondary transition-all">
-                                Gửi
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
+
         </div>
     );
 }
