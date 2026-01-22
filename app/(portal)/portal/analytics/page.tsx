@@ -23,6 +23,7 @@ import { RadarChartDots } from '@/components/portal/charts/RadarChartDots';
 import { RadialChartShape } from '@/components/portal/charts/RadialChartShape';
 import { PieChartLabel } from '@/components/portal/charts/PieChartLabel';
 import { RadarChartGridCircleFill } from '@/components/portal/charts/RadarChartGridCircleFill';
+import { AreaChartGradient } from '@/components/portal/charts/AreaChartGradient';
 import { cn } from '@/lib/utils';
 
 export default function AnalyticsPage() {
@@ -67,18 +68,20 @@ export default function AnalyticsPage() {
         contacts: { label: 'Liên hệ', color: '#ef4444' },
     };
 
-    const activityData = [
-        { month: 'T1', desktop: 15, mobile: 10 },
-        { month: 'T2', desktop: 25, mobile: 15 },
-        { month: 'T3', desktop: 35, mobile: 20 },
-        { month: 'T4', desktop: 20, mobile: 12 },
-        { month: 'T5', desktop: 30, mobile: 18 },
-        { month: 'T6', desktop: 45, mobile: 25 },
-    ];
+    const activityData =
+        stats?.trends?.map((t: any) => ({
+            month: t.month.toUpperCase(),
+            news: t.news,
+            projects: t.projects,
+            products: t.products,
+            total: t.news + t.projects + t.products,
+        })) || [];
 
     const activityConfig = {
-        desktop: { label: 'Hoạt động CMS', color: 'var(--brand-primary)' },
-        mobile: { label: 'Lượt truy cập', color: 'var(--brand-accent)' },
+        news: { label: 'Tin tức', color: 'var(--brand-primary)' },
+        projects: { label: 'Dự án', color: 'var(--brand-cyan)' },
+        products: { label: 'Sản phẩm', color: 'var(--brand-accent)' },
+        total: { label: 'Tổng số', color: 'var(--brand-primary)' },
     };
 
     const totalContent =
@@ -188,42 +191,59 @@ export default function AnalyticsPage() {
                             visitors: stats?.counts?.contacts || 0,
                             fill: 'var(--brand-accent)',
                         },
-                        { browser: 'pending', visitors: 12, fill: 'var(--brand-cyan)' },
+                        {
+                            browser: 'pending',
+                            visitors: stats?.contactStats?.new || 0,
+                            fill: '#ef4444',
+                        },
                     ]}
                     config={{
                         visitors: { label: 'Lượt' },
-                        contacts: { label: 'Liên hệ', color: 'var(--brand-accent)' },
-                        pending: { label: 'Chờ xử lý', color: 'var(--brand-cyan)' },
+                        contacts: { label: 'Tổng liên hệ', color: 'var(--brand-accent)' },
+                        pending: { label: 'Chưa xử lý', color: '#ef4444' },
                     }}
                     footerTitle="Hỗ trợ 24/7"
-                    footerDescription="Thời gian phản hồ trung bình: 15 phút"
+                    footerDescription="Thời gian phản hồi trung bình: 15 phút"
                     className="lg:col-span-1"
                 />
 
-                {/* Activity Trend - Radar Filled */}
-                <RadarChartGridCircleFill
-                    title="Xu hướng hoạt động CMS"
-                    description="Phạm vi hoạt động của hệ thống theo tháng"
+                {/* Content Growth - Area Chart */}
+                <AreaChartGradient
+                    title="Tăng trưởng hệ thống"
+                    description="Biểu đồ xu hướng cập nhật dữ liệu 6 tháng qua"
                     data={activityData}
                     config={activityConfig}
-                    dataKey="desktop"
-                    angleKey="month"
-                    footerTitle="+5.2% Hoạt động"
-                    footerDescription="Tần suất cập nhật nội dung đang tăng dần"
+                    dataKeys={['products', 'projects', 'news']}
+                    xAxisKey="month"
+                    footerTitle="Tốc độ số hóa"
+                    footerDescription="Dữ liệu tổng hợp từ các module chính"
                     className="lg:col-span-2"
                 />
 
                 {/* Monthly Activity Dots */}
                 <RadarChartDots
-                    title="Lượt truy cập & Tương tác"
-                    description="So sánh đa chỉ số chi tiết"
+                    title="Phân bổ hoạt động"
+                    description="So sánh chi tiết 3 nhóm nội dung"
                     data={activityData}
                     config={activityConfig}
-                    dataKey="mobile"
+                    dataKey="total"
                     angleKey="month"
-                    footerTitle="Dữ liệu đồng bộ"
-                    footerDescription="Cập nhật tự động từ Google Analytics Engine"
+                    footerTitle="Ổn định"
+                    footerDescription="Cập nhật tự động từ Core Engine"
                     className="lg:col-span-1"
+                />
+
+                {/* Activity Trend - Radar Filled */}
+                <RadarChartGridCircleFill
+                    title="Ma trận bao phủ dữ liệu"
+                    description="Phân tích tỷ trọng hoạt động tổng thể"
+                    data={activityData}
+                    config={activityConfig}
+                    dataKey="total"
+                    angleKey="month"
+                    footerTitle="Tối ưu vận hành"
+                    footerDescription="Dữ liệu đồng bộ từ Core Engine"
+                    className="lg:col-span-3"
                 />
             </div>
 
