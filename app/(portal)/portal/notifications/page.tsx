@@ -342,10 +342,7 @@ export default function NotificationsPage() {
                         ) : (
                             <div className="divide-y divide-slate-100">
                                 {filteredNotifications.map((notification) => {
-                                    const Icon = notificationIcons[notification.type];
                                     const label = notificationLabels[notification.type];
-                                    const iconColor = notificationIconColors[notification.type];
-                                    const bgColor = notificationBgColors[notification.type];
 
                                     return (
                                         <div
