@@ -1,279 +1,472 @@
-"use client";
+'use client';
 
-import api from "@/services/axios";
-import { 
-  Plus, 
-  Search, 
-  MoreHorizontal, 
-  Edit2, 
-  Trash2, 
-  Loader2,
-  Briefcase,
-  MapPin,
-  Clock
-} from "lucide-react";
-import Link from "next/link";
-import * as React from "react";
+import api from '@/services/axios';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { DeleteConfirmationDialog } from "@/components/portal/delete-confirmation-dialog";
-import { TablePagination } from "@/components/portal/table-pagination";
-import { PORTAL_ROUTES, API_ROUTES } from "@/constants/routes";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import { useAuth } from "@/hooks/use-auth";
-import { PERMISSIONS } from "@/constants/rbac";
+    Plus,
+    Search,
+    MoreHorizontal,
+    Edit2,
+    Trash2,
+    Loader2,
+    Briefcase,
+    MapPin,
+    Clock,
+    ExternalLink,
+    ChevronLeft,
+    ChevronRight,
+    Filter,
+    AlertCircle,
+    CheckCircle2,
+    Calendar,
+} from 'lucide-react';
+import Link from 'next/link';
+import * as React from 'react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { DeleteConfirmationDialog } from '@/components/portal/delete-confirmation-dialog';
+import { TablePagination } from '@/components/portal/table-pagination';
+import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
+import { useAuth } from '@/hooks/use-auth';
+import { PERMISSIONS } from '@/constants/rbac';
+import { cn } from '@/lib/utils';
+import { PieChartLabel } from '@/components/portal/charts/PieChartLabel';
+import { AreaChartGradient } from '@/components/portal/charts/AreaChartGradient';
 
 interface JobPosting {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  location: string | null;
-  employment_type: string;
-  salary_range: string | null;
-  experience_level: string | null;
-  department: string | null;
-  status: "open" | "closed";
-  deadline: string | null;
-  created_at: string;
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    location: string | null;
+    employment_type: string;
+    salary_range: string | null;
+    experience_level: string | null;
+    department: string | null;
+    status: 'open' | 'closed';
+    deadline: string | null;
+    created_at: string;
 }
 
 const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
-  full_time: "Toàn thời gian",
-  part_time: "Bán thời gian",
-  contract: "Hợp đồng",
-  internship: "Thực tập",
+    full_time: 'Toàn thời gian',
+    part_time: 'Bán thời gian',
+    contract: 'Hợp đồng',
+    internship: 'Thực tập',
+};
+
+const STATUS_CONFIG = {
+    open: {
+        label: 'Đang tuyển',
+        color: 'bg-emerald-500/10 text-emerald-600',
+        chartColor: '#10b981',
+        icon: CheckCircle2,
+    },
+    closed: {
+        label: 'Đã đóng',
+        color: 'bg-slate-500/10 text-slate-500',
+        chartColor: '#64748b',
+        icon: AlertCircle,
+    },
 };
 
 export default function JobsManagementPage() {
-  const { hasPermission } = useAuth();
-  const [jobs, setJobs] = React.useState<JobPosting[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [debouncedSearch, setDebouncedSearch] = React.useState("");
-  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [itemToDelete, setItemToDelete] = React.useState<JobPosting | null>(null);
-  const [isDeleting, setIsDeleting] = React.useState(false);
-  
-  // Pagination state
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(10);
-  const [totalItems, setTotalItems] = React.useState(0);
+    const { hasPermission } = useAuth();
+    const [jobs, setJobs] = React.useState<JobPosting[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [stats, setStats] = React.useState<any>(null);
+    const [searchTerm, setSearchTerm] = React.useState('');
+    const [debouncedSearch, setDebouncedSearch] = React.useState('');
+    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+    const [itemToDelete, setItemToDelete] = React.useState<JobPosting | null>(null);
+    const [isDeleting, setIsDeleting] = React.useState(false);
 
-  // Debounce search term
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      setCurrentPage(1);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+    // Pagination state
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const [pageSize, setPageSize] = React.useState(10);
+    const [totalItems, setTotalItems] = React.useState(0);
 
-  const fetchJobs = async (page: number, limit: number, search: string) => {
-    setIsLoading(true);
-    try {
-      const params = new URLSearchParams({ 
-        page: String(page), 
-        limit: String(limit) 
-      });
-      
-      if (search) params.append("search", search);
+    // Debounce search term
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchTerm);
+            setCurrentPage(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
-      const res = await api.get(`${API_ROUTES.JOBS}?${params.toString()}`);
-      setJobs(res.data.data || []);
-      if (res.data.meta) {
-        setTotalItems(res.data.meta.total || 0);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Không thể tải danh sách tuyển dụng");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const fetchJobs = async (page: number, limit: number, search: string) => {
+        setIsLoading(true);
+        try {
+            const params = new URLSearchParams({
+                page: String(page),
+                limit: String(limit),
+            });
 
-  React.useEffect(() => {
-    fetchJobs(currentPage, pageSize, debouncedSearch);
-  }, [currentPage, pageSize, debouncedSearch]);
+            if (search) params.append('search', search);
 
-  const handleDelete = async () => {
-    if (!itemToDelete) return;
-    setIsDeleting(true);
-    try {
-      await api.delete(`${API_ROUTES.JOBS}/${itemToDelete.id}`);
-      toast.success("Đã xóa tin tuyển dụng");
-      fetchJobs(currentPage, pageSize, debouncedSearch);
-    } catch {
-      toast.error("Không thể xóa tin tuyển dụng");
-    } finally {
-      setIsDeleting(false);
-      setDeleteDialogOpen(false);
-      setItemToDelete(null);
-    }
-  };
+            const res = await api.get(`${API_ROUTES.JOBS}?${params.toString()}`);
+            setJobs(res.data.data || []);
+            if (res.data.meta) {
+                setTotalItems(res.data.meta.total || 0);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('Không thể tải danh sách tuyển dụng');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-  const getStatusBadge = (status: string) => {
-    if (status === "open") {
-      return <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-none text-[9px] font-black uppercase tracking-widest">Đang tuyển</Badge>;
-    }
-    return <Badge className="bg-slate-500/10 text-slate-500 hover:bg-slate-500/20 border-none text-[9px] font-black uppercase tracking-widest">Đã đóng</Badge>;
-  };
+    const fetchStats = async () => {
+        try {
+            const res = await api.get(API_ROUTES.STATS);
+            setStats(res.data.data);
+        } catch (error) {
+            console.error('Failed to fetch job stats', error);
+        }
+    };
 
-  return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900">Quản lý Tuyển dụng</h1>
-          <p className="text-sm text-muted-foreground font-medium">Quản lý các tin tuyển dụng của công ty.</p>
-        </div>
-        {hasPermission(PERMISSIONS.RECRUITMENT_CREATE) && (
-          <Link href={PORTAL_ROUTES.cms.jobs.add}>
-            <Button className="h-14 px-8 bg-brand-primary hover:bg-brand-secondary text-white rounded-none text-[10px] font-black uppercase tracking-widest shadow-lg">
-              <Plus size={18} className="mr-3" /> Thêm tin tuyển dụng
-            </Button>
-          </Link>
-        )}
-      </div>
+    React.useEffect(() => {
+        fetchJobs(currentPage, pageSize, debouncedSearch);
+        fetchStats();
+    }, [currentPage, pageSize, debouncedSearch]);
 
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 p-4 bg-slate-50 border border-slate-100">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo tiêu đề..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-12 pl-12 pr-4 bg-white border border-slate-100 text-sm font-bold placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-brand-primary/20"
-          />
-        </div>
-      </div>
+    const handleDelete = async () => {
+        if (!itemToDelete) return;
+        setIsDeleting(true);
+        try {
+            await api.delete(`${API_ROUTES.JOBS}/${itemToDelete.id}`);
+            toast.success('Đã xóa tin tuyển dụng');
+            fetchJobs(currentPage, pageSize, debouncedSearch);
+            fetchStats();
+        } catch {
+            toast.error('Không thể xóa tin tuyển dụng');
+        } finally {
+            setIsDeleting(false);
+            setDeleteDialogOpen(false);
+            setItemToDelete(null);
+        }
+    };
 
-      {/* Table */}
-      <div className="bg-white border border-slate-100 overflow-hidden">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
-          </div>
-        ) : jobs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-            <Briefcase size={48} className="mb-4" />
-            <p className="text-sm font-bold">Chưa có tin tuyển dụng nào</p>
-          </div>
-        ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-50 bg-slate-50/50">
-                <th className="text-left p-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Vị trí</th>
-                <th className="text-left p-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Địa điểm</th>
-                <th className="text-left p-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Loại hình</th>
-                <th className="text-left p-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Trạng thái</th>
-                <th className="text-left p-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Hạn nộp</th>
-                <th className="text-right p-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {jobs.map((job) => (
-                <tr key={job.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                  <td className="p-4">
-                    <div className="space-y-1">
-                      <p className="text-sm font-black text-slate-900 uppercase tracking-tight line-clamp-1">{job.title}</p>
-                      {job.department && (
-                        <p className="text-[10px] font-bold text-brand-primary uppercase">{job.department}</p>
-                      )}
+    // Prepare chart data
+    const statusChartData = stats?.jobStats
+        ? Object.entries(stats.jobStats).map(([status, count]) => {
+              const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] || {
+                  label: status,
+                  chartColor: '#64748b',
+              };
+              return {
+                  status,
+                  count: Number(count),
+                  fill: config.chartColor,
+              };
+          })
+        : [];
+
+    const statusConfig = Object.entries(STATUS_CONFIG).reduce(
+        (acc: any, [key, val]) => {
+            acc[key] = { label: val.label, color: val.chartColor };
+            return acc;
+        },
+        { count: { label: 'Số lượng' } },
+    );
+
+    const trendData =
+        stats?.trends?.map((t: any) => ({
+            month: t.month.toUpperCase(),
+            jobs: t.jobs || 0,
+        })) || [];
+
+    return (
+        <div className="flex-1 space-y-10 py-8 pt-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="px-2 py-0.5 bg-[#002d6b] text-white text-[8px] font-black uppercase tracking-widest text-[#fbbf24]">
+                            Sài Gòn Valve CMS
+                        </span>
+                        <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-1">
+                            <span className="size-1.5 bg-emerald-500 rounded-full animate-pulse" />{' '}
+                            Live Recruitment
+                        </span>
                     </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                      <MapPin size={12} className="text-brand-primary" />
-                      {job.location || "Chưa xác định"}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span className="text-xs font-bold text-slate-600">
-                      {EMPLOYMENT_TYPE_LABELS[job.employment_type] || job.employment_type}
-                    </span>
-                  </td>
-                  <td className="p-4">{getStatusBadge(job.status)}</td>
-                  <td className="p-4">
-                    {job.deadline ? (
-                      <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                        <Clock size={12} />
-                        {format(new Date(job.deadline), "dd/MM/yyyy", { locale: vi })}
-                      </div>
-                    ) : (
-                      <span className="text-xs text-slate-400">—</span>
-                    )}
-                  </td>
-                  <td className="p-4 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
+                    <h2 className="text-4xl font-black tracking-tighter uppercase italic text-[#002d6b] border-l-8 border-[#002d6b] pl-6 leading-none">
+                        Quản lý Tuyển dụng
+                    </h2>
+                    <p className="text-slate-500 font-medium italic text-xs max-w-2xl leading-relaxed">
+                        Hệ thống quản trị tin tuyển dụng và nguồn nhân lực. Theo dõi mật độ đăng
+                        tin, phân tích trạng thái tuyển dụng và hiệu quả thu hút nhân tài.
+                    </p>
+                </div>
+                {hasPermission(PERMISSIONS.RECRUITMENT_CREATE) && (
+                    <Link href={PORTAL_ROUTES.cms.jobs.add}>
+                        <Button className="h-14 px-10 bg-[#002d6b] hover:bg-[#002d6b]/90 text-white rounded-none text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-900/10 flex items-center gap-3">
+                            <Plus size={18} /> Thêm tin mới
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-none">
-                        <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest">Thao tác</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {hasPermission(PERMISSIONS.RECRUITMENT_UPDATE) && (
-                          <DropdownMenuItem asChild>
-                            <Link href={PORTAL_ROUTES.cms.jobs.edit(job.id)} className="flex items-center gap-2 text-xs font-bold">
-                              <Edit2 size={14} /> Chỉnh sửa
-                            </Link>
-                          </DropdownMenuItem>
-                        )}
-                        {hasPermission(PERMISSIONS.RECRUITMENT_DELETE) && (
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setItemToDelete(job);
-                              setDeleteDialogOpen(true);
-                            }}
-                            className="text-red-600 flex items-center gap-2 text-xs font-bold"
-                          >
-                            <Trash2 size={14} /> Xóa
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+                    </Link>
+                )}
+            </div>
 
-      {/* Pagination */}
-      <TablePagination
-        currentPage={currentPage}
-        pageSize={pageSize}
-        totalItems={totalItems}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={(size) => {
-          setPageSize(size);
-          setCurrentPage(1);
-        }}
-      />
+            {/* Visual Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <PieChartLabel
+                    title="Trạng thái tuyển dụng"
+                    description="Phân bổ tin tuyển dụng theo trạng thái"
+                    data={statusChartData}
+                    config={statusConfig}
+                    dataKey="count"
+                    nameKey="status"
+                    footerTitle="Tỷ lệ lấp đầy"
+                    footerDescription="Tình trạng tin tuyển dụng đang hoạt động"
+                    className="lg:col-span-1"
+                />
+                <AreaChartGradient
+                    title="Mật độ đăng tin"
+                    description="Số lượng tin tuyển dụng mới qua các tháng"
+                    data={trendData}
+                    config={{ jobs: { label: 'Tin tuyển dụng', color: '#002d6b' } }}
+                    dataKeys={['jobs']}
+                    xAxisKey="month"
+                    footerTitle="Tăng trưởng nhân sự"
+                    footerDescription="Phân tích nhu cầu tuyển dụng 6 tháng qua"
+                    className="lg:col-span-2"
+                />
+            </div>
 
-      {/* Delete Confirmation Dialog */}
-      <DeleteConfirmationDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onConfirm={handleDelete}
-        loading={isDeleting}
-        itemName={itemToDelete?.title || ""}
-      />
-    </div>
-  );
+            <div className="space-y-6">
+                <div className="flex flex-col md:flex-row gap-4 p-6 bg-slate-50 border border-slate-100">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <input
+                            placeholder="TÌM KIẾM THEO TIÊU ĐỀ, PHÒNG BAN..."
+                            className="w-full h-12 pl-12 pr-4 bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-brand-primary/20"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                <div className="bg-white border border-slate-100 shadow-sm overflow-hidden">
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center py-20 opacity-30">
+                            <div className="h-12 w-12 border-4 border-[#002d6b] border-t-transparent rounded-full animate-spin mb-4" />
+                            <p className="text-[10px] font-black uppercase tracking-widest">
+                                Đang tải dữ liệu...
+                            </p>
+                        </div>
+                    ) : jobs.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                            <Briefcase size={48} className="mb-4 opacity-10" />
+                            <p className="text-[10px] font-black uppercase tracking-widest">
+                                Không có tin tuyển dụng nào.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b border-slate-50 bg-slate-50/50">
+                                        <th className="text-left p-6 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                            Vị trí & Phòng ban
+                                        </th>
+                                        <th className="text-left p-6 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                            Địa điểm & Loại hình
+                                        </th>
+                                        <th className="text-left p-6 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                            Trạng thái
+                                        </th>
+                                        <th className="text-left p-6 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                            Hạn nộp
+                                        </th>
+                                        <th className="text-right p-6 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                            Thao tác
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {jobs.map((job) => (
+                                        <tr
+                                            key={job.id}
+                                            className="hover:bg-slate-50/30 transition-colors group"
+                                        >
+                                            <td className="p-6">
+                                                <div className="space-y-1">
+                                                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight line-clamp-1">
+                                                        {job.title}
+                                                    </p>
+                                                    {job.department && (
+                                                        <p className="text-[10px] font-black text-[#002d6b] uppercase tracking-wider">
+                                                            {job.department}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="p-6 text-xs font-bold text-slate-600">
+                                                <div className="flex flex-col gap-1.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <MapPin
+                                                            size={12}
+                                                            className="text-slate-300"
+                                                        />
+                                                        {job.location || 'Chưa xác định'}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock
+                                                            size={12}
+                                                            className="text-slate-300"
+                                                        />
+                                                        {EMPLOYMENT_TYPE_LABELS[
+                                                            job.employment_type
+                                                        ] || job.employment_type}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-6">
+                                                <Badge
+                                                    className={cn(
+                                                        'rounded-none text-[9px] uppercase tracking-widest font-black py-1 px-3 h-auto border-none',
+                                                        STATUS_CONFIG[
+                                                            job.status as keyof typeof STATUS_CONFIG
+                                                        ]?.color,
+                                                    )}
+                                                >
+                                                    {
+                                                        STATUS_CONFIG[
+                                                            job.status as keyof typeof STATUS_CONFIG
+                                                        ]?.label
+                                                    }
+                                                </Badge>
+                                            </td>
+                                            <td className="p-6 whitespace-nowrap">
+                                                {job.deadline ? (
+                                                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase">
+                                                        <Calendar
+                                                            size={12}
+                                                            className="text-slate-300"
+                                                        />
+                                                        {format(
+                                                            new Date(job.deadline),
+                                                            'dd/MM/yyyy',
+                                                            { locale: vi },
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[10px] text-slate-300 font-black uppercase">
+                                                        —
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="p-6 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    {hasPermission(
+                                                        PERMISSIONS.RECRUITMENT_UPDATE,
+                                                    ) && (
+                                                        <Link
+                                                            href={PORTAL_ROUTES.cms.jobs.edit(
+                                                                job.id,
+                                                            )}
+                                                        >
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-9 w-9 bg-slate-50 hover:bg-[#002d6b] hover:text-white text-slate-400 transition-all rounded-none"
+                                                            >
+                                                                <Edit2 size={14} />
+                                                            </Button>
+                                                        </Link>
+                                                    )}
+
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                className="h-9 w-9 p-0 rounded-none hover:bg-slate-50"
+                                                            >
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent
+                                                            align="end"
+                                                            className="rounded-none border-slate-100 shadow-xl w-56 p-2"
+                                                        >
+                                                            <DropdownMenuLabel className="text-[9px] uppercase font-black tracking-widest text-slate-400 px-3 py-2">
+                                                                Quản trị tin
+                                                            </DropdownMenuLabel>
+                                                            <DropdownMenuSeparator className="bg-slate-50" />
+                                                            <DropdownMenuItem
+                                                                asChild
+                                                                className="text-[10px] font-black uppercase tracking-tight cursor-pointer gap-3 px-3 py-2"
+                                                            >
+                                                                <Link
+                                                                    href={`/tuyen-dung/${job.slug}`}
+                                                                    target="_blank"
+                                                                    className="flex items-center gap-3"
+                                                                >
+                                                                    <ExternalLink
+                                                                        size={14}
+                                                                        className="text-blue-500"
+                                                                    />{' '}
+                                                                    Xem trực tiếp
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator className="bg-slate-50" />
+                                                            {hasPermission(
+                                                                PERMISSIONS.RECRUITMENT_DELETE,
+                                                            ) && (
+                                                                <DropdownMenuItem
+                                                                    onClick={() => {
+                                                                        setItemToDelete(job);
+                                                                        setDeleteDialogOpen(true);
+                                                                    }}
+                                                                    className="text-[10px] font-black uppercase tracking-tight cursor-pointer gap-3 text-rose-500 hover:bg-rose-50 px-3 py-2"
+                                                                >
+                                                                    <Trash2 size={14} /> Xóa tin
+                                                                    đăng
+                                                                </DropdownMenuItem>
+                                                            )}
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+
+                {/* Pagination */}
+                <TablePagination
+                    currentPage={currentPage}
+                    pageSize={pageSize}
+                    totalItems={totalItems}
+                    onPageChange={setCurrentPage}
+                    onPageSizeChange={(size) => {
+                        setPageSize(size);
+                        setCurrentPage(1);
+                    }}
+                />
+            </div>
+
+            <DeleteConfirmationDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                onConfirm={handleDelete}
+                loading={isDeleting}
+                itemName={itemToDelete?.title || ''}
+            />
+        </div>
+    );
 }
