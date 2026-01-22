@@ -95,7 +95,7 @@ export default function ModulesPage() {
                     </p>
                 </div>
                 <Link href={PORTAL_ROUTES.users.modules.add}>
-                    <Button className="bg-brand-primary hover:bg-[#002d6b] text-[10px] font-black uppercase tracking-[0.2em] px-8 py-6 h-auto shadow-lg transition-all rounded-none hover:-translate-y-1 active:scale-95 border-b-4 border-b-brand-secondary">
+                    <Button className="bg-brand-primary hover:bg-[#002d6b] text-[10px] font-black uppercase tracking-[0.2em] px-8 py-4 hover:cursor-pointer h-auto shadow-lg transition-all rounded-none hover:-translate-y-1 active:scale-95 border-b-4 border-b-brand-secondary">
                         <Plus className="mr-2 size-4" /> Thêm Module mới
                     </Button>
                 </Link>

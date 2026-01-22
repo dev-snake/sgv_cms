@@ -125,7 +125,7 @@ export default function AddUserPage() {
                   </Label>
                   <Input 
                     placeholder="VD: NGUYENVANA"
-                    className="h-16 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-brand-primary/10 rounded-none transition-all placeholder:font-normal placeholder:italic"
+                    className="h-12 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-brand-primary/10 rounded-none transition-all placeholder:font-normal placeholder:italic"
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value.toUpperCase() })}
                     disabled={isSubmitting}
@@ -138,7 +138,7 @@ export default function AddUserPage() {
                   <Input 
                     type="password"
                     placeholder="••••••••"
-                    className="h-16 bg-slate-50 border-none text-xs font-bold rounded-none focus:ring-2 focus:ring-brand-primary/10 transition-all"
+                    className="h-12 bg-slate-50 border-none text-xs font-bold rounded-none focus:ring-2 focus:ring-brand-primary/10 transition-all"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     disabled={isSubmitting}
@@ -150,7 +150,7 @@ export default function AddUserPage() {
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Họ và tên đầy đủ</Label>
                 <Input 
                   placeholder="VD: NGUYỄN VĂN A"
-                  className="h-16 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-brand-primary/10 rounded-none transition-all"
+                  className="h-12 bg-slate-50 border-none text-[11px] font-black  tracking-widest focus:ring-2 focus:ring-brand-primary/10 rounded-none transition-all"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                   disabled={isSubmitting}
@@ -162,7 +162,7 @@ export default function AddUserPage() {
                   <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Email liên hệ</Label>
                   <Input 
                     placeholder="example@saigonvalve.vn"
-                    className="h-16 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-brand-primary/10 rounded-none transition-all"
+                    className="h-12 bg-slate-50 border-none text-[11px] font-black  tracking-widest focus:ring-2 focus:ring-brand-primary/10 rounded-none transition-all"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     disabled={isSubmitting}
@@ -172,7 +172,7 @@ export default function AddUserPage() {
                   <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Số điện thoại</Label>
                   <Input 
                     placeholder="09xx xxx xxx"
-                    className="h-16 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-brand-primary/10 rounded-none transition-all"
+                    className="h-12 bg-slate-50 border-none text-[11px] font-black uppercase tracking-widest focus:ring-2 focus:ring-brand-primary/10 rounded-none transition-all"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     disabled={isSubmitting}
@@ -246,7 +246,7 @@ export default function AddUserPage() {
             <div className="pt-4">
               <Button 
                 type="submit" 
-                className="w-full md:w-auto bg-brand-primary hover:bg-[#002d6b] text-[10px] font-black uppercase tracking-[0.2em] px-16 py-8 h-auto shadow-2xl shadow-brand-primary/20 transition-all rounded-none hover:-translate-y-1 active:scale-95"
+                className="w-full md:w-auto bg-brand-primary hover:bg-[#002d6b] text-[10px] font-black uppercase tracking-[0.2em] px-16 py-4 hover:cursor-pointer h-auto shadow-2xl shadow-brand-primary/20 transition-all rounded-none hover:-translate-y-1 active:scale-95"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (

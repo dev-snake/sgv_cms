@@ -94,7 +94,7 @@ export default function RolesManagementPage() {
                     </p>
                 </div>
                 <Link href={PORTAL_ROUTES.users.roles.add}>
-                    <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+                    <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 hover:cursor-pointer h-auto transition-all rounded-none">
                         <Plus className="mr-2 size-4" /> Tạo vai trò mới
                     </Button>
                 </Link>

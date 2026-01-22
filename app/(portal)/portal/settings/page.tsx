@@ -187,7 +187,7 @@ export default function SettingsPage() {
                             <Button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none"
+                                className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 hover:cursor-pointer h-auto transition-all rounded-none"
                             >
                                 {isSubmitting ? (
                                     <Loader2 className="mr-2 size-4 animate-spin" />
