@@ -38,8 +38,8 @@ export function RadialChartShape({
     dataKey = 'visitors',
     label = 'Total',
     endAngle = 100,
-    innerRadius = 80,
-    outerRadius = 140,
+    innerRadius = 70,
+    outerRadius = 100,
     footerTitle,
     footerDescription,
     footerIcon: FooterIcon = TrendingUp,
@@ -72,7 +72,7 @@ export function RadialChartShape({
                             radialLines={false}
                             stroke="none"
                             className="first:fill-slate-100 last:fill-white"
-                            polarRadius={[86, 74]}
+                            polarRadius={[76, 64]}
                         />
                         <RadialBar dataKey={dataKey} background />
                         <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
