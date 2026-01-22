@@ -10,18 +10,31 @@ import {
     Check,
     CheckCheck,
     Loader2,
-    AlertCircle,
+    Search,
+    Filter,
+    ChevronLeft,
+    ChevronRight,
 } from 'lucide-react';
 import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { API_ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
+import { RadialChartGrid } from '@/components/portal/charts/RadialChartGrid';
 
 interface Notification {
     id: string;
@@ -45,10 +58,16 @@ const notificationLabels = {
     application: 'Ứng tuyển',
 };
 
-const notificationColorClasses = {
-    comment: 'bg-blue-500/10 border-blue-200 text-blue-700',
-    contact: 'bg-green-500/10 border-green-200 text-green-700',
-    application: 'bg-purple-500/10 border-purple-200 text-purple-700',
+const notificationIconColors = {
+    comment: 'text-blue-500',
+    contact: 'text-green-500',
+    application: 'text-purple-500',
+};
+
+const notificationBgColors = {
+    comment: 'bg-blue-500/5 border-blue-500/10',
+    contact: 'bg-green-500/5 border-green-500/10',
+    application: 'bg-purple-500/5 border-purple-500/10',
 };
 
 export default function NotificationsPage() {
@@ -56,14 +75,23 @@ export default function NotificationsPage() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [unreadCount, setUnreadCount] = React.useState(0);
     const [activeTab, setActiveTab] = React.useState('all');
+    const [searchTerm, setSearchTerm] = React.useState('');
+    const [page, setPage] = React.useState(1);
+    const [totalItems, setTotalItems] = React.useState(0);
     const { user } = useAuth();
 
     const fetchNotifications = async () => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.NOTIFICATIONS);
+            const res = await api.get(API_ROUTES.NOTIFICATIONS, {
+                params: {
+                    page,
+                    limit: 10,
+                },
+            });
             setNotifications(res.data.data || []);
             setUnreadCount(res.data.meta?.unreadCount || 0);
+            setTotalItems(res.data.meta?.total || res.data.data?.length || 0);
         } catch (error) {
             console.error(error);
             toast.error('Không thể tải danh sách thông báo');
@@ -74,7 +102,7 @@ export default function NotificationsPage() {
 
     React.useEffect(() => {
         fetchNotifications();
-    }, []);
+    }, [page]);
 
     const handleMarkAsRead = async (id: string) => {
         try {
@@ -101,10 +129,28 @@ export default function NotificationsPage() {
     };
 
     const filteredNotifications = React.useMemo(() => {
-        if (activeTab === 'all') return notifications;
-        if (activeTab === 'unread') return notifications.filter((n) => !n.is_read);
-        return notifications.filter((n) => n.type === activeTab);
-    }, [notifications, activeTab]);
+        let filtered = notifications;
+
+        // Filter by tab
+        if (activeTab !== 'all') {
+            if (activeTab === 'unread') {
+                filtered = filtered.filter((n) => !n.is_read);
+            } else {
+                filtered = filtered.filter((n) => n.type === activeTab);
+            }
+        }
+
+        // Filter by search
+        if (searchTerm) {
+            filtered = filtered.filter(
+                (n) =>
+                    n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    n.content.toLowerCase().includes(searchTerm.toLowerCase()),
+            );
+        }
+
+        return filtered;
+    }, [notifications, activeTab, searchTerm]);
 
     const stats = React.useMemo(() => {
         return {
@@ -116,13 +162,37 @@ export default function NotificationsPage() {
         };
     }, [notifications, unreadCount]);
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center p-40">
-                <Loader2 className="animate-spin text-brand-primary opacity-20" size={48} />
-            </div>
-        );
-    }
+    // Prepare chart data
+    const notificationChartData = [
+        {
+            browser: 'comment',
+            visitors: stats.comment,
+            fill: '#3b82f6',
+        },
+        {
+            browser: 'contact',
+            visitors: stats.contact,
+            fill: '#10b981',
+        },
+        {
+            browser: 'application',
+            visitors: stats.application,
+            fill: '#a855f7',
+        },
+    ];
+
+    const notificationStatusData = [
+        {
+            browser: 'read',
+            visitors: stats.total - stats.unread,
+            fill: '#10b981',
+        },
+        {
+            browser: 'unread',
+            visitors: stats.unread,
+            fill: '#f59e0b',
+        },
+    ];
 
     return (
         <div className="flex-1 space-y-10 py-8 pt-6">
@@ -131,11 +201,11 @@ export default function NotificationsPage() {
                 <div className="space-y-2">
                     <div className="flex items-center gap-2 mb-2">
                         <span className="px-2 py-0.5 bg-[#002d6b] text-white text-[8px] font-black uppercase tracking-widest">
-                            Sài Gòn Valve CMS
+                            Notification Center
                         </span>
                         <span className="text-[9px] font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1">
                             <span className="size-1.5 bg-amber-500 rounded-full animate-pulse" />{' '}
-                            Notification Center
+                            Real-time Monitoring
                         </span>
                     </div>
                     <h2 className="text-4xl font-black tracking-tighter uppercase italic text-[#002d6b] border-l-8 border-[#002d6b] pl-6 leading-none">
@@ -156,254 +226,238 @@ export default function NotificationsPage() {
                 </Button>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-gradient-to-br from-[#002d6b] to-[#001d4a] p-6 border-b-4 border-[#fbbf24] relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16" />
-                    <div className="relative">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-white/60">
-                                Tổng số
-                            </span>
-                            <Bell className="size-5 text-[#fbbf24]" />
-                        </div>
-                        <div className="text-4xl font-black text-white mb-1">{stats.total}</div>
-                        <div className="text-[8px] font-bold uppercase tracking-wider text-white/40">
-                            Tổng thông báo
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white border border-slate-200 p-6 border-b-4 border-orange-500 relative overflow-hidden group hover:shadow-xl transition-shadow">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-orange-50 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform" />
-                    <div className="relative">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                                Chưa đọc
-                            </span>
-                            <AlertCircle className="size-5 text-orange-500" />
-                        </div>
-                        <div className="text-4xl font-black text-orange-500 mb-1">
-                            {stats.unread}
-                        </div>
-                        <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400">
-                            Cần xử lý
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white border border-slate-200 p-6 border-b-4 border-blue-500 relative overflow-hidden group hover:shadow-xl transition-shadow">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform" />
-                    <div className="relative">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                                Bình luận
-                            </span>
-                            <MessageSquare className="size-5 text-blue-500" />
-                        </div>
-                        <div className="text-4xl font-black text-blue-500 mb-1">
-                            {stats.comment}
-                        </div>
-                        <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400">
-                            Phản hồi mới
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white border border-slate-200 p-6 border-b-4 border-green-500 relative overflow-hidden group hover:shadow-xl transition-shadow">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform" />
-                    <div className="relative">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                                Tổng hợp
-                            </span>
-                            <div className="flex gap-1">
-                                <Mail className="size-4 text-green-500" />
-                                <Briefcase className="size-4 text-purple-500" />
-                            </div>
-                        </div>
-                        <div className="text-4xl font-black text-green-500 mb-1">
-                            {stats.contact + stats.application}
-                        </div>
-                        <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400">
-                            Liên hệ & Ứng tuyển
-                        </div>
-                    </div>
-                </div>
+            {/* Visual Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <RadialChartGrid
+                    title="Phân loại thông báo"
+                    description="Tỷ lệ thông báo theo từng loại"
+                    data={notificationChartData}
+                    config={{
+                        visitors: { label: 'Thông báo' },
+                        comment: { label: 'Bình luận', color: '#3b82f6' },
+                        contact: { label: 'Liên hệ', color: '#10b981' },
+                        application: { label: 'Ứng tuyển', color: '#a855f7' },
+                    }}
+                    footerTitle="Phân bố hoạt động"
+                    footerDescription="Cập nhật theo thời gian thực"
+                    className="lg:col-span-1"
+                />
+                <RadialChartGrid
+                    title="Trạng thái xử lý"
+                    description="Tỷ lệ thông báo đã đọc vs chưa đọc"
+                    data={notificationStatusData}
+                    config={{
+                        visitors: { label: 'Thông báo' },
+                        read: { label: 'Đã đọc', color: '#10b981' },
+                        unread: { label: 'Chưa đọc', color: '#f59e0b' },
+                    }}
+                    footerTitle="Mức độ phản hồi"
+                    footerDescription={`${stats.unread} thông báo cần xử lý`}
+                    className="lg:col-span-1"
+                />
             </div>
 
-            {/* Filter Tabs */}
-            <div className="bg-slate-50 border border-slate-100 p-6">
-                <div className="flex items-center gap-3 flex-wrap">
-                    <button
-                        onClick={() => setActiveTab('all')}
-                        className={cn(
-                            'px-6 py-3 text-[9px] font-black uppercase tracking-widest transition-all border-b-2',
-                            activeTab === 'all'
-                                ? 'bg-[#002d6b] text-white border-[#fbbf24]'
-                                : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300',
-                        )}
-                    >
-                        Tất cả ({stats.total})
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('unread')}
-                        className={cn(
-                            'px-6 py-3 text-[9px] font-black uppercase tracking-widest transition-all border-b-2',
-                            activeTab === 'unread'
-                                ? 'bg-[#002d6b] text-white border-[#fbbf24]'
-                                : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300',
-                        )}
-                    >
-                        Chưa đọc ({stats.unread})
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('comment')}
-                        className={cn(
-                            'px-6 py-3 text-[9px] font-black uppercase tracking-widest transition-all border-b-2',
-                            activeTab === 'comment'
-                                ? 'bg-[#002d6b] text-white border-[#fbbf24]'
-                                : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300',
-                        )}
-                    >
-                        <MessageSquare className="inline-block size-3 mr-2" />
-                        Bình luận ({stats.comment})
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('contact')}
-                        className={cn(
-                            'px-6 py-3 text-[9px] font-black uppercase tracking-widest transition-all border-b-2',
-                            activeTab === 'contact'
-                                ? 'bg-[#002d6b] text-white border-[#fbbf24]'
-                                : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300',
-                        )}
-                    >
-                        <Mail className="inline-block size-3 mr-2" />
-                        Liên hệ ({stats.contact})
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('application')}
-                        className={cn(
-                            'px-6 py-3 text-[9px] font-black uppercase tracking-widest transition-all border-b-2',
-                            activeTab === 'application'
-                                ? 'bg-[#002d6b] text-white border-[#fbbf24]'
-                                : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300',
-                        )}
-                    >
-                        <Briefcase className="inline-block size-3 mr-2" />
-                        Ứng tuyển ({stats.application})
-                    </button>
-                </div>
-            </div>
-
-            {/* Notifications List */}
-            <div className="space-y-4">
-                {filteredNotifications.length === 0 ? (
-                    <div className="bg-white border border-slate-100 p-16 text-center">
-                        <div className="inline-flex items-center justify-center size-20 bg-slate-50 rounded-full mb-6">
-                            <Bell className="size-10 text-slate-300" />
-                        </div>
-                        <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                            Không có thông báo
-                        </h3>
-                        <p className="text-[10px] text-slate-400 font-medium">
-                            {activeTab === 'unread'
-                                ? 'Bạn đã xem hết tất cả thông báo'
-                                : 'Chưa có thông báo mới nào'}
-                        </p>
-                    </div>
-                ) : (
-                    filteredNotifications.map((notification) => {
-                        const Icon = notificationIcons[notification.type];
-                        const colorClass = notificationColorClasses[notification.type];
-                        const label = notificationLabels[notification.type];
-
-                        return (
-                            <div
-                                key={notification.id}
-                                className={cn(
-                                    'bg-white border border-slate-100 p-6 transition-all hover:shadow-lg',
-                                    !notification.is_read &&
-                                        'border-l-4 border-l-[#fbbf24] bg-amber-50/30',
-                                )}
-                            >
-                                <div className="flex gap-6">
-                                    <div
-                                        className={cn(
-                                            'flex size-12 shrink-0 items-center justify-center border-2 rounded-none',
-                                            colorClass,
-                                        )}
-                                    >
-                                        <Icon className="size-6" />
-                                    </div>
-
-                                    <div className="flex-1 space-y-3">
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="flex-1 space-y-1">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <Badge
-                                                        className={cn(
-                                                            'text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-none border',
-                                                            colorClass,
-                                                        )}
-                                                    >
-                                                        {label}
-                                                    </Badge>
-                                                    <span className="text-[9px] font-medium text-slate-400 uppercase tracking-wider">
-                                                        {format(
-                                                            new Date(notification.created_at),
-                                                            'dd/MM/yyyy • HH:mm',
-                                                            { locale: vi },
-                                                        )}
-                                                    </span>
-                                                    {!notification.is_read && (
-                                                        <Badge className="bg-[#fbbf24] text-[#002d6b] text-[7px] font-black uppercase tracking-widest px-2 py-0.5 rounded-none border-none">
-                                                            MỚI
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                                <h3 className="text-sm font-bold text-[#002d6b] leading-tight">
-                                                    {notification.title}
-                                                </h3>
-                                                <p className="text-xs text-slate-600 leading-relaxed">
-                                                    {notification.content}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-3 pt-2">
-                                            {notification.link && (
-                                                <Button
-                                                    size="sm"
-                                                    className="h-9 px-6 bg-[#002d6b] hover:bg-[#002d6b]/90 text-white rounded-none text-[9px] font-black uppercase tracking-widest"
-                                                    asChild
-                                                >
-                                                    <Link href={notification.link}>
-                                                        <ExternalLink className="mr-2 size-3" />
-                                                        Xem chi tiết
-                                                    </Link>
-                                                </Button>
-                                            )}
-
-                                            {!notification.is_read && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="h-9 px-6 rounded-none text-[9px] font-black uppercase tracking-widest border-slate-200 hover:bg-slate-50"
-                                                    onClick={() =>
-                                                        handleMarkAsRead(notification.id)
-                                                    }
-                                                >
-                                                    <Check className="mr-2 size-3" />
-                                                    Đánh dấu đã đọc
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </div>
+            <div className="grid gap-4">
+                <Card className="rounded-none border border-slate-100 shadow-sm overflow-hidden">
+                    <CardHeader className="bg-slate-50/50 pb-6 border-b border-slate-100">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex items-center gap-2 flex-1 max-w-md">
+                                <div className="relative w-full">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <Input
+                                        placeholder="TÌM KIẾM THÔNG BÁO..."
+                                        className="pl-12 h-12 rounded-none border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest placeholder:text-slate-300 focus-visible:ring-brand-primary focus-visible:ring-offset-0"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
                                 </div>
                             </div>
-                        );
-                    })
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <Filter size={16} className="text-slate-400" />
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                        Lọc:
+                                    </span>
+                                </div>
+                                <Select value={activeTab} onValueChange={setActiveTab}>
+                                    <SelectTrigger className="h-12 w-[200px] rounded-none border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest focus:ring-0 focus:ring-offset-0">
+                                        <SelectValue placeholder="Tất cả" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-none border-slate-100">
+                                        <SelectItem
+                                            value="all"
+                                            className="text-[10px] font-black uppercase tracking-widest"
+                                        >
+                                            Tất cả ({stats.total})
+                                        </SelectItem>
+                                        <SelectItem
+                                            value="unread"
+                                            className="text-[10px] font-black uppercase tracking-widest"
+                                        >
+                                            Chưa đọc ({stats.unread})
+                                        </SelectItem>
+                                        <SelectItem
+                                            value="comment"
+                                            className="text-[10px] font-black uppercase tracking-widest"
+                                        >
+                                            Bình luận ({stats.comment})
+                                        </SelectItem>
+                                        <SelectItem
+                                            value="contact"
+                                            className="text-[10px] font-black uppercase tracking-widest"
+                                        >
+                                            Liên hệ ({stats.contact})
+                                        </SelectItem>
+                                        <SelectItem
+                                            value="application"
+                                            className="text-[10px] font-black uppercase tracking-widest"
+                                        >
+                                            Ứng tuyển ({stats.application})
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        {isLoading ? (
+                            <div className="flex flex-col items-center justify-center py-20 opacity-30">
+                                <div className="h-12 w-12 border-4 border-[#002d6b] border-t-transparent rounded-full animate-spin mb-4" />
+                                <p className="text-[10px] font-black uppercase tracking-widest">
+                                    Đang tải dữ liệu...
+                                </p>
+                            </div>
+                        ) : filteredNotifications.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                                <Bell size={48} className="mb-4 opacity-10" />
+                                <p className="text-[10px] font-black uppercase tracking-widest">
+                                    Không có thông báo nào
+                                </p>
+                                <p className="text-[9px] font-medium text-slate-300 mt-2">
+                                    {activeTab === 'unread'
+                                        ? 'Bạn đã xem hết tất cả thông báo'
+                                        : 'Chưa có thông báo mới nào'}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-slate-100">
+                                {filteredNotifications.map((notification) => {
+                                    const Icon = notificationIcons[notification.type];
+                                    const label = notificationLabels[notification.type];
+                                    const iconColor = notificationIconColors[notification.type];
+                                    const bgColor = notificationBgColors[notification.type];
+
+                                    return (
+                                        <div
+                                            key={notification.id}
+                                            className={cn(
+                                                'p-8 hover:bg-slate-50/30 transition-colors',
+                                                !notification.is_read && 'bg-amber-50/20',
+                                            )}
+                                        >
+                                            <div className="flex items-start justify-between gap-8">
+                                                <div className="flex-1 space-y-4">
+                                                    {/* Header */}
+                                                    <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                                                        <Badge className="rounded-none text-[9px] uppercase tracking-widest font-black py-1 px-3 h-auto border-none">
+                                                            {label}
+                                                        </Badge>
+
+                                                        <div className="px-3 py-1 bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-tight">
+                                                            {format(
+                                                                new Date(notification.created_at),
+                                                                'HH:mm - dd/MM/yyyy',
+                                                                { locale: vi },
+                                                            )}
+                                                        </div>
+
+                                                        {!notification.is_read && (
+                                                            <Badge className="rounded-none text-[8px] font-black uppercase tracking-widest px-3 py-1 h-auto bg-[#fbbf24] text-[#002d6b] border-none">
+                                                                MỚI
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Content */}
+                                                    <div className="space-y-2">
+                                                        <h3 className="text-sm font-black text-[#002d6b] uppercase tracking-tight">
+                                                            {notification.title}
+                                                        </h3>
+                                                        <div className="bg-slate-50/50 border-l-4 border-l-[#002d6b] p-6 text-sm text-slate-700 leading-relaxed italic">
+                                                            {notification.content}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Actions */}
+                                                <div className="flex items-center gap-2 pt-1">
+                                                    {notification.link && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-10 rounded-none gap-3 text-[10px] font-black uppercase tracking-widest border-slate-200 hover:bg-[#002d6b] hover:text-white hover:border-[#002d6b] transition-all"
+                                                            asChild
+                                                        >
+                                                            <Link href={notification.link}>
+                                                                <ExternalLink size={14} />
+                                                                Xem chi tiết
+                                                            </Link>
+                                                        </Button>
+                                                    )}
+
+                                                    {!notification.is_read && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-10 rounded-none gap-3 text-[10px] font-black uppercase tracking-widest border-slate-200 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all"
+                                                            onClick={() =>
+                                                                handleMarkAsRead(notification.id)
+                                                            }
+                                                        >
+                                                            <Check size={14} />
+                                                            Đánh dấu đã đọc
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Pagination */}
+                {totalItems > 10 && (
+                    <div className="flex items-center justify-between px-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            Hiển thị {filteredNotifications.length} / {totalItems} thông báo
+                        </p>
+                        <div className="flex items-center gap-3">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-10 w-10 rounded-none border-slate-200 transition-all hover:bg-slate-50"
+                                onClick={() => setPage(page - 1)}
+                                disabled={page === 1}
+                            >
+                                <ChevronLeft size={16} />
+                            </Button>
+                            <div className="h-10 min-w-[60px] flex items-center justify-center text-[10px] font-black border border-slate-200 px-4 bg-white uppercase tracking-widest">
+                                TRANG {page}
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-10 w-10 rounded-none border-slate-200 transition-all hover:bg-slate-50"
+                                onClick={() => setPage(page + 1)}
+                                disabled={page * 10 >= totalItems}
+                            >
+                                <ChevronRight size={16} />
+                            </Button>
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
