@@ -91,7 +91,7 @@ export default function UsersManagementPage() {
         </div>
         {hasPermission(PERMISSIONS.USERS_CREATE) && (
           <Link href={PORTAL_ROUTES.users.add}>
-            <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-6 h-auto transition-all rounded-none">
+            <Button className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-8 py-4 h-auto hover:cursor-pointer transition-all rounded-none">
               <Plus className="mr-2 size-4" /> Tạo tài khoản mới
             </Button>
           </Link>

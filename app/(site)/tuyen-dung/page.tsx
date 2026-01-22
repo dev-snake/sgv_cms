@@ -286,33 +286,11 @@ export default function RecruitmentPage() {
                                 </PaginationContent>
                             </Pagination>
                         </div>
-                    )}
+                )}
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="py-20 bg-slate-950 text-white relative overflow-hidden">
-                <div className="absolute inset-0 bg-carbon opacity-10"></div>
-                <div className="container relative z-10 mx-auto px-4 lg:px-8 text-center sm:text-left">
-                    <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-                        <div className="space-y-4 max-w-2xl">
-                            <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tight">
-                                KHÔNG TÌM THẤY VỊ TRÍ PHÙ HỢP?
-                            </h2>
-                            <p className="text-slate-400 font-medium leading-relaxed">
-                                Gửi CV của bạn đến chúng tôi. Sài Gòn Valve luôn chào đón những ứng
-                                viên tài năng và sẵn sàng liên hệ khi có vị trí phù hợp.
-                            </p>
-                        </div>
-                        <Link
-                            href={SITE_ROUTES.CONTACT}
-                            className="shrink-0 inline-flex items-center gap-4 px-12 py-5 bg-white text-slate-950 font-black uppercase tracking-[0.2em] hover:bg-brand-primary hover:text-white transition-all transform hover:-translate-y-1"
-                        >
-                            GỬI CV NGAY <MoveRight size={20} />
-                        </Link>
-                    </div>
-                </div>
-            </section>
+
         </div>
     );
 }
