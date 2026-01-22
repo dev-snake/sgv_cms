@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/use-auth';
 
 interface ModuleFormProps {
     initialData?: any;
@@ -18,6 +19,7 @@ interface ModuleFormProps {
 
 export function ModuleForm({ initialData, isEditing = false }: ModuleFormProps) {
     const router = useRouter();
+    const { refreshUser } = useAuth();
     const [isSubmitting, setIsSubmitting] = React.useState(false);
 
     const [formData, setFormData] = React.useState({
@@ -44,6 +46,9 @@ export function ModuleForm({ initialData, isEditing = false }: ModuleFormProps) 
                 await api.post(API_ROUTES.MODULES, formData);
                 toast.success('Tạo module mới thành công');
             }
+
+            // Refresh user profile để cập nhật sidebar modules
+            await refreshUser();
 
             router.push(PORTAL_ROUTES.users.modules.list);
             router.refresh();

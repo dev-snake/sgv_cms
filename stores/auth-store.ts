@@ -101,6 +101,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     });
                 });
 
+                // If superadmin, use ALL modules from allModules field
+                if (isSystemSuper && profileData.allModules) {
+                    profileData.allModules.forEach((module: any) => {
+                        if (module.route && !moduleMap.has(module.code)) {
+                            moduleMap.set(module.code, {
+                                code: module.code,
+                                name: module.name,
+                                icon: module.icon,
+                                route: module.route,
+                                order: module.order ?? 0,
+                            });
+                        }
+                    });
+                }
+
                 const sidebarModules = Array.from(moduleMap.values()).sort(
                     (a, b) => a.order - b.order,
                 );

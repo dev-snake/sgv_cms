@@ -190,7 +190,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                             return (
                                 <SidebarMenuItem
-                                    key={item.url}
+                                    key={item.code}
                                     className="w-full flex justify-center"
                                 >
                                     <SidebarMenuButton

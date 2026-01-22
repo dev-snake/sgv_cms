@@ -35,8 +35,10 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function ModulesPage() {
+    const { refreshUser } = useAuth();
     const [modules, setModules] = React.useState<any[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [searchQuery, setSearchQuery] = React.useState('');
@@ -66,6 +68,10 @@ export default function ModulesPage() {
         try {
             await api.delete(`${API_ROUTES.MODULES}/${deleteId}`);
             toast.success('Xóa module thành công');
+
+            // Refresh user profile để cập nhật sidebar modules
+            await refreshUser();
+
             fetchModules();
         } catch (error: any) {
             console.error(error);
