@@ -40,11 +40,12 @@ COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/db ./db
 COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/utils ./utils
+COPY --from=builder /app/entrypoint.sh ./entrypoint.sh
 
 # Install tsx to run server.ts
-RUN npm install -g tsx
+RUN npm install -g tsx && chmod +x ./entrypoint.sh
 
 EXPOSE 3000
 
-# Start application using the production script
-CMD ["tsx", "server.ts"]
+# Start application using the entrypoint script
+ENTRYPOINT ["./entrypoint.sh"]
