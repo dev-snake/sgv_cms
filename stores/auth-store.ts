@@ -6,6 +6,7 @@ import axios from 'axios';
 import { API_ROUTES } from '@/constants/routes';
 
 export interface SidebarModule {
+    id: string;
     code: string;
     name: string;
     icon: string | null;
@@ -36,6 +37,8 @@ interface AuthState {
     refreshUser: () => Promise<void>;
     initialize: () => void;
     logout: () => void;
+    setModulesOrder: (newModules: SidebarModule[]) => void;
+    syncModulesOrder: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -92,6 +95,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     r.permissions.forEach((p: any) => {
                         if (p.canView && p.module && !moduleMap.has(p.module.code)) {
                             moduleMap.set(p.module.code, {
+                                id: p.module.id,
                                 code: p.module.code,
                                 name: p.module.name,
                                 icon: p.module.icon,
@@ -107,6 +111,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     profileData.allModules.forEach((module: any) => {
                         if (module.route && !moduleMap.has(module.code)) {
                             moduleMap.set(module.code, {
+                                id: module.id,
                                 code: module.code,
                                 name: module.name,
                                 icon: module.icon,
@@ -157,5 +162,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     logout: () => {
         set({ user: null, isInitialized: false });
+    },
+    setModulesOrder: (newModules: SidebarModule[]) => {
+        const currentUser = get().user;
+        if (!currentUser) return;
+
+        set({
+            user: {
+                ...currentUser,
+                modules: newModules.map((m, index) => ({ ...m, order: index })),
+            },
+        });
+    },
+    syncModulesOrder: async () => {
+        const currentUser = get().user;
+        if (!currentUser) return;
+
+        try {
+            await api.patch('/api/modules/reorder', {
+                items: currentUser.modules.map((m) => ({ id: m.id, order: m.order })),
+            });
+        } catch (error) {
+            console.error('Failed to sync modules order:', error);
+            // Optional: You might want to re-fetch if sync fails to ensure consistency
+            // get().refreshUser();
+            throw error;
+        }
     },
 }));

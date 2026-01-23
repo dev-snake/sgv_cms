@@ -21,8 +21,10 @@ import {
     LucideIcon,
     History,
     Bell,
+    GripVertical,
 } from 'lucide-react';
 import Image from 'next/image';
+import { Reorder } from 'motion/react';
 
 import {
     Sidebar,
@@ -118,8 +120,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     const isPathActive = (url: string) => {
         if (!url) return false;
-        console.log(url, "url");
-        console.log(pathname, "pathname");
+        console.log(url, 'url');
+        console.log(pathname, 'pathname');
         // Nếu path khớp hoàn toàn
         if (pathname === url) return true;
 
@@ -191,50 +193,82 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
             <SidebarContent className="scrollbar-hide bg-[#002d6b] py-2 overflow-x-hidden">
                 <SidebarGroup className="p-0">
-                    <SidebarMenu className="gap-0 group-data-[collapsible=icon]:items-center">
-                        {navItems.map((item) => {
-                            const isActive = isPathActive(item.url);
+                    <Reorder.Group
+                        axis="y"
+                        values={user?.modules || []}
+                        onReorder={(newOrder) => {
+                            useAuthStore.getState().setModulesOrder(newOrder);
+                        }}
+                        className="flex w-full min-w-0 flex-col gap-1 group-data-[collapsible=icon]:items-center list-none p-0"
+                        data-slot="sidebar-menu"
+                        data-sidebar="menu"
+                    >
+                        {(user?.modules || [])
+                            .filter((module: SidebarModule) => !!module.route)
+                            .map((module: SidebarModule) => {
+                                const Icon = getIconComponent(module.icon);
+                                const isActive = isPathActive(module.route as string);
 
-                            return (
-                                <SidebarMenuItem
-                                    key={item.code}
-                                    className="w-full flex justify-center"
-                                >
-                                    <SidebarMenuButton
-                                        asChild
-                                        tooltip={item.title}
-                                        className={cn(
-                                            'text-[10px] font-black  px-4 transition-colors duration-200 uppercase tracking-widest rounded-none h-auto group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center',
-                                            isActive
-                                                ? 'bg-white text-[#002d6b] hover:bg-white hover:text-[#002d6b]'
-                                                : 'text-white/70 hover:bg-white/5 hover:text-white',
-                                        )}
+                                return (
+                                    <Reorder.Item
+                                        key={module.code}
+                                        value={module}
+                                        layout="position"
+                                        transition={{
+                                            type: 'spring',
+                                            stiffness: 450,
+                                            damping: 40,
+                                            mass: 0.8,
+                                        }}
+                                        onDragEnd={() => {
+                                            useAuthStore.getState().syncModulesOrder();
+                                        }}
+                                        className="group/menu-item relative w-full flex justify-center list-none"
+                                        data-slot="sidebar-menu-item"
+                                        data-sidebar="menu-item"
                                     >
-                                        <Link
-                                            href={item.url}
-                                            className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center"
+                                        <SidebarMenuButton
+                                            asChild
+                                            tooltip={module.name}
+                                            className={cn(
+                                                'text-[10px] font-black px-4 transition-none! uppercase tracking-widest rounded-none h-auto group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center relative',
+                                                isActive
+                                                    ? 'bg-white text-[#002d6b] hover:bg-white hover:text-[#002d6b]'
+                                                    : 'text-white/70 hover:bg-white/5 hover:text-white',
+                                            )}
                                         >
-                                            <div className="flex items-center justify-center shrink-0 size-5">
-                                                {item.icon && (
-                                                    <item.icon
-                                                        className={cn(
-                                                            'size-4',
-                                                            isActive
-                                                                ? 'text-[#002d6b]'
-                                                                : 'text-[#fbbf24]',
+                                            <div className="flex items-center gap-2 w-full">
+                                                {/* Drag Handle - only visible on hover and not in icon mode */}
+                                                <div className="flex items-center justify-center shrink-0 opacity-0 group-hover/menu-item:opacity-40 transition-opacity cursor-grab active:cursor-grabbing group-data-[collapsible=icon]:hidden">
+                                                    <GripVertical className="size-3" />
+                                                </div>
+
+                                                <Link
+                                                    href={module.route as string}
+                                                    className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center"
+                                                >
+                                                    <div className="flex items-center justify-center shrink-0 size-5">
+                                                        {Icon && (
+                                                            <Icon
+                                                                className={cn(
+                                                                    'size-4',
+                                                                    isActive
+                                                                        ? 'text-[#002d6b]'
+                                                                        : 'text-[#fbbf24]',
+                                                                )}
+                                                            />
                                                         )}
-                                                    />
-                                                )}
+                                                    </div>
+                                                    <span className="truncate group-data-[collapsible=icon]:hidden">
+                                                        {module.name}
+                                                    </span>
+                                                </Link>
                                             </div>
-                                            <span className="truncate group-data-[collapsible=icon]:hidden">
-                                                {item.title}
-                                            </span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            );
-                        })}
-                    </SidebarMenu>
+                                        </SidebarMenuButton>
+                                    </Reorder.Item>
+                                );
+                            })}
+                    </Reorder.Group>
                 </SidebarGroup>
             </SidebarContent>
 
