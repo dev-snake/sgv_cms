@@ -7,6 +7,7 @@ import { NextRequest } from 'next/server';
 import { decrypt } from '@/services/auth';
 import { ZodSchema, ZodError } from 'zod';
 import { apiError } from '@/utils/api-response';
+import { RBAC_ROLES } from '@/constants/rbac';
 // SUPER_ADMIN_ROLE removed, using is_super flag instead
 
 /**
@@ -167,7 +168,14 @@ export function sanitizeHtml(html: string): string {
 }
 
 export function isAdmin(user: UserSession['user']): boolean {
-    // Check is_super flag
+    // Check is_super flag OR ADMIN role code
+    return user.is_super || user.roles?.includes(RBAC_ROLES.ADMIN) || false;
+}
+
+/**
+ * Check if user is a TRUE SuperAdmin (is_super flag)
+ */
+export function isSuperAdmin(user: UserSession['user']): boolean {
     return user.is_super || false;
 }
 

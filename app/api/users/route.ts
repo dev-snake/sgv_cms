@@ -1,10 +1,10 @@
 import { db } from '@/db';
 import { users, user_roles, roles } from '@/db/schema';
 import { apiResponse, apiError } from '@/utils/api-response';
-import { desc, eq, sql } from 'drizzle-orm';
+import { desc, eq, sql, inArray } from 'drizzle-orm';
 // @ts-ignore
 import bcrypt from 'bcryptjs';
-import { withAuth } from '@/middlewares/middleware';
+import { withAuth, isSuperAdmin } from '@/middlewares/middleware';
 import { NextRequest } from 'next/server';
 import { PERMISSIONS } from '@/constants/rbac';
 import { AUTH } from '@/constants/app';
@@ -49,12 +49,28 @@ export const GET = withAuth(
 
 // POST /api/users - Create a new user
 export const POST = withAuth(
-    async (request: NextRequest) => {
+    async (request: NextRequest, session) => {
         try {
             const { username, password, fullName, email, phone, roleIds } = await request.json();
 
             if (!username || !password) {
                 return apiError('Username and password are required', 400);
+            }
+
+            // Security check: Only SuperAdmin can assign SuperAdmin roles
+            if (roleIds && Array.isArray(roleIds) && roleIds.length > 0) {
+                const requestedRoles = await db
+                    .select({ is_super: roles.is_super })
+                    .from(roles)
+                    .where(inArray(roles.id, roleIds));
+
+                const assigningSuperAdminRole = requestedRoles.some((r) => r.is_super);
+                if (assigningSuperAdminRole && !isSuperAdmin(session.user)) {
+                    return apiError(
+                        'Chỉ SuperAdmin mới có quyền gán vai trò có quyền tối cao',
+                        403,
+                    );
+                }
             }
 
             const hashedPassword = await bcrypt.hash(password, AUTH.BCRYPT_SALT_ROUNDS);

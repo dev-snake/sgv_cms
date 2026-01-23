@@ -1,10 +1,10 @@
 import { db } from '@/db';
 import { users, user_roles, roles } from '@/db/schema';
 import { apiResponse, apiError } from '@/utils/api-response';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 // @ts-ignore
 import bcrypt from 'bcryptjs';
-import { withAuth } from '@/middlewares/middleware';
+import { withAuth, isSuperAdmin } from '@/middlewares/middleware';
 import { NextRequest } from 'next/server';
 import { AUTH } from '@/constants/app';
 import { PERMISSIONS } from '@/constants/rbac';
@@ -55,6 +55,45 @@ export const PATCH = withAuth(
             const { id: userId } = await params;
             const body = await request.json();
             const { username, password, fullName, email, phone, roleIds } = body;
+
+            // 1. Fetch the user being updated and their current SuperAdmin status
+            const currentUserRoles = await db
+                .select({ is_super: roles.is_super })
+                .from(user_roles)
+                .innerJoin(roles, eq(user_roles.role_id, roles.id))
+                .where(eq(user_roles.user_id, userId));
+
+            const targetIsSuperAdmin = currentUserRoles.some((r) => r.is_super);
+
+            // Protection: Only SuperAdmin can modify another SuperAdmin
+            if (targetIsSuperAdmin && !isSuperAdmin(session.user)) {
+                return apiError(
+                    'Chỉ SuperAdmin mới có quyền sửa đổi tài khoản SuperAdmin khác',
+                    403,
+                );
+            }
+
+            // 2. If changing roles, check for SuperAdmin role ganting/revoking
+            if (roleIds && Array.isArray(roleIds)) {
+                // Check if NEW roles include a SuperAdmin role
+                const newRoles = await db
+                    .select({ is_super: roles.is_super })
+                    .from(roles)
+                    .where(inArray(roles.id, roleIds));
+
+                const assigningSuperAdminRole = newRoles.some((r) => r.is_super);
+                const revokingSuperAdminRole = targetIsSuperAdmin && !assigningSuperAdminRole;
+
+                if (
+                    (assigningSuperAdminRole || revokingSuperAdminRole) &&
+                    !isSuperAdmin(session.user)
+                ) {
+                    return apiError(
+                        'Chỉ SuperAdmin mới có quyền gán hoặc tước vai trò SuperAdmin',
+                        403,
+                    );
+                }
+            }
 
             const updatedUser = await db.transaction(async (tx) => {
                 const updateData: any = {};
@@ -127,6 +166,20 @@ export const DELETE = withAuth(
     async (request: Request, session, { params }) => {
         try {
             const { id: userId } = await params;
+
+            // 1. Fetch user status and roles
+            const targetUserRoles = await db
+                .select({ is_super: roles.is_super })
+                .from(user_roles)
+                .innerJoin(roles, eq(user_roles.role_id, roles.id))
+                .where(eq(user_roles.user_id, userId));
+
+            const targetIsSuperAdmin = targetUserRoles.some((r) => r.is_super);
+
+            // Protection: Only SuperAdmin can delete another SuperAdmin
+            if (targetIsSuperAdmin && !isSuperAdmin(session.user)) {
+                return apiError('Chỉ SuperAdmin mới có quyền xóa tài khoản SuperAdmin', 403);
+            }
 
             // Prevent self-deletion
             if (userId === session.user.id) {

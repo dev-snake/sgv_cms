@@ -1,8 +1,8 @@
 import { db } from '@/db';
 import { roles, permissions, modules } from '@/db/schema';
 import { apiResponse, apiError } from '@/utils/api-response';
-import { eq, sql } from 'drizzle-orm';
-import { withAuth } from '@/middlewares/middleware';
+import { eq } from 'drizzle-orm';
+import { withAuth, isSuperAdmin } from '@/middlewares/middleware';
 import { PERMISSIONS } from '@/constants/rbac';
 
 export const GET = withAuth(
@@ -14,7 +14,7 @@ export const GET = withAuth(
 
             if (!role) return apiError('Role not found', 404);
 
-            // Fetch associated permissions (new structure: permissions belong directly to roles)
+            // Fetch associated permissions
             const rolePermissions = await db
                 .select({
                     id: permissions.id,
@@ -48,9 +48,27 @@ export const PATCH = withAuth(
             const { name, code, description, is_super, permissionsMatrix } = await request.json();
 
             const [existingRole] = await db.select().from(roles).where(eq(roles.id, roleId));
+            if (!existingRole) return apiError('Role not found', 404);
 
-            // Protection: Prevent renaming the code of system roles (is_super)
-            if (existingRole?.is_super && code && code !== existingRole.code) {
+            // Protection: Only SuperAdmin can modify a system role
+            if (existingRole.is_super && !isSuperAdmin(session.user)) {
+                return apiError('Chỉ SuperAdmin mới có quyền sửa đổi vai trò hệ thống', 403);
+            }
+
+            // Protection: Only SuperAdmin can change the is_super flag
+            if (
+                is_super !== undefined &&
+                is_super !== existingRole.is_super &&
+                !isSuperAdmin(session.user)
+            ) {
+                return apiError(
+                    'Chỉ SuperAdmin mới có quyền thay đổi trạng thái SuperAdmin của vai trò',
+                    403,
+                );
+            }
+
+            // Protection: Prevent renaming the code of system roles
+            if (existingRole.is_super && code && code !== existingRole.code) {
                 return apiError('Không thể thay đổi mã định danh của vai trò hệ thống', 400);
             }
 
@@ -59,7 +77,7 @@ export const PATCH = withAuth(
                     .update(roles)
                     .set({
                         name,
-                        ...(existingRole?.is_super ? {} : { code }),
+                        ...(existingRole.is_super ? {} : { code }),
                         description,
                         is_super: is_super !== undefined ? is_super : undefined,
                         updated_at: new Date(),
@@ -104,11 +122,16 @@ export const DELETE = withAuth(
         try {
             const { id: roleId } = await params;
 
-            // Prevent deleting protected roles (is_super)
             const [role] = await db.select().from(roles).where(eq(roles.id, roleId));
-            if (role && role.is_super) {
+            if (!role) return apiError('Role not found', 404);
+
+            // Protection: Prevent deleting protected roles (is_super)
+            if (role.is_super) {
                 return apiError('Không thể xóa vai trò hệ thống cốt lõi', 400);
             }
+
+            // Additional Protection: Only SuperAdmin can delete any system-related roles if needed
+            // (Already blocked above for is_super roles)
 
             const [deletedRole] = await db.delete(roles).where(eq(roles.id, roleId)).returning();
 

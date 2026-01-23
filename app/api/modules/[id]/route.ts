@@ -3,7 +3,7 @@ import { modules } from '@/db/schema';
 import { apiResponse, apiError } from '@/utils/api-response';
 import { PERMISSIONS, PROTECTED_MODULES } from '@/constants/rbac';
 import { eq } from 'drizzle-orm';
-import { withAuth } from '@/middlewares/middleware';
+import { withAuth, isSuperAdmin } from '@/middlewares/middleware';
 
 export const GET = withAuth(
     async (request, session, { params }) => {
@@ -15,7 +15,7 @@ export const GET = withAuth(
                 return apiError('Không tìm thấy module', 404);
             }
 
-          return apiResponse(module);
+            return apiResponse(module);
         } catch (error) {
             console.error('Error fetching module:', error);
             return apiError('Internal Server Error', 500);
@@ -30,6 +30,14 @@ export const PATCH = withAuth(
             const { id } = await params;
             const body = await request.json();
             const { name, code, icon, route, order } = body;
+
+            const [module] = await db.select().from(modules).where(eq(modules.id, id));
+            if (!module) return apiError('Không tìm thấy module', 404);
+
+            // Protection: Only SuperAdmin can modify core modules
+            if (PROTECTED_MODULES.includes(module.code) && !isSuperAdmin(session.user)) {
+                return apiError('Chỉ SuperAdmin mới có quyền sửa đổi module hệ thống', 403);
+            }
 
             const [updatedModule] = await db
                 .update(modules)
@@ -74,9 +82,9 @@ export const DELETE = withAuth(
                 return apiError('Không tìm thấy module', 404);
             }
 
-            // Protection: Check if it's a hardcoded protected module (System Module)
-            if (PROTECTED_MODULES.includes(module.code)) {
-                return apiError('Đây là module hệ thống, không thể xóa', 403);
+            // Protection: Only SuperAdmin can delete system modules
+            if (PROTECTED_MODULES.includes(module.code) && !isSuperAdmin(session.user)) {
+                return apiError('Chỉ SuperAdmin mới có quyền xóa module hệ thống', 403);
             }
 
             const [deletedModule] = await db.delete(modules).where(eq(modules.id, id)).returning();
