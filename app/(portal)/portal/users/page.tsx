@@ -9,7 +9,6 @@ import {
     User as UserIcon,
     Edit2,
     Trash2,
-
     Shield,
     Activity,
     Users,
@@ -186,7 +185,7 @@ export default function UsersManagementPage() {
             </div>
 
             <div className="space-y-6">
-                <div className="p-6 bg-slate-50 border border-slate-100">
+                <div className="p-8 bg-slate-50 border border-slate-100">
                     <div className="relative max-w-md group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-300 group-focus-within:text-[#002d6b] transition-colors" />
                         <input
@@ -211,19 +210,19 @@ export default function UsersManagementPage() {
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b border-slate-50 bg-slate-50/50">
-                                        <th className="px-8 py-6 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                        <th className="px-8 py-6 text-left text-[9px] font-black uppercase tracking-widest text-slate-400">
                                             Người dùng
                                         </th>
-                                        <th className="px-8 py-6 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                        <th className="px-8 py-6 text-left text-[9px] font-black uppercase tracking-widest text-slate-400">
                                             Thông tin chi tiết
                                         </th>
-                                        <th className="px-8 py-6 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                        <th className="px-8 py-6 text-left text-[9px] font-black uppercase tracking-widest text-slate-400">
                                             Phân quyền
                                         </th>
-                                        <th className="px-8 py-6 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                        <th className="px-8 py-6 text-left text-[9px] font-black uppercase tracking-widest text-slate-400">
                                             Ngày gia nhập
                                         </th>
-                                        <th className="px-8 py-6 text-[9px] font-black uppercase tracking-widest text-slate-400 text-right">
+                                        <th className="px-8 py-6 text-right text-[9px] font-black uppercase tracking-widest text-slate-400">
                                             Thao tác
                                         </th>
                                     </tr>

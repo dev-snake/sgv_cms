@@ -299,7 +299,7 @@ export default function EditUserPage() {
                         <div className="pt-4">
                             <Button
                                 type="submit"
-                                className="w-full md:w-auto bg-[#002d6b] hover:bg-brand-primary text-[10px] font-black uppercase tracking-[0.2em] px-16 py-8 h-auto shadow-2xl shadow-brand-primary/20 transition-all rounded-none hover:-translate-y-1 active:scale-95"
+                                className="w-full md:w-auto bg-[#002d6b] hover:bg-brand-primary text-[10px] font-black uppercase tracking-[0.2em] px-16 py-4 hover:cursor-pointer h-auto shadow-2xl shadow-brand-primary/20 transition-all rounded-none hover:-translate-y-1 active:scale-95"
                                 disabled={isSubmitting}
                             >
                                 {isSubmitting ? (
