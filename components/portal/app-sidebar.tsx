@@ -1,28 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {
-    LayoutDashboard,
-    Settings,
-    FileText,
-    Briefcase,
-    Box,
-    ChevronRight,
-    User,
-    LogOut,
-    Lock,
-    Mail,
-    Images,
-    UserRoundSearch,
-    ClipboardList,
-    ShieldCheck,
-    Layers,
-    MessageCircle,
-    LucideIcon,
-    History,
-    Bell,
-    GripVertical,
-} from 'lucide-react';
+import { icons, ChevronRight, User, LogOut, GripVertical, FileText } from 'lucide-react';
 import Image from 'next/image';
 import {
     DndContext,
@@ -71,39 +50,27 @@ import { cn } from '@/lib/utils';
 import { PORTAL_ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 
-const ICON_MAP: Record<string, LucideIcon> = {
-    LayoutDashboard,
-    FileText,
-    Briefcase,
-    Box,
-    Images,
-    Settings,
-    Mail,
-    ClipboardList,
-    MessageCircle,
-    UserRoundSearch,
-    ShieldCheck,
-    Lock,
-    Layers,
-    User,
-    History,
-    Bell,
-};
-const DEFAULT_ICON = FileText;
+const DynamicIcon = React.memo(
+    ({ name, className }: { name: string | null; className?: string }) => {
+        if (!name) return <FileText className={className} />;
 
-const getIconComponent = (iconName: string | null): LucideIcon => {
-    if (!iconName) return DEFAULT_ICON;
-    return ICON_MAP[iconName] || DEFAULT_ICON;
-};
+        const IconComponent = icons[name as keyof typeof icons];
 
-// Sortable Menu Item Component
+        if (!IconComponent) {
+            return <FileText className={className} />;
+        }
+
+        return <IconComponent className={className} />;
+    },
+);
+DynamicIcon.displayName = 'DynamicIcon';
+
 interface SortableMenuItemProps {
     module: SidebarModule;
     isActive: boolean;
 }
 
 function SortableMenuItem({ module, isActive }: SortableMenuItemProps) {
-    const Icon = getIconComponent(module.icon);
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: module.code,
     });
@@ -148,14 +115,13 @@ function SortableMenuItem({ module, isActive }: SortableMenuItemProps) {
                         className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center"
                     >
                         <div className="flex items-center justify-center shrink-0 size-5">
-                            {Icon && (
-                                <Icon
-                                    className={cn(
-                                        'size-4',
-                                        isActive ? 'text-[#002d6b]' : 'text-[#fbbf24]',
-                                    )}
-                                />
-                            )}
+                            <DynamicIcon
+                                name={module.icon}
+                                className={cn(
+                                    'size-4',
+                                    isActive ? 'text-[#002d6b]' : 'text-[#fbbf24]',
+                                )}
+                            />
                         </div>
                         <span className="truncate group-data-[collapsible=icon]:hidden">
                             {module.name}
@@ -201,27 +167,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         }
     };
 
-    // Build navigation items from user modules
     const navItems = React.useMemo(() => {
         if (!user?.modules) return [];
 
-        // Map modules from user permissions
         return user.modules
             .filter((module: SidebarModule) => !!module.route)
             .map((module: SidebarModule) => ({
                 title: module.name,
                 url: module.route as string,
-                icon: getIconComponent(module.icon),
+                iconName: module.icon,
                 code: module.code,
             }));
     }, [user?.modules]);
 
-    // Filtered modules for sidebar menu
     const filteredModules = React.useMemo(() => {
         return (user?.modules || []).filter((module: SidebarModule) => !!module.route);
     }, [user?.modules]);
 
-    // Handle drag end for reordering
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
@@ -240,25 +202,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     const isPathActive = (url: string) => {
         if (!url) return false;
-        console.log(url, 'url');
-        console.log(pathname, 'pathname');
-        // Nếu path khớp hoàn toàn
         if (pathname === url) return true;
 
-        // Nếu path bắt đầu bằng url/ (để active cho các trang con)
         if (pathname.startsWith(url + '/')) {
-            // Kiểm tra xem có item nào khác trong menu có URL dài hơn và cũng khớp không
-            // Nếu có, thì item hiện tại (ngắn hơn) sẽ không được coi là active chủ đạo
             const hasBetterMatch = navItems.some(
                 (item) =>
                     item.url !== url &&
                     item.url.length > url.length &&
                     (pathname === item.url || pathname.startsWith(item.url + '/')),
             );
-
             return !hasBetterMatch;
         }
-
         return false;
     };
 
