@@ -155,7 +155,7 @@ export default function UsersManagementPage() {
                 </div>
                 {hasPermission(PERMISSIONS.USERS_CREATE) && (
                     <Link href={PORTAL_ROUTES.users.add}>
-                        <Button className="h-14 px-10 bg-[#002d6b] hover:bg-[#002d6b]/90 text-white rounded-none text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-900/10 flex items-center gap-3">
+                        <Button className="h-10 hover:cursor-pointer px-10  bg-[#002d6b] hover:bg-[#002d6b]/90 text-white rounded-none text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-900/10 flex items-center gap-3">
                             <Plus size={18} /> Tạo tài khoản mới
                         </Button>
                     </Link>
