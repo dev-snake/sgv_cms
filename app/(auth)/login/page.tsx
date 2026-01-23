@@ -10,6 +10,7 @@ import api from '@/services/axios';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { API_ROUTES, ADMIN_ROUTES } from '@/constants/routes';
+import { useAuthStore } from '@/stores/auth-store';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -29,6 +30,7 @@ export default function LoginPage() {
             // No need to manually store them in localStorage
 
             toast.success('Đăng nhập thành công! Đang chuyển hướng...');
+            await useAuthStore.getState().refreshUser();
             router.push(ADMIN_ROUTES.DASHBOARD);
             router.refresh();
         } catch (error) {

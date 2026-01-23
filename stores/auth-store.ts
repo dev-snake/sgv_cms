@@ -35,6 +35,7 @@ interface AuthState {
     setLoading: (isLoading: boolean) => void;
     refreshUser: () => Promise<void>;
     initialize: () => void;
+    logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -152,5 +153,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (!get().isInitialized) {
             get().refreshUser();
         }
+    },
+
+    logout: () => {
+        set({ user: null, isInitialized: false });
     },
 }));

@@ -45,6 +45,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import api from '@/services/axios';
 import { toast } from 'sonner';
 import { useAuth, SidebarModule } from '@/hooks/use-auth';
+import { useAuthStore } from '@/stores/auth-store';
 
 import { cn } from '@/lib/utils';
 import { PORTAL_ROUTES } from '@/constants/routes';
@@ -86,6 +87,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const handleLogout = async () => {
         try {
             await api.post('/api/auth/logout');
+            useAuthStore.getState().logout(); // Reset auth store state
             toast.success('Đã đăng xuất');
             router.push('/login');
             router.refresh();
