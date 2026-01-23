@@ -1,16 +1,52 @@
 import { db } from '@/db';
 import { modules } from '@/db/schema';
 import { apiResponse, apiError } from '@/utils/api-response';
-import {  PERMISSIONS } from '@/constants/rbac';
-import { sql, asc } from 'drizzle-orm';
+import { PERMISSIONS } from '@/constants/rbac';
+import { sql, asc, ilike, or } from 'drizzle-orm';
 import { withAuth } from '@/middlewares/middleware';
+import { parsePaginationParams, calculateOffset, createPaginationMeta } from '@/utils/pagination';
 
 export const GET = withAuth(
-    async () => {
+    async (request) => {
         try {
-            const allModules = await db.select().from(modules).orderBy(asc(modules.code));
+            const { searchParams } = new URL(request.url);
+            const search = searchParams.get('search');
 
-            return apiResponse(allModules);
+            // Parse pagination params
+            const { page, limit } = parsePaginationParams(searchParams);
+            const offset = calculateOffset(page, limit);
+
+            // Build conditions
+            const conditions = [];
+            if (search) {
+                conditions.push(
+                    or(ilike(modules.name, `%${search}%`), ilike(modules.code, `%${search}%`)),
+                );
+            }
+
+            // Count total
+            const countQuery = db.select({ count: sql<number>`count(*)` }).from(modules);
+            if (conditions.length > 0) {
+                countQuery.where(sql`${sql.join(conditions, sql` AND `)}`);
+            }
+            const [{ count: total }] = await countQuery;
+
+            // Fetch data
+            let query = db
+                .select()
+                .from(modules)
+                .orderBy(asc(modules.order))
+                .limit(limit)
+                .offset(offset);
+            if (conditions.length > 0) {
+                query = query.where(sql`${sql.join(conditions, sql` AND `)}`) as any;
+            }
+
+            const allModules = await query;
+
+            return apiResponse(allModules, {
+                meta: createPaginationMeta(page, limit, Number(total)),
+            });
         } catch (error) {
             console.error('Error fetching modules:', error);
             return apiError('Internal Server Error', 500);

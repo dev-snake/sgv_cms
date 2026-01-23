@@ -12,6 +12,7 @@ import {
     LayoutDashboard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { TablePagination } from '@/components/portal/table-pagination';
 import api from '@/services/axios';
 import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import { toast } from 'sonner';
@@ -42,14 +43,24 @@ export default function ModulesPage() {
     const [modules, setModules] = React.useState<any[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [searchQuery, setSearchQuery] = React.useState('');
+    const [page, setPage] = React.useState(1);
+    const [pageSize, setPageSize] = React.useState(10);
+    const [totalItems, setTotalItems] = React.useState(0);
     const [deleteId, setDeleteId] = React.useState<string | null>(null);
     const [isDeleting, setIsDeleting] = React.useState(false);
 
     const fetchModules = async () => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.MODULES);
+            const res = await api.get(API_ROUTES.MODULES, {
+                params: {
+                    page,
+                    limit: pageSize,
+                    search: searchQuery || undefined,
+                },
+            });
             setModules(res.data.data || []);
+            setTotalItems(res.data.meta?.total || 0);
         } catch (error) {
             console.error(error);
             toast.error('Không thể tải danh sách module');
@@ -60,7 +71,14 @@ export default function ModulesPage() {
 
     React.useEffect(() => {
         fetchModules();
-    }, []);
+    }, [page, pageSize]);
+
+    // Handle search with debounce or simple reset
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        setPage(1);
+        fetchModules();
+    };
 
     const handleDelete = async () => {
         if (!deleteId) return;
@@ -83,11 +101,8 @@ export default function ModulesPage() {
         }
     };
 
-    const filteredModules = modules.filter(
-        (m) =>
-            m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            m.code.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    // Searching is now handled on the server
+    const displayModules = modules;
 
     return (
         <div className="space-y-8 pb-20">
@@ -109,7 +124,7 @@ export default function ModulesPage() {
 
             <div className="bg-white border border-slate-100 shadow-sm rounded-sm overflow-hidden">
                 <div className="p-6 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/30">
-                    <div className="relative flex-1 max-w-md">
+                    <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
                         <Search
                             className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                             size={16}
@@ -120,13 +135,16 @@ export default function ModulesPage() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
-                    </div>
+                    </form>
                     <div className="flex items-center gap-2">
                         <Button
                             variant="outline"
                             size="icon"
                             className="h-12 w-12 rounded-none border-slate-200"
-                            onClick={fetchModules}
+                            onClick={() => {
+                                setPage(1);
+                                fetchModules();
+                            }}
                         >
                             <Loader2 className={isLoading ? 'animate-spin' : ''} size={18} />
                         </Button>
@@ -169,7 +187,7 @@ export default function ModulesPage() {
                                         </td>
                                     </tr>
                                 ))
-                            ) : filteredModules.length === 0 ? (
+                            ) : displayModules.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-8 py-20 text-center">
                                         <div className="flex flex-col items-center gap-2 opacity-20">
@@ -181,7 +199,7 @@ export default function ModulesPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                filteredModules.map((item) => {
+                                displayModules.map((item) => {
                                     const isProtected = PROTECTED_MODULES.includes(item.code);
                                     return (
                                         <tr
@@ -287,6 +305,18 @@ export default function ModulesPage() {
                         </tbody>
                     </table>
                 </div>
+
+                <TablePagination
+                    currentPage={page}
+                    totalItems={totalItems}
+                    pageSize={pageSize}
+                    onPageChange={setPage}
+                    onPageSizeChange={(size) => {
+                        setPageSize(size);
+                        setPage(1);
+                    }}
+                    itemLabel="module"
+                />
             </div>
 
             <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
