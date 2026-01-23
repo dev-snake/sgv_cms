@@ -8,6 +8,7 @@ import { withAuth, isSuperAdmin } from '@/middlewares/middleware';
 import { NextRequest } from 'next/server';
 import { PERMISSIONS } from '@/constants/rbac';
 import { AUTH } from '@/constants/app';
+import { auditService } from '@/services/audit-service';
 
 // GET /api/users - List all users with their roles
 export const GET = withAuth(
@@ -101,6 +102,16 @@ export const POST = withAuth(
                 }
 
                 return user;
+            });
+
+            // Audit Log
+            auditService.logAction({
+                userId: session.user.id,
+                action: 'CREATE',
+                module: 'USERS',
+                targetId: newUser.id,
+                description: `Tạo người dùng mới: ${newUser.username}`,
+                request,
             });
 
             return apiResponse(newUser, { status: 201 });

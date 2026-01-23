@@ -4,6 +4,7 @@ import { apiResponse, apiError } from '@/utils/api-response';
 import { eq } from 'drizzle-orm';
 import { withAuth, isSuperAdmin } from '@/middlewares/middleware';
 import { PERMISSIONS } from '@/constants/rbac';
+import { auditService } from '@/services/audit-service';
 
 export const GET = withAuth(
     async (request, session, { params }) => {
@@ -107,6 +108,20 @@ export const PATCH = withAuth(
                 return role;
             });
 
+            // Audit Log
+            auditService.logAction({
+                userId: session.user.id,
+                action: 'UPDATE',
+                module: 'ROLES',
+                targetId: roleId,
+                description: `Cập nhật vai trò: ${existingRole.name} -> ${updatedRole.name || existingRole.name}`,
+                changes: {
+                    old: existingRole,
+                    new: updatedRole,
+                },
+                request,
+            });
+
             return apiResponse(updatedRole);
         } catch (error: any) {
             console.error('Error updating role:', error);
@@ -136,6 +151,17 @@ export const DELETE = withAuth(
             const [deletedRole] = await db.delete(roles).where(eq(roles.id, roleId)).returning();
 
             if (!deletedRole) return apiError('Role not found', 404);
+
+            // Audit Log
+            auditService.logAction({
+                userId: session.user.id,
+                action: 'DELETE',
+                module: 'ROLES',
+                targetId: roleId,
+                description: `Xóa vai trò: ${deletedRole.name}`,
+                changes: { old: deletedRole },
+                request,
+            });
 
             return apiResponse({ message: 'Role deleted successfully' });
         } catch (error) {

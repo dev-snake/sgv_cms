@@ -8,6 +8,7 @@ import { withAuth, isSuperAdmin } from '@/middlewares/middleware';
 import { NextRequest } from 'next/server';
 import { AUTH } from '@/constants/app';
 import { PERMISSIONS } from '@/constants/rbac';
+import { auditService } from '@/services/audit-service';
 
 // GET /api/users/[id] - Get a single user
 export const GET = withAuth(
@@ -95,6 +96,17 @@ export const PATCH = withAuth(
                 }
             }
 
+            const [oldUser] = await db
+                .select({
+                    id: users.id,
+                    username: users.username,
+                    fullName: users.full_name,
+                    email: users.email,
+                    phone: users.phone,
+                })
+                .from(users)
+                .where(eq(users.id, userId));
+
             const updatedUser = await db.transaction(async (tx) => {
                 const updateData: any = {};
                 if (username) updateData.username = username;
@@ -133,6 +145,20 @@ export const PATCH = withAuth(
                 }
 
                 return user;
+            });
+
+            // Audit Log
+            auditService.logAction({
+                userId: session.user.id,
+                action: 'UPDATE',
+                module: 'USERS',
+                targetId: userId,
+                description: `Cập nhật thông tin người dùng: ${updatedUser.username}`,
+                changes: {
+                    old: oldUser,
+                    new: updatedUser,
+                },
+                request,
             });
 
             return apiResponse(updatedUser);
@@ -189,6 +215,17 @@ export const DELETE = withAuth(
             const [deletedUser] = await db.delete(users).where(eq(users.id, userId)).returning();
 
             if (!deletedUser) return apiError('User not found', 404);
+
+            // Audit Log
+            auditService.logAction({
+                userId: session.user.id,
+                action: 'DELETE',
+                module: 'USERS',
+                targetId: userId,
+                description: `Xóa tài khoản người dùng: ${deletedUser.username}`,
+                changes: { old: deletedUser },
+                request,
+            });
 
             return apiResponse({ message: 'User deleted successfully' });
         } catch (error) {

@@ -11,9 +11,21 @@ import { PORTAL_ROUTES } from '@/constants/routes';
 import { PAGINATION } from '@/constants/app';
 import { validateBody, sanitizeHtml } from '@/middlewares/middleware';
 import { contactSchema } from '@/validations/contact.schema';
+import { checkRateLimit } from '@/utils/rate-limiter';
 
 export async function POST(request: Request) {
     try {
+        // 1. Rate Limiting Check
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+        const { isLimited, retryAfter } = checkRateLimit(`contact:${ip}`, 3, 60 * 60 * 1000); // 3 per hour
+
+        if (isLimited) {
+            return apiError(
+                `Bạn đã gửi yêu cầu quá thường xuyên. Vui lòng thử lại sau ${Math.ceil(retryAfter! / 60)} phút.`,
+                429,
+            );
+        }
+
         // Validate request body
         const dataOrError = await validateBody(request, contactSchema);
         if (dataOrError instanceof Response) {

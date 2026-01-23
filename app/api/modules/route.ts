@@ -5,6 +5,7 @@ import { PERMISSIONS } from '@/constants/rbac';
 import { sql, asc, ilike, or, and } from 'drizzle-orm';
 import { withAuth } from '@/middlewares/middleware';
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from '@/utils/pagination';
+import { auditService } from '@/services/audit-service';
 
 export const GET = withAuth(
     async (request) => {
@@ -89,6 +90,16 @@ export const POST = withAuth(
                     order: parseInt(order) || 0,
                 })
                 .returning();
+
+            // Audit Log
+            auditService.logAction({
+                userId: (request as any).session?.user?.id,
+                action: 'CREATE',
+                module: 'MODULES',
+                targetId: newModule.id,
+                description: `Tạo module mới: ${newModule.name} (${newModule.code})`,
+                request,
+            });
 
             return apiResponse(newModule, { status: 201 });
         } catch (error) {

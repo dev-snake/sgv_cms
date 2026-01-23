@@ -6,6 +6,7 @@ import { parsePaginationParams, calculateOffset, createPaginationMeta } from '@/
 import { withAuth, withHybridAuth, hasPermission, isAdmin } from '@/middlewares/middleware';
 import { PERMISSIONS } from '@/constants/rbac';
 import { ARTICLE, PAGINATION } from '@/constants/app';
+import { auditService } from '@/services/audit-service';
 
 // GET /api/news - List news articles with pagination
 export const GET = withHybridAuth(
@@ -133,7 +134,7 @@ export const GET = withHybridAuth(
 
 // POST /api/news - Create a new article
 export const POST = withAuth(
-    async (request) => {
+    async (request, session) => {
         try {
             const body = await request.json();
             const {
@@ -168,6 +169,17 @@ export const POST = withAuth(
                     published_at: published_at ? new Date(published_at) : null,
                 })
                 .returning();
+
+            // Audit Log
+            auditService.logAction({
+                userId: session.user.id,
+                action: 'CREATE',
+                module: 'NEWS',
+                targetId: newArticle.id,
+                description: `Tạo bài viết mới: ${newArticle.title}`,
+                changes: { new: newArticle },
+                request,
+            });
 
             return apiResponse(newArticle, { status: 201 });
         } catch (error) {

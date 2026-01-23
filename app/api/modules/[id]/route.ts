@@ -4,6 +4,7 @@ import { apiResponse, apiError } from '@/utils/api-response';
 import { PERMISSIONS, PROTECTED_MODULES } from '@/constants/rbac';
 import { eq } from 'drizzle-orm';
 import { withAuth, isSuperAdmin } from '@/middlewares/middleware';
+import { auditService } from '@/services/audit-service';
 
 export const GET = withAuth(
     async (request, session, { params }) => {
@@ -61,6 +62,20 @@ export const PATCH = withAuth(
                 return apiError('Không tìm thấy module', 404);
             }
 
+            // Audit Log
+            auditService.logAction({
+                userId: session.user.id,
+                action: 'UPDATE',
+                module: 'MODULES',
+                targetId: id,
+                description: `Cập nhật module: ${module.name} -> ${updatedModule.name}`,
+                changes: {
+                    old: module,
+                    new: updatedModule,
+                },
+                request,
+            });
+
             return apiResponse(updatedModule);
         } catch (error) {
             console.error('Error updating module:', error);
@@ -88,6 +103,17 @@ export const DELETE = withAuth(
             }
 
             const [deletedModule] = await db.delete(modules).where(eq(modules.id, id)).returning();
+
+            // Audit Log
+            auditService.logAction({
+                userId: session.user.id,
+                action: 'DELETE',
+                module: 'MODULES',
+                targetId: id,
+                description: `Xóa module: ${module.name}`,
+                changes: { old: module },
+                request,
+            });
 
             return apiResponse(null, { status: 200 });
         } catch (error) {
