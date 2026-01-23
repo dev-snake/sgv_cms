@@ -6,22 +6,11 @@ import { login, generateTokens } from '@/services/auth';
 import { apiResponse, apiError } from '@/utils/api-response';
 import { validateBody } from '@/middlewares/middleware';
 import { loginSchema } from '@/validations/auth.schema';
-import { checkRateLimit } from '@/utils/rate-limiter';
 import { auditService } from '@/services/audit-service';
+import { AUDIT_ACTIONS, AUDIT_MODULES } from '@/constants/audit';
 
 export async function POST(request: Request) {
     try {
-        // 1. Rate Limiting Check
-        const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
-        const { isLimited, retryAfter } = checkRateLimit(`login:${ip}`, 5, 15 * 60 * 1000); // 5 attempts per 15 mins
-
-        if (isLimited) {
-            return apiError(
-                `Quá nhiều lần thử đăng nhập thất bại. Vui lòng thử lại sau ${retryAfter} giây.`,
-                429,
-            );
-        }
-
         // Validate request body
         const dataOrError = await validateBody(request, loginSchema);
         if (dataOrError instanceof Response) {
@@ -34,8 +23,8 @@ export async function POST(request: Request) {
 
         if (!user) {
             auditService.logAction({
-                action: 'AUTH_FAILURE',
-                module: 'AUTH',
+                action: AUDIT_ACTIONS.AUTH_FAILURE,
+                module: AUDIT_MODULES.AUTH,
                 description: `Thử đăng nhập thất bại với username: ${username}`,
                 request,
             });
@@ -47,8 +36,8 @@ export async function POST(request: Request) {
         if (!passwordMatch) {
             auditService.logAction({
                 userId: user.id,
-                action: 'AUTH_FAILURE',
-                module: 'AUTH',
+                action: AUDIT_ACTIONS.AUTH_FAILURE,
+                module: AUDIT_MODULES.AUTH,
                 description: 'Mật khẩu không chính xác',
                 request,
             });
@@ -76,8 +65,8 @@ export async function POST(request: Request) {
         // Audit Log Success
         auditService.logAction({
             userId: user.id,
-            action: 'LOGIN',
-            module: 'AUTH',
+            action: AUDIT_ACTIONS.LOGIN,
+            module: AUDIT_MODULES.AUTH,
             description: 'Đăng nhập thành công',
             request,
         });

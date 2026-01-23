@@ -7,6 +7,7 @@ import { withAuth, withHybridAuth, hasPermission, isAdmin } from '@/middlewares/
 import { PERMISSIONS } from '@/constants/rbac';
 import { ARTICLE, PAGINATION } from '@/constants/app';
 import { auditService } from '@/services/audit-service';
+import { AUDIT_ACTIONS, AUDIT_MODULES } from '@/constants/audit';
 
 // GET /api/news - List news articles with pagination
 export const GET = withHybridAuth(
@@ -173,8 +174,8 @@ export const POST = withAuth(
             // Audit Log
             auditService.logAction({
                 userId: session.user.id,
-                action: 'CREATE',
-                module: 'NEWS',
+                action: AUDIT_ACTIONS.CREATE,
+                module: AUDIT_MODULES.NEWS,
                 targetId: newArticle.id,
                 description: `Tạo bài viết mới: ${newArticle.title}`,
                 changes: { new: newArticle },

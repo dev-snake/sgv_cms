@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { withAuth, isSuperAdmin } from '@/middlewares/middleware';
 import { PERMISSIONS } from '@/constants/rbac';
 import { auditService } from '@/services/audit-service';
+import { AUDIT_ACTIONS, AUDIT_MODULES } from '@/constants/audit';
 
 export const GET = withAuth(
     async (request, session, { params }) => {
@@ -111,8 +112,8 @@ export const PATCH = withAuth(
             // Audit Log
             auditService.logAction({
                 userId: session.user.id,
-                action: 'UPDATE',
-                module: 'ROLES',
+                action: AUDIT_ACTIONS.UPDATE,
+                module: AUDIT_MODULES.ROLES,
                 targetId: roleId,
                 description: `Cập nhật vai trò: ${existingRole.name} -> ${updatedRole.name || existingRole.name}`,
                 changes: {
@@ -155,8 +156,8 @@ export const DELETE = withAuth(
             // Audit Log
             auditService.logAction({
                 userId: session.user.id,
-                action: 'DELETE',
-                module: 'ROLES',
+                action: AUDIT_ACTIONS.DELETE,
+                module: AUDIT_MODULES.ROLES,
                 targetId: roleId,
                 description: `Xóa vai trò: ${deletedRole.name}`,
                 changes: { old: deletedRole },

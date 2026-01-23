@@ -5,6 +5,7 @@ import { PERMISSIONS, PROTECTED_MODULES } from '@/constants/rbac';
 import { eq } from 'drizzle-orm';
 import { withAuth, isSuperAdmin } from '@/middlewares/middleware';
 import { auditService } from '@/services/audit-service';
+import { AUDIT_ACTIONS, AUDIT_MODULES } from '@/constants/audit';
 
 export const GET = withAuth(
     async (request, session, { params }) => {
@@ -65,8 +66,8 @@ export const PATCH = withAuth(
             // Audit Log
             auditService.logAction({
                 userId: session.user.id,
-                action: 'UPDATE',
-                module: 'MODULES',
+                action: AUDIT_ACTIONS.UPDATE,
+                module: AUDIT_MODULES.MODULES,
                 targetId: id,
                 description: `Cập nhật module: ${module.name} -> ${updatedModule.name}`,
                 changes: {
@@ -107,8 +108,8 @@ export const DELETE = withAuth(
             // Audit Log
             auditService.logAction({
                 userId: session.user.id,
-                action: 'DELETE',
-                module: 'MODULES',
+                action: AUDIT_ACTIONS.DELETE,
+                module: AUDIT_MODULES.MODULES,
                 targetId: id,
                 description: `Xóa module: ${module.name}`,
                 changes: { old: module },

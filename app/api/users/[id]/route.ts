@@ -9,6 +9,7 @@ import { NextRequest } from 'next/server';
 import { AUTH } from '@/constants/app';
 import { PERMISSIONS } from '@/constants/rbac';
 import { auditService } from '@/services/audit-service';
+import { AUDIT_ACTIONS, AUDIT_MODULES } from '@/constants/audit';
 
 // GET /api/users/[id] - Get a single user
 export const GET = withAuth(
@@ -175,8 +176,8 @@ export const PATCH = withAuth(
             // Audit Log
             auditService.logAction({
                 userId: session.user.id,
-                action: 'UPDATE',
-                module: 'USERS',
+                action: AUDIT_ACTIONS.UPDATE,
+                module: AUDIT_MODULES.USERS,
                 targetId: userId,
                 description: `Cập nhật thông tin người dùng: ${updatedUser.username}`,
                 changes: {
@@ -245,8 +246,8 @@ export const DELETE = withAuth(
             // Audit Log
             auditService.logAction({
                 userId: session.user.id,
-                action: 'DELETE',
-                module: 'USERS',
+                action: AUDIT_ACTIONS.DELETE,
+                module: AUDIT_MODULES.USERS,
                 targetId: userId,
                 description: `Xóa tài khoản người dùng: ${deletedUser.username}`,
                 changes: { old: deletedUser },

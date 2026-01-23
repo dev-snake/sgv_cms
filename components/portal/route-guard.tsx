@@ -71,6 +71,12 @@ export function RouteGuard({ children }: RouteGuardProps) {
         return permissionsForRoute.some((perm) => hasPermission(perm));
     })();
 
+    // If user is not logged in, return null (handled by middleware redirect)
+    // This prevents the "Permission Denied" UI from flashing during logout
+    if (!user && !isLoading) {
+        return null;
+    }
+
     // If not authorized, show inline Permission Denied UI instead of redirecting
     if (!isAuthorized) {
         return (

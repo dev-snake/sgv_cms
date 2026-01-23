@@ -1,0 +1,35 @@
+/**
+ * Audit Log Constants
+ * Centralized constants for Audit Logging actions and modules
+ */
+
+export const AUDIT_ACTIONS = {
+    CREATE: 'CREATE',
+    UPDATE: 'UPDATE',
+    DELETE: 'DELETE',
+    RESTORE: 'RESTORE',
+    LOGIN: 'LOGIN',
+    LOGOUT: 'LOGOUT',
+    AUTH_FAILURE: 'AUTH_FAILURE',
+    EXPORT: 'EXPORT',
+    IMPORT: 'IMPORT',
+} as const;
+
+export const AUDIT_MODULES = {
+    AUTH: 'AUTH',
+    USERS: 'USERS',
+    ROLES: 'ROLES',
+    MODULES: 'MODULES',
+    NEWS: 'NEWS',
+    PRODUCTS: 'PRODUCTS',
+    PROJECTS: 'PROJECTS',
+    CONTACTS: 'CONTACTS',
+    RECRUITMENT: 'RECRUITMENT',
+    APPLICATIONS: 'APPLICATIONS',
+    COMMENTS: 'COMMENTS',
+    MEDIA: 'MEDIA',
+    SETTINGS: 'SETTINGS',
+    AUDIT_LOGS: 'AUDIT_LOGS',
+    NOTIFICATIONS: 'NOTIFICATIONS',
+    CHAT: 'CHAT',
+} as const;

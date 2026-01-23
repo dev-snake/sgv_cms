@@ -1,11 +1,4 @@
-/**
- * Application Constants
- * Centralized configuration to avoid hard-coded values
- */
 
-// ============================================================================
-// COMPANY INFORMATION
-// ============================================================================
 export const COMPANY = {
   NAME: "Sài Gòn Valve",
   SHORT_NAME: "SGV",
@@ -13,9 +6,7 @@ export const COMPANY = {
   WEBSITE: process.env.APP_URL || "https://saigonvalve.vn",
 } as const;
 
-// ============================================================================
-// PAGINATION DEFAULTS
-// ============================================================================
+
 export const PAGINATION = {
   DEFAULT_PAGE: 1,
   DEFAULT_LIMIT: 10,

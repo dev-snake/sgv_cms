@@ -9,6 +9,7 @@ import { NextRequest } from 'next/server';
 import { PERMISSIONS } from '@/constants/rbac';
 import { AUTH } from '@/constants/app';
 import { auditService } from '@/services/audit-service';
+import { AUDIT_ACTIONS, AUDIT_MODULES } from '@/constants/audit';
 
 // GET /api/users - List all users with their roles
 export const GET = withAuth(
@@ -108,8 +109,8 @@ export const POST = withAuth(
             // Audit Log
             auditService.logAction({
                 userId: session.user.id,
-                action: 'CREATE',
-                module: 'USERS',
+                action: AUDIT_ACTIONS.CREATE,
+                module: AUDIT_MODULES.USERS,
                 targetId: newUser.id,
                 description: `Tạo người dùng mới: ${newUser.username}`,
                 request,

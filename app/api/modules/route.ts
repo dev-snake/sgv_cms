@@ -6,6 +6,7 @@ import { sql, asc, ilike, or, and } from 'drizzle-orm';
 import { withAuth } from '@/middlewares/middleware';
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from '@/utils/pagination';
 import { auditService } from '@/services/audit-service';
+import { AUDIT_ACTIONS, AUDIT_MODULES } from '@/constants/audit';
 
 export const GET = withAuth(
     async (request) => {
@@ -94,8 +95,8 @@ export const POST = withAuth(
             // Audit Log
             auditService.logAction({
                 userId: (request as any).session?.user?.id,
-                action: 'CREATE',
-                module: 'MODULES',
+                action: AUDIT_ACTIONS.CREATE,
+                module: AUDIT_MODULES.MODULES,
                 targetId: newModule.id,
                 description: `Tạo module mới: ${newModule.name} (${newModule.code})`,
                 request,
