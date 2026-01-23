@@ -85,7 +85,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 );
 
                 const moduleMap = new Map<string, SidebarModule>();
-                let isSystemSuper = false;
+                let isSystemSuper = !!profileData.is_super;
 
                 profileData.roles.forEach((r: any) => {
                     if (r.is_super) isSystemSuper = true;

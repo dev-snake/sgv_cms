@@ -23,6 +23,7 @@ export const GET = withAuth(
                     email: users.email,
                     phone: users.phone,
                     isActive: users.is_active,
+                    is_super: users.is_super,
                     createdAt: users.created_at,
                 })
                 .from(users)
@@ -57,17 +58,30 @@ export const PATCH = withAuth(
             const body = await request.json();
             const { username, password, fullName, email, phone, roleIds } = body;
 
-            // 1. Fetch the user being updated and their current SuperAdmin status
+            // 1. Fetch the user being updated and their current status
+            const [targetUser] = await db
+                .select({
+                    isSuper: users.is_super,
+                    username: users.username,
+                })
+                .from(users)
+                .where(eq(users.id, userId));
+
+            if (!targetUser) return apiError('User not found', 404);
+
             const currentUserRoles = await db
                 .select({ is_super: roles.is_super })
                 .from(user_roles)
                 .innerJoin(roles, eq(user_roles.role_id, roles.id))
                 .where(eq(user_roles.user_id, userId));
 
-            const targetIsSuperAdmin = currentUserRoles.some((r) => r.is_super);
+            // targetIsSuper if he has super role OR is_super flag
+            const targetIsSuperAdmin =
+                currentUserRoles.some((r) => r.is_super) || targetUser.isSuper;
+            const isActorSuper = isSuperAdmin(session.user);
 
             // Protection: Only SuperAdmin can modify another SuperAdmin
-            if (targetIsSuperAdmin && !isSuperAdmin(session.user)) {
+            if (targetIsSuperAdmin && !isActorSuper) {
                 return apiError(
                     'Chỉ SuperAdmin mới có quyền sửa đổi tài khoản SuperAdmin khác',
                     403,
@@ -85,14 +99,23 @@ export const PATCH = withAuth(
                 const assigningSuperAdminRole = newRoles.some((r) => r.is_super);
                 const revokingSuperAdminRole = targetIsSuperAdmin && !assigningSuperAdminRole;
 
-                if (
-                    (assigningSuperAdminRole || revokingSuperAdminRole) &&
-                    !isSuperAdmin(session.user)
-                ) {
+                if ((assigningSuperAdminRole || revokingSuperAdminRole) && !isActorSuper) {
                     return apiError(
                         'Chỉ SuperAdmin mới có quyền gán hoặc tước vai trò SuperAdmin',
                         403,
                     );
+                }
+            }
+
+            const { isSuper } = body;
+            // Protection for is_super flag
+            if (isSuper !== undefined && isSuper !== targetUser.isSuper) {
+                if (!isActorSuper) {
+                    return apiError('Chỉ SuperAdmin mới có quyền thay đổi cờ SuperAdmin', 403);
+                }
+                // Prevent self-demotion
+                if (!isSuper && userId === session.user.id) {
+                    return apiError('Bạn không thể tự tước quyền SuperAdmin của chính mình', 400);
                 }
             }
 
@@ -113,6 +136,7 @@ export const PATCH = withAuth(
                 if (fullName !== undefined) updateData.full_name = fullName;
                 if (email !== undefined) updateData.email = email;
                 if (phone !== undefined) updateData.phone = phone;
+                if (isSuper !== undefined) updateData.is_super = isSuper;
                 if (password) {
                     updateData.password = await bcrypt.hash(password, AUTH.BCRYPT_SALT_ROUNDS);
                 }
@@ -128,6 +152,7 @@ export const PATCH = withAuth(
                         fullName: users.full_name,
                         email: users.email,
                         phone: users.phone,
+                        isSuper: users.is_super,
                     });
 
                 if (!user) throw new Error('User not found');
@@ -201,9 +226,10 @@ export const DELETE = withAuth(
                 .where(eq(user_roles.user_id, userId));
 
             const targetIsSuperAdmin = targetUserRoles.some((r) => r.is_super);
+            const isActorSuper = isSuperAdmin(session.user);
 
             // Protection: Only SuperAdmin can delete another SuperAdmin
-            if (targetIsSuperAdmin && !isSuperAdmin(session.user)) {
+            if (targetIsSuperAdmin && !isActorSuper) {
                 return apiError('Chỉ SuperAdmin mới có quyền xóa tài khoản SuperAdmin', 403);
             }
 

@@ -42,7 +42,8 @@ export async function generateTokens(user: any) {
         .where(eq(user_roles.user_id, user.id));
 
     const roleIds = userRoles.map((r) => r.id);
-    const isSuperUser = userRoles.some((r) => r.is_super);
+    // is_super if EITHER user.is_super flag is true OR any role has is_super true
+    const isSuperUser = user.is_super || userRoles.some((r) => r.is_super);
 
     let userPermissions: string[] = [];
     if (roleIds.length > 0) {

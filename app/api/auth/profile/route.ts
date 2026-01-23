@@ -25,6 +25,7 @@ export async function GET() {
                 phone: users.phone,
                 isActive: users.is_active,
                 isLocked: users.is_locked,
+                is_super: users.is_super, // Use consistent field name
                 avatarUrl: users.avatar_url,
             })
             .from(users)
@@ -52,8 +53,8 @@ export async function GET() {
 
         const roleIds = userRoles.map((r) => r.id);
 
-        // Check if user has superadmin role
-        const isSuperAdmin = userRoles.some((r) => r.is_super);
+        // Check if user has superadmin role OR is_super flag is set in users table
+        const isSystemSuper = userRoles.some((r) => r.is_super) || user.is_super;
 
         // 3. Fetch permissions for these roles
         let allPermissions: any[] = [];
@@ -89,7 +90,7 @@ export async function GET() {
 
         // 4. If superadmin, fetch ALL modules
         let allModules: any[] = [];
-        if (isSuperAdmin) {
+        if (isSystemSuper) {
             allModules = await db
                 .select({
                     id: modules.id,
@@ -120,8 +121,9 @@ export async function GET() {
 
         return apiResponse({
             ...user,
+            is_super: isSystemSuper, // Ensure this is the only super flag
             roles: rolesWithPermissions,
-            allModules: isSuperAdmin ? allModules : undefined, // Add all modules for superadmin
+            allModules: isSystemSuper ? allModules : undefined, // Add all modules for superadmin
         });
     } catch (error) {
         console.error('Profile Error:', error);

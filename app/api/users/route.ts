@@ -23,6 +23,7 @@ export const GET = withAuth(
                     email: users.email,
                     phone: users.phone,
                     isActive: users.is_active,
+                    is_super: users.is_super,
                     createdAt: users.created_at,
                     roles: sql<any[]>`
           COALESCE(
