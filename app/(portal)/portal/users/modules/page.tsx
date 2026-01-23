@@ -46,8 +46,18 @@ export default function ModulesPage() {
     const [page, setPage] = React.useState(1);
     const [pageSize, setPageSize] = React.useState(10);
     const [totalItems, setTotalItems] = React.useState(0);
+    const [debouncedSearch, setDebouncedSearch] = React.useState('');
     const [deleteId, setDeleteId] = React.useState<string | null>(null);
     const [isDeleting, setIsDeleting] = React.useState(false);
+
+    // Debounce search query
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+            setPage(1); // Reset to page 1 on search
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
     const fetchModules = async () => {
         setIsLoading(true);
@@ -56,7 +66,7 @@ export default function ModulesPage() {
                 params: {
                     page,
                     limit: pageSize,
-                    search: searchQuery || undefined,
+                    search: debouncedSearch || undefined,
                 },
             });
             setModules(res.data.data || []);
@@ -71,7 +81,7 @@ export default function ModulesPage() {
 
     React.useEffect(() => {
         fetchModules();
-    }, [page, pageSize]);
+    }, [page, pageSize, debouncedSearch]);
 
     // Handle search with debounce or simple reset
     const handleSearch = (e: React.FormEvent) => {

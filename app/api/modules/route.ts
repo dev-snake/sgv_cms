@@ -2,7 +2,7 @@ import { db } from '@/db';
 import { modules } from '@/db/schema';
 import { apiResponse, apiError } from '@/utils/api-response';
 import { PERMISSIONS } from '@/constants/rbac';
-import { sql, asc, ilike, or } from 'drizzle-orm';
+import { sql, asc, ilike, or, and } from 'drizzle-orm';
 import { withAuth } from '@/middlewares/middleware';
 import { parsePaginationParams, calculateOffset, createPaginationMeta } from '@/utils/pagination';
 
@@ -27,7 +27,7 @@ export const GET = withAuth(
             // Count total
             const countQuery = db.select({ count: sql<number>`count(*)` }).from(modules);
             if (conditions.length > 0) {
-                countQuery.where(sql`${sql.join(conditions, sql` AND `)}`);
+                countQuery.where(and(...(conditions as any[])));
             }
             const [{ count: total }] = await countQuery;
 
@@ -39,7 +39,8 @@ export const GET = withAuth(
                 .limit(limit)
                 .offset(offset);
             if (conditions.length > 0) {
-                query = query.where(sql`${sql.join(conditions, sql` AND `)}`) as any;
+                // @ts-expect-error - Drizzle dynamic conditions
+                query = query.where(and(...conditions));
             }
 
             const allModules = await query;
