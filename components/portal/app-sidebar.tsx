@@ -24,7 +24,23 @@ import {
     GripVertical,
 } from 'lucide-react';
 import Image from 'next/image';
-import { Reorder } from 'motion/react';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import {
     Sidebar,
@@ -80,11 +96,98 @@ const getIconComponent = (iconName: string | null): LucideIcon => {
     return ICON_MAP[iconName] || DEFAULT_ICON;
 };
 
+// Sortable Menu Item Component
+interface SortableMenuItemProps {
+    module: SidebarModule;
+    isActive: boolean;
+}
+
+function SortableMenuItem({ module, isActive }: SortableMenuItemProps) {
+    const Icon = getIconComponent(module.icon);
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: module.code });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 1 : 0,
+    };
+
+    return (
+        <li
+            ref={setNodeRef}
+            style={style}
+            className="group/menu-item relative w-full flex justify-center list-none"
+            data-slot="sidebar-menu-item"
+            data-sidebar="menu-item"
+        >
+            <SidebarMenuButton
+                asChild
+                tooltip={module.name}
+                className={cn(
+                    'text-[10px] font-black px-4 transition-none! uppercase tracking-widest rounded-none h-auto group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center relative',
+                    isActive
+                        ? 'bg-white text-[#002d6b] hover:bg-white hover:text-[#002d6b]'
+                        : 'text-white/70 hover:bg-white/5 hover:text-white',
+                )}
+            >
+                <div className="flex items-center gap-2 w-full">
+                    {/* Drag Handle - only visible on hover and not in icon mode */}
+                    <div
+                        {...attributes}
+                        {...listeners}
+                        className="flex items-center justify-center shrink-0 opacity-0 group-hover/menu-item:opacity-40 transition-opacity cursor-grab active:cursor-grabbing group-data-[collapsible=icon]:hidden"
+                    >
+                        <GripVertical className="size-3" />
+                    </div>
+
+                    <Link
+                        href={module.route as string}
+                        className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center"
+                    >
+                        <div className="flex items-center justify-center shrink-0 size-5">
+                            {Icon && (
+                                <Icon
+                                    className={cn(
+                                        'size-4',
+                                        isActive ? 'text-[#002d6b]' : 'text-[#fbbf24]',
+                                    )}
+                                />
+                            )}
+                        </div>
+                        <span className="truncate group-data-[collapsible=icon]:hidden">
+                            {module.name}
+                        </span>
+                    </Link>
+                </div>
+            </SidebarMenuButton>
+        </li>
+    );
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const pathname = usePathname();
     const router = useRouter();
     const { user } = useAuth();
     const [isMounted, setIsMounted] = React.useState(false);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        }),
+    );
 
     React.useEffect(() => {
         setIsMounted(true);
@@ -117,6 +220,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 code: module.code,
             }));
     }, [user?.modules]);
+
+    // Filtered modules for sidebar menu
+    const filteredModules = React.useMemo(() => {
+        return (user?.modules || []).filter((module: SidebarModule) => !!module.route);
+    }, [user?.modules]);
+
+    // Handle drag end for reordering
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const modules = user?.modules || [];
+            const oldIndex = modules.findIndex((m) => m.code === active.id);
+            const newIndex = modules.findIndex((m) => m.code === over.id);
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const newOrder = arrayMove(modules, oldIndex, newIndex);
+                useAuthStore.getState().setModulesOrder(newOrder);
+                useAuthStore.getState().syncModulesOrder();
+            }
+        }
+    };
 
     const isPathActive = (url: string) => {
         if (!url) return false;
@@ -193,82 +318,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
             <SidebarContent className="scrollbar-hide bg-[#002d6b] py-2 overflow-x-hidden">
                 <SidebarGroup className="p-0">
-                    <Reorder.Group
-                        axis="y"
-                        values={user?.modules || []}
-                        onReorder={(newOrder) => {
-                            useAuthStore.getState().setModulesOrder(newOrder);
-                        }}
-                        className="flex w-full min-w-0 flex-col gap-1 group-data-[collapsible=icon]:items-center list-none p-0"
-                        data-slot="sidebar-menu"
-                        data-sidebar="menu"
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
                     >
-                        {(user?.modules || [])
-                            .filter((module: SidebarModule) => !!module.route)
-                            .map((module: SidebarModule) => {
-                                const Icon = getIconComponent(module.icon);
-                                const isActive = isPathActive(module.route as string);
-
-                                return (
-                                    <Reorder.Item
+                        <SortableContext
+                            items={filteredModules.map((m) => m.code)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            <ul
+                                className="flex w-full min-w-0 flex-col gap-1 group-data-[collapsible=icon]:items-center list-none p-0"
+                                data-slot="sidebar-menu"
+                                data-sidebar="menu"
+                            >
+                                {filteredModules.map((module: SidebarModule) => (
+                                    <SortableMenuItem
                                         key={module.code}
-                                        value={module}
-                                        layout="position"
-                                        transition={{
-                                            type: 'spring',
-                                            stiffness: 450,
-                                            damping: 40,
-                                            mass: 0.8,
-                                        }}
-                                        onDragEnd={() => {
-                                            useAuthStore.getState().syncModulesOrder();
-                                        }}
-                                        className="group/menu-item relative w-full flex justify-center list-none"
-                                        data-slot="sidebar-menu-item"
-                                        data-sidebar="menu-item"
-                                    >
-                                        <SidebarMenuButton
-                                            asChild
-                                            tooltip={module.name}
-                                            className={cn(
-                                                'text-[10px] font-black px-4 transition-none! uppercase tracking-widest rounded-none h-auto group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center relative',
-                                                isActive
-                                                    ? 'bg-white text-[#002d6b] hover:bg-white hover:text-[#002d6b]'
-                                                    : 'text-white/70 hover:bg-white/5 hover:text-white',
-                                            )}
-                                        >
-                                            <div className="flex items-center gap-2 w-full">
-                                                {/* Drag Handle - only visible on hover and not in icon mode */}
-                                                <div className="flex items-center justify-center shrink-0 opacity-0 group-hover/menu-item:opacity-40 transition-opacity cursor-grab active:cursor-grabbing group-data-[collapsible=icon]:hidden">
-                                                    <GripVertical className="size-3" />
-                                                </div>
-
-                                                <Link
-                                                    href={module.route as string}
-                                                    className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center"
-                                                >
-                                                    <div className="flex items-center justify-center shrink-0 size-5">
-                                                        {Icon && (
-                                                            <Icon
-                                                                className={cn(
-                                                                    'size-4',
-                                                                    isActive
-                                                                        ? 'text-[#002d6b]'
-                                                                        : 'text-[#fbbf24]',
-                                                                )}
-                                                            />
-                                                        )}
-                                                    </div>
-                                                    <span className="truncate group-data-[collapsible=icon]:hidden">
-                                                        {module.name}
-                                                    </span>
-                                                </Link>
-                                            </div>
-                                        </SidebarMenuButton>
-                                    </Reorder.Item>
-                                );
-                            })}
-                    </Reorder.Group>
+                                        module={module}
+                                        isActive={isPathActive(module.route as string)}
+                                    />
+                                ))}
+                            </ul>
+                        </SortableContext>
+                    </DndContext>
                 </SidebarGroup>
             </SidebarContent>
 
