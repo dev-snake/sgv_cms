@@ -6,8 +6,6 @@ import { login, generateTokens } from '@/services/auth';
 import { apiResponse, apiError } from '@/utils/api-response';
 import { validateBody } from '@/middlewares/middleware';
 import { loginSchema } from '@/validations/auth.schema';
-import { auditService } from '@/services/audit-service';
-import { AUDIT_ACTIONS, AUDIT_MODULES } from '@/constants/audit';
 
 export async function POST(request: Request) {
     try {
@@ -22,25 +20,12 @@ export async function POST(request: Request) {
         const [user] = await db.select().from(users).where(eq(users.username, username));
 
         if (!user) {
-            auditService.logAction({
-                action: AUDIT_ACTIONS.AUTH_FAILURE,
-                module: AUDIT_MODULES.AUTH,
-                description: `Thử đăng nhập thất bại với username: ${username}`,
-                request,
-            });
             return apiError('Tên đăng nhập hoặc mật khẩu không đúng', 401);
         }
 
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
-            auditService.logAction({
-                userId: user.id,
-                action: AUDIT_ACTIONS.AUTH_FAILURE,
-                module: AUDIT_MODULES.AUTH,
-                description: 'Mật khẩu không chính xác',
-                request,
-            });
             return apiError('Tên đăng nhập hoặc mật khẩu không đúng', 401);
         }
 
@@ -61,15 +46,6 @@ export async function POST(request: Request) {
 
         // Prepare session for cookie (backward compatibility for middleware)
         await login(sessionPayload);
-
-        // Audit Log Success
-        auditService.logAction({
-            userId: user.id,
-            action: AUDIT_ACTIONS.LOGIN,
-            module: AUDIT_MODULES.AUTH,
-            description: 'Đăng nhập thành công',
-            request,
-        });
 
         return apiResponse({
             user: sessionPayload,
