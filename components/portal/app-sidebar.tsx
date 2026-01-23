@@ -104,14 +104,9 @@ interface SortableMenuItemProps {
 
 function SortableMenuItem({ module, isActive }: SortableMenuItemProps) {
     const Icon = getIconComponent(module.icon);
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({ id: module.code });
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        id: module.code,
+    });
 
     const style = {
         transform: CSS.Transform.toString(transform),
