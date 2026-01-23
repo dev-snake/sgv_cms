@@ -19,6 +19,8 @@ import {
     Layers,
     MessageCircle,
     LucideIcon,
+    History,
+    Bell,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -66,6 +68,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
     Lock,
     Layers,
     User,
+    History,
+    Bell,
 };
 const DEFAULT_ICON = FileText;
 
@@ -77,7 +81,7 @@ const getIconComponent = (iconName: string | null): LucideIcon => {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const pathname = usePathname();
     const router = useRouter();
-    const { user, isSuperAdmin } = useAuth();
+    const { user } = useAuth();
     const [isMounted, setIsMounted] = React.useState(false);
 
     React.useEffect(() => {
@@ -114,7 +118,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     const isPathActive = (url: string) => {
         if (!url) return false;
-
+        console.log(url, "url");
+        console.log(pathname, "pathname");
         // Nếu path khớp hoàn toàn
         if (pathname === url) return true;
 

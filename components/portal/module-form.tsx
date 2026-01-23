@@ -40,10 +40,16 @@ export function ModuleForm({ initialData, isEditing = false }: ModuleFormProps) 
         setIsSubmitting(true);
         try {
             if (isEditing && initialData) {
-                await api.patch(`${API_ROUTES.MODULES}/${initialData.id}`, formData);
+                await api.patch(`${API_ROUTES.MODULES}/${initialData.id}`, {
+                    ...formData,
+                    route: formData.route.trim(),
+                });
                 toast.success('Cập nhật module thành công');
             } else {
-                await api.post(API_ROUTES.MODULES, formData);
+                await api.post(API_ROUTES.MODULES, {
+                    ...formData,
+                    route: formData.route.trim(),
+                });
                 toast.success('Tạo module mới thành công');
             }
 
