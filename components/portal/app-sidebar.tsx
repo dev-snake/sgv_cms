@@ -163,7 +163,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarHeader className="border-b border-white/5 flex items-center justify-start px-4 bg-[#002d6b] shrink-0 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
                 <Link
                     href={PORTAL_ROUTES.dashboard}
-                    className="flex items-center gap-3 group/logo relative w-full h-full justify-center px-1"
+                    className="flex items-center gap-3 group/logo relative w-full h-full justify-center px-4"
                 >
                     <div className="relative flex items-center gap-3 group-data-[collapsible=icon]:hidden w-full px-1">
                         <div className="bg-white p-1 rounded-none flex items-center justify-center h-8 w-8 shrink-0">
