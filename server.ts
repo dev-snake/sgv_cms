@@ -6,8 +6,8 @@ import { chatStreamManager } from './services/chat-stream';
 import { notificationService } from './services/notification-service';
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
-const port = 3000;
+const hostname = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+const port = parseInt(process.env.PORT || '3000', 10);
 
 // when using middleware `hostname` and `port` must be provided below
 const app = next({ dev, hostname, port });
