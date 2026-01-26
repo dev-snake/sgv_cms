@@ -8,8 +8,6 @@ export const AUDIT_ACTIONS = {
     LOGIN: 'LOGIN',
     LOGOUT: 'LOGOUT',
     AUTH_FAILURE: 'AUTH_FAILURE',
-    EXPORT: 'EXPORT',
-    IMPORT: 'IMPORT',
 } as const;
 
 export const AUDIT_MODULES = {
