@@ -5,22 +5,15 @@ import {
     Search,
     MoreHorizontal,
     Trash2,
-    Loader2,
     Mail,
     Phone,
-    User,
     Clock,
     CheckCircle2,
     AlertCircle,
-    FileDown,
-    ChevronLeft,
-    ChevronRight,
     MessageSquare,
     Calendar as CalendarIcon,
     Building,
     Eye,
-    Filter,
-    X,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import {
@@ -33,14 +26,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@/components/ui/dialog';
 import {
     Sheet,
     SheetContent,

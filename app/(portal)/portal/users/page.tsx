@@ -32,7 +32,6 @@ import { vi } from 'date-fns/locale';
 import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/use-auth';
 import { PERMISSIONS } from '@/constants/rbac';
-import { cn } from '@/lib/utils';
 import { PieChartLabel } from '@/components/portal/charts/PieChartLabel';
 import { AreaChartGradient } from '@/components/portal/charts/AreaChartGradient';
 

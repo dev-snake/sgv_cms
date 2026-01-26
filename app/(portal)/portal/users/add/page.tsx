@@ -10,7 +10,6 @@ import {
     Lock,
     User as UserIcon,
     Loader2,
-    Settings2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,6 @@ import {
 import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import { toast } from 'sonner';
 import { Role } from '@/types';
-import { cn } from '@/lib/utils';
 
 export default function AddUserPage() {
     const router = useRouter();
@@ -40,7 +38,7 @@ export default function AddUserPage() {
         roleId: '' as string,
     });
     const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
-    const [isLoadingRoles, setIsLoadingRoles] = useState(true);
+    const [, setIsLoadingRoles] = useState(true);
     const [selectedRoleDetails, setSelectedRoleDetails] = useState<any>(null);
     const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 

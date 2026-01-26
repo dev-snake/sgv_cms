@@ -9,7 +9,6 @@ import {
     ExternalLink,
     Check,
     CheckCheck,
-    Loader2,
     Search,
     Filter,
     ChevronLeft,
@@ -46,11 +45,6 @@ interface Notification {
     created_at: string;
 }
 
-const notificationIcons = {
-    comment: MessageSquare,
-    contact: Mail,
-    application: Briefcase,
-};
 
 const notificationLabels = {
     comment: 'Bình luận',
@@ -58,17 +52,6 @@ const notificationLabels = {
     application: 'Ứng tuyển',
 };
 
-const notificationIconColors = {
-    comment: 'text-blue-500',
-    contact: 'text-green-500',
-    application: 'text-purple-500',
-};
-
-const notificationBgColors = {
-    comment: 'bg-blue-500/5 border-blue-500/10',
-    contact: 'bg-green-500/5 border-green-500/10',
-    application: 'bg-purple-500/5 border-purple-500/10',
-};
 
 export default function NotificationsPage() {
     const [notifications, setNotifications] = React.useState<Notification[]>([]);
