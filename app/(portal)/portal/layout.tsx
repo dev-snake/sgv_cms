@@ -1,3 +1,4 @@
+"use client"
 import { AppSidebar } from '@/components/portal/app-sidebar';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
@@ -14,8 +15,16 @@ import { PORTAL_ROUTES } from '@/constants/routes';
 import { NotificationDropdown } from '@/components/portal/notification-dropdown';
 
 import { RouteGuard } from '@/components/portal/route-guard';
+import { useAuthStore } from '@/stores/auth-store';
+import { useEffect } from 'react';
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
+    const initialize = useAuthStore((state) => state.initialize);
+
+    useEffect(() => {
+        initialize();
+    }, [initialize]);
+
     return (
         <SidebarProvider>
             <AppSidebar />

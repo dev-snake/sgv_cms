@@ -9,10 +9,6 @@ export type { AuthUser, SidebarModule };
 export function useAuth() {
     const { user, isLoading, refreshUser, initialize } = useAuthStore();
 
-    useEffect(() => {
-        initialize();
-    }, [initialize]);
-
     const hasPermission = (permission: string) => {
         if (!user) return false;
         if (user.is_super) return true;
