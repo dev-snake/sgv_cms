@@ -281,7 +281,7 @@ async function main() {
             username: SEED_DEFAULTS.SUPER_ADMIN_USERNAME,
             password: SEED_DEFAULTS.SUPER_ADMIN_PASSWORD,
             fullName: 'Super Administrator',
-            roleCode: 'SUPER_ADMIN',
+            isSuper: true,
         },
     ];
 
@@ -301,6 +301,7 @@ async function main() {
                             : `${userData.username}@saigonvalve.vn`,
                     password: hashedPassword,
                     full_name: userData.fullName,
+                    is_super: userData.isSuper || false,
                     is_active: true,
                     is_locked: false,
                 })
@@ -309,8 +310,10 @@ async function main() {
             console.log(`Added user: ${userData.username} / ${userData.password}`);
         }
 
-        // Link user to role
-        const roleRecord = allRoles.find((r) => r.code === userData.roleCode);
+        // Link user to role if roleCode is provided
+        const roleRecord = userData.roleCode
+            ? allRoles.find((r) => r.code === userData.roleCode)
+            : null;
         if (userRecord && roleRecord) {
             const existingUserRole = await db
                 .select()
