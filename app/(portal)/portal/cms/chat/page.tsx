@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { io } from 'socket.io-client';
+import { useSocket } from '@/hooks/use-socket';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConfirmationDialog } from '@/components/portal/delete-confirmation-dialog';
 import { SimpleConfirmDialog } from '@/components/shared/simple-confirm-dialog';
@@ -56,7 +56,6 @@ export default function ChatAdminPage() {
     const [replyingTo, setReplyingTo] = useState<Message | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const socketRef = useRef<any>(null);
     const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
     const [isDeletingSession, setIsDeletingSession] = useState(false);
     const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
@@ -108,17 +107,17 @@ export default function ChatAdminPage() {
         }
     };
 
+    const { socket } = useSocket({
+        query: {
+            isAdmin: 'true',
+            sessionId: selectedSession?.id || '',
+        },
+        transports: ['websocket'],
+    });
+
     // Real-time listener for admins with Socket.io
     useEffect(() => {
-        const socket = io({
-            query: {
-                isAdmin: 'true',
-                sessionId: selectedSession?.id || '',
-            },
-            transports: ['websocket'], // Force websocket for reliability in dev
-        });
-
-        socketRef.current = socket;
+        if (!socket) return;
 
         socket.on('message', (data: any) => {
             // Update session list order/last message
@@ -188,10 +187,13 @@ export default function ChatAdminPage() {
         });
 
         return () => {
-            socket.disconnect();
-            socketRef.current = null;
+            socket.off('message');
+            socket.off('message_update');
+            socket.off('session_update');
+            socket.off('session_removed');
+            socket.off('typing');
         };
-    }, [selectedSession?.id]);
+    }, [socket, selectedSession?.id]);
 
     // Scroll to bottom
     useEffect(() => {
@@ -267,8 +269,8 @@ export default function ChatAdminPage() {
     };
 
     const sendTypingStatus = (isTyping: boolean) => {
-        if (!selectedSession || !socketRef.current) return;
-        socketRef.current.emit('typing', {
+        if (!selectedSession || !socket) return;
+        socket.emit('typing', {
             sessionId: selectedSession.id,
             senderType: 'admin',
             isTyping,

@@ -14,7 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import api from '@/services/axios';
-import { io, Socket } from 'socket.io-client';
+import { useSocket } from '@/hooks/use-socket';
 import Link from 'next/link';
 import { API_ROUTES, PORTAL_ROUTES } from '@/constants/routes';
 import { cn } from '@/lib/utils';
@@ -34,7 +34,10 @@ export function NotificationDropdown() {
     const [unreadCount, setUnreadCount] = React.useState(0);
     const [isOpen, setIsOpen] = React.useState(false);
     const [isMounted, setIsMounted] = React.useState(false);
-    const socketRef = React.useRef<Socket | null>(null);
+
+    const { socket } = useSocket({
+        query: { isAdmin: 'true' },
+    });
 
     React.useEffect(() => {
         setIsMounted(true);
@@ -54,18 +57,10 @@ export function NotificationDropdown() {
 
     React.useEffect(() => {
         fetchNotifications();
+    }, [fetchNotifications]);
 
-        // Setup Socket.io
-        const socket = io({
-            query: { isAdmin: 'true' }, // Join admins room
-            transports: ['websocket', 'polling'],
-            reconnectionAttempts: 5,
-        });
-        socketRef.current = socket;
-
-        socket.on('connect', () => {
-            console.log('[NotificationDropdown] Connected to Socket.io', socket.id);
-        });
+    React.useEffect(() => {
+        if (!socket) return;
 
         socket.on('new-notification', (notification: Notification) => {
             setNotifications((prev) => [notification, ...prev].slice(0, 20));
@@ -78,9 +73,9 @@ export function NotificationDropdown() {
         });
 
         return () => {
-            socket.disconnect();
+            socket.off('new-notification');
         };
-    }, [fetchNotifications]);
+    }, [socket]);
 
     const markAsRead = async (id: string) => {
         try {

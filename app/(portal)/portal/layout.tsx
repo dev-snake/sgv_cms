@@ -10,7 +10,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Search, Bell, HelpCircle } from 'lucide-react';
+import { Search, HelpCircle } from 'lucide-react';
 import { PORTAL_ROUTES } from '@/constants/routes';
 import { NotificationDropdown } from '@/components/portal/notification-dropdown';
 
