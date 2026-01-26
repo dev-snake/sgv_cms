@@ -27,7 +27,7 @@ import {
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 
 export default function ProjectDetailPage() {
     const params = useParams();
@@ -40,8 +40,8 @@ export default function ProjectDetailPage() {
         const fetchData = async () => {
             try {
                 const [projectRes, relatedRes] = await Promise.all([
-                    api.get(`/api/projects/${params.slug}`),
-                    api.get('/api/projects?limit=3'),
+                    $api.get(`/api/projects/${params.slug}`),
+                    $api.get('/api/projects?limit=3'),
                 ]);
 
                 if (projectRes.data.success) {

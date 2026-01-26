@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,7 +55,7 @@ export default function AddProjectPage() {
     React.useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await api.get(`${API_ROUTES.CATEGORIES}?type=project`);
+                const res = await $api.get(`${API_ROUTES.CATEGORIES}?type=project`);
                 setCategories(res.data.data || []);
             } catch (error) {
                 console.error('Failed to fetch categories', error);
@@ -92,7 +92,7 @@ export default function AddProjectPage() {
                 image_url: formData.image,
             };
 
-            await api.post(API_ROUTES.PROJECTS, submissionData);
+            await $api.post(API_ROUTES.PROJECTS, submissionData);
 
             toast.success('Đã tạo dự án thành công');
             router.push(PORTAL_ROUTES.cms.projects.list);

@@ -1,8 +1,8 @@
 'use client';
 
-import {FormEvent, useEffect, useState} from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import {
     ArrowLeft,
     Save,
@@ -44,8 +44,8 @@ export default function EditUserPage() {
         const fetchData = async () => {
             try {
                 const [userRes, rolesRes] = await Promise.all([
-                    api.get(`${API_ROUTES.USERS}/${userId}`),
-                    api.get(API_ROUTES.ROLES),
+                    $api.get(`${API_ROUTES.USERS}/${userId}`),
+                    $api.get(API_ROUTES.ROLES),
                 ]);
 
                 const user = userRes.data.data;
@@ -85,7 +85,7 @@ export default function EditUserPage() {
             const updatePayload: any = { ...formData };
             if (!updatePayload.password) delete updatePayload.password;
 
-            await api.patch(`${API_ROUTES.USERS}/${userId}`, updatePayload);
+            await $api.patch(`${API_ROUTES.USERS}/${userId}`, updatePayload);
             toast.success('Cập nhật tài khoản thành công');
             router.push(PORTAL_ROUTES.users.list);
             router.refresh();

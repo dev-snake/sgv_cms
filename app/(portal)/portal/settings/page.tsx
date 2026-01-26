@@ -16,7 +16,7 @@ import {
 import { User, Bell, Shield, Globe, Save, Loader2 } from 'lucide-react';
 import { ImageUploader } from '@/components/portal/ImageUploader';
 import { useAuth } from '@/hooks/use-auth';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { toast } from 'sonner';
 
 export default function SettingsPage() {
@@ -45,7 +45,7 @@ export default function SettingsPage() {
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
-            const response = await api.patch('/api/auth/profile', {
+            const response = await $api.patch('/api/auth/profile', {
                 fullName: formData.fullName,
                 phone: formData.phone,
                 avatarUrl: formData.avatarUrl,

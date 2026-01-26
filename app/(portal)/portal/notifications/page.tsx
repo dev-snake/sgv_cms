@@ -1,6 +1,6 @@
 'use client';
 
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import {
     Bell,
     MessageSquare,
@@ -45,13 +45,11 @@ interface Notification {
     created_at: string;
 }
 
-
 const notificationLabels = {
     comment: 'Bình luận',
     contact: 'Liên hệ',
     application: 'Ứng tuyển',
 };
-
 
 export default function NotificationsPage() {
     const [notifications, setNotifications] = React.useState<Notification[]>([]);
@@ -66,7 +64,7 @@ export default function NotificationsPage() {
     const fetchNotifications = async () => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.NOTIFICATIONS, {
+            const res = await $api.get(API_ROUTES.NOTIFICATIONS, {
                 params: {
                     page,
                     limit: 10,
@@ -89,7 +87,7 @@ export default function NotificationsPage() {
 
     const handleMarkAsRead = async (id: string) => {
         try {
-            await api.patch(API_ROUTES.NOTIFICATIONS, { id });
+            await $api.patch(API_ROUTES.NOTIFICATIONS, { id });
             setNotifications(notifications.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
             setUnreadCount((prev) => Math.max(0, prev - 1));
             toast.success('Đã đánh dấu là đã đọc');
@@ -101,7 +99,7 @@ export default function NotificationsPage() {
 
     const handleMarkAllAsRead = async () => {
         try {
-            await api.patch(API_ROUTES.NOTIFICATIONS, { all: true });
+            await $api.patch(API_ROUTES.NOTIFICATIONS, { all: true });
             setNotifications(notifications.map((n) => ({ ...n, is_read: true })));
             setUnreadCount(0);
             toast.success('Đã đánh dấu tất cả là đã đọc');

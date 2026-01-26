@@ -14,7 +14,7 @@ import {
     Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { COMPANY_INFO } from '@/constants/site-info';
 
 export default function ContactForm() {
@@ -44,7 +44,7 @@ export default function ContactForm() {
 
         setIsSubmitting(true);
         try {
-            await api.post('/api/contacts', formData);
+            await $api.post('/api/contacts', formData);
             toast.success('Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ lại sớm nhất.');
             setFormData({
                 name: '',

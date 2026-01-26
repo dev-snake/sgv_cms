@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react';
 import { Bell, MessageSquare, Mail, UserPlus, CheckCheck, ChevronRight } from 'lucide-react';
 import {
     DropdownMenu,
@@ -12,7 +12,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { useSocket } from '@/hooks/use-socket';
 import Link from 'next/link';
 import { API_ROUTES, PORTAL_ROUTES } from '@/constants/routes';
@@ -44,7 +44,7 @@ export function NotificationDropdown() {
 
     const fetchNotifications = useCallback(async () => {
         try {
-            const response = await api.get(API_ROUTES.NOTIFICATIONS);
+            const response = await $api.get(API_ROUTES.NOTIFICATIONS);
             if (response.data.success) {
                 setNotifications(response.data.data);
                 setUnreadCount(response.data.meta.unreadCount);
@@ -78,7 +78,7 @@ export function NotificationDropdown() {
 
     const markAsRead = async (id: string) => {
         try {
-            await api.patch(API_ROUTES.NOTIFICATIONS, { id });
+            await $api.patch(API_ROUTES.NOTIFICATIONS, { id });
             setNotifications((prev) =>
                 prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
             );
@@ -90,7 +90,7 @@ export function NotificationDropdown() {
 
     const markAllAsRead = async () => {
         try {
-            await api.patch(API_ROUTES.NOTIFICATIONS, { all: true });
+            await $api.patch(API_ROUTES.NOTIFICATIONS, { all: true });
             setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
             setUnreadCount(0);
         } catch (error) {

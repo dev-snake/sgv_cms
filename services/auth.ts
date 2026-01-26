@@ -29,7 +29,6 @@ export async function decrypt(input: string): Promise<any> {
 }
 
 export async function generateTokens(user: any) {
-    // Fetch full roles and permissions for the session
     const userRoles = await db
         .select({
             id: roles.id,
@@ -59,8 +58,6 @@ export async function generateTokens(user: any) {
             .innerJoin(modules, eq(permissions.module_id, modules.id))
             .where(inArray(permissions.role_id, roleIds));
 
-        // Convert to a flattened list of permissions like 'BLOG:READ', 'BLOG:WRITE' or similar
-        // for backward compatibility or use the new structure
         userPermissions = perms.flatMap((p) => {
             const ps = [];
             if (p.canView) ps.push(`${p.moduleCode}:VIEW`);
@@ -74,7 +71,7 @@ export async function generateTokens(user: any) {
     const sessionPayload = {
         ...user,
         is_super: isSuperUser,
-        roles: userRoles.map((r) => r.code), // Use code for consistency
+        roles: userRoles.map((r) => r.code),
         permissions: userPermissions,
     };
 
@@ -86,7 +83,6 @@ export async function generateTokens(user: any) {
 export async function setAuthCookies(accessToken: string, refreshToken: string) {
     const cookieStore = await cookies();
 
-    // Set Access Token (15 minutes) - not httpOnly so axios interceptor can read it
     cookieStore.set('accessToken', accessToken, {
         httpOnly: false,
         maxAge: 15 * 60,
@@ -95,7 +91,6 @@ export async function setAuthCookies(accessToken: string, refreshToken: string) 
         secure: process.env.NODE_ENV === 'production',
     });
 
-    // Set Refresh Token (7 days) - httpOnly for security
     cookieStore.set('refreshToken', refreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60,
@@ -106,11 +101,9 @@ export async function setAuthCookies(accessToken: string, refreshToken: string) 
 }
 
 export async function login(user: any) {
-    // Create the session
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const session = await encrypt({ user, expires });
 
-    // Save the session in a cookie
     (await cookies()).set('session', session, { expires, httpOnly: true });
 }
 
@@ -131,7 +124,6 @@ export async function updateSession(request: NextRequest) {
     const session = request.cookies.get('session')?.value;
     if (!session) return;
 
-    // Refresh the session so it doesn't expire
     const parsed = await decrypt(session);
     parsed.expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const res = NextResponse.next();

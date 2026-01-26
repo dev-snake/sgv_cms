@@ -56,8 +56,6 @@ export const auditService = {
                 userAgent = headers.get('user-agent') || 'unknown';
             }
 
-            // Insert into database asynchronously (don't await to avoid blocking the main request)
-            // We use a separate promise but don't strictly await it in the caller
             db.insert(auditLogs)
                 .values({
                     user_id: userId,
@@ -73,7 +71,6 @@ export const auditService = {
                     console.error('Audit Log Insertion Failed:', err);
                 });
         } catch (error) {
-            // Silently fail to not break the main application flow
             console.error('Audit Service Error:', error);
         }
     },

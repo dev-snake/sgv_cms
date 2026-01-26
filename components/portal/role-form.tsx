@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { ArrowLeft, Save, Shield, Loader2, Check, Circle } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -38,7 +38,7 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
             const url = initialData?.id
                 ? `${API_ROUTES.PERMISSIONS}?roleId=${initialData.id}`
                 : API_ROUTES.PERMISSIONS;
-            const res = await api.get(url);
+            const res = await $api.get(url);
             setMatrix(res.data.data || []);
         } catch (error) {
             console.error(error);
@@ -145,10 +145,10 @@ export function RoleForm({ initialData, isEditing = false }: RoleFormProps) {
             };
 
             if (isEditing && initialData) {
-                await api.patch(`${API_ROUTES.ROLES}/${initialData.id}`, payload);
+                await $api.patch(`${API_ROUTES.ROLES}/${initialData.id}`, payload);
                 toast.success('Cập nhật vai trò thành công');
             } else {
-                await api.post(API_ROUTES.ROLES, payload);
+                await $api.post(API_ROUTES.ROLES, payload);
                 toast.success('Tạo vai trò mới thành công');
             }
 

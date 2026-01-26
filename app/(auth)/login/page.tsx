@@ -6,7 +6,7 @@ import { ShieldCheck, Lock, User, Loader2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { API_ROUTES, ADMIN_ROUTES } from '@/constants/routes';
@@ -25,7 +25,7 @@ export default function LoginPage() {
         setIsLoading(true);
 
         try {
-            await api.post(API_ROUTES.AUTH.LOGIN, formData);
+            await $api.post(API_ROUTES.AUTH.LOGIN, formData);
 
             toast.success('Đăng nhập thành công! Đang chuyển hướng...');
             await useAuthStore.getState().refreshUser();

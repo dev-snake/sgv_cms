@@ -1,6 +1,6 @@
 'use client';
 
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import {
     Search,
     MoreHorizontal,
@@ -111,7 +111,7 @@ export default function ContactsManagementPage() {
     const fetchContacts = async (page: number, limit: number, search: string, dr?: DateRange) => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.CONTACTS, {
+            const res = await $api.get(API_ROUTES.CONTACTS, {
                 params: {
                     page,
                     limit,
@@ -134,7 +134,7 @@ export default function ContactsManagementPage() {
 
     const fetchStats = async () => {
         try {
-            const res = await api.get(API_ROUTES.STATS);
+            const res = await $api.get(API_ROUTES.STATS);
             setStats(res.data.data);
         } catch (error) {
             console.error('Failed to fetch contact stats', error);
@@ -148,7 +148,7 @@ export default function ContactsManagementPage() {
 
     const handleUpdateStatus = async (id: string, status: string) => {
         try {
-            await api.patch(`${API_ROUTES.CONTACTS}/${id}`, { status });
+            await $api.patch(`${API_ROUTES.CONTACTS}/${id}`, { status });
             toast.success('Đã cập nhật trạng thái');
             fetchContacts(currentPage, pageSize, debouncedSearch, dateRange);
             fetchStats();
@@ -161,7 +161,7 @@ export default function ContactsManagementPage() {
         if (!itemToDelete) return;
         setIsDeleting(true);
         try {
-            await api.delete(`${API_ROUTES.CONTACTS}/${itemToDelete.id}`);
+            await $api.delete(`${API_ROUTES.CONTACTS}/${itemToDelete.id}`);
             toast.success('Đã xóa liên hệ');
             fetchContacts(currentPage, pageSize, debouncedSearch, dateRange);
             fetchStats();

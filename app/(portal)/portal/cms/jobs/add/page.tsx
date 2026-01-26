@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { ArrowLeft, Save, Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -68,7 +68,7 @@ export default function AddJobPage() {
                 ...formData,
                 deadline: formData.deadline ? formData.deadline.toISOString() : null,
             };
-            await api.post(API_ROUTES.JOBS, submissionData);
+            await $api.post(API_ROUTES.JOBS, submissionData);
             toast.success('Đã tạo tin tuyển dụng thành công');
             router.push(PORTAL_ROUTES.cms.jobs.list);
         } catch (error: any) {

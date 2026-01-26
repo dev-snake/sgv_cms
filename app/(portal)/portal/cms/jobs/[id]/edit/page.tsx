@@ -1,9 +1,9 @@
 'use client';
 
-import {FormEvent, useEffect, useState} from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { ArrowLeft, Save, Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,7 +53,7 @@ export default function EditJobPage() {
         const fetchJob = async () => {
             setIsLoading(true);
             try {
-                const res = await api.get(`${API_ROUTES.JOBS}/${jobId}`);
+                const res = await $api.get(`${API_ROUTES.JOBS}/${jobId}`);
                 const job = res.data.data;
                 if (job) {
                     setFormData({
@@ -106,7 +106,7 @@ export default function EditJobPage() {
                 ...formData,
                 deadline: formData.deadline ? formData.deadline.toISOString() : null,
             };
-            await api.patch(`${API_ROUTES.JOBS}/${jobId}`, submissionData);
+            await $api.patch(`${API_ROUTES.JOBS}/${jobId}`, submissionData);
             toast.success('Cập nhật tin tuyển dụng thành công');
             router.push(PORTAL_ROUTES.cms.jobs.list);
         } catch (error: any) {

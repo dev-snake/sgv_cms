@@ -3,7 +3,7 @@
 import React from 'react';
 import { useParams } from 'next/navigation';
 import { ModuleForm } from '@/components/portal/module-form';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { API_ROUTES } from '@/constants/routes';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -17,7 +17,7 @@ export default function EditModulePage() {
     React.useEffect(() => {
         const fetchModule = async () => {
             try {
-                const res = await api.get(`${API_ROUTES.MODULES}/${id}`);
+                const res = await $api.get(`${API_ROUTES.MODULES}/${id}`);
                 setModule(res.data.data);
             } catch (error) {
                 console.error(error);

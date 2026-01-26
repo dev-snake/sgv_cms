@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { MapPin, ExternalLink, MoveRight } from 'lucide-react';
 import { SITE_ROUTES } from '@/constants/routes';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { cn } from '@/lib/utils';
 import {
     Pagination,
@@ -40,7 +40,7 @@ export default function ProjectsPage() {
     const fetchProjects = async (page: number = 1) => {
         setLoading(true);
         try {
-            const response = await api.get('/api/projects', {
+            const response = await $api.get('/api/projects', {
                 params: {
                     page,
                     limit: ITEMS_PER_PAGE,

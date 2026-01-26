@@ -1,9 +1,9 @@
 'use client';
 
-import {useEffect, useState, FormEvent} from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import {
     ArrowLeft,
     Save,
@@ -79,8 +79,8 @@ export default function AddNewsPage() {
         const fetchData = async () => {
             try {
                 const [catsRes, authorsRes] = await Promise.all([
-                    api.get(`${API_ROUTES.CATEGORIES}?type=news`),
-                    api.get(API_ROUTES.AUTHORS),
+                    $api.get(`${API_ROUTES.CATEGORIES}?type=news`),
+                    $api.get(API_ROUTES.AUTHORS),
                 ]);
 
                 setCategories(catsRes.data.data || []);
@@ -90,7 +90,7 @@ export default function AddNewsPage() {
                 }
 
                 // Fetch recent articles for preview sidebar
-                const recentRes = await api.get('/api/news?limit=5');
+                const recentRes = await $api.get('/api/news?limit=5');
                 if (recentRes.data.success) {
                     setRecentArticles(recentRes.data.data);
                 }
@@ -126,7 +126,7 @@ export default function AddNewsPage() {
                 ...formData,
                 published_at: formData.published_at ? formData.published_at.toISOString() : null,
             };
-            await api.post(API_ROUTES.NEWS, submissionData);
+            await $api.post(API_ROUTES.NEWS, submissionData);
 
             toast.success('Đã tạo bài viết thành công!');
             router.push(PORTAL_ROUTES.cms.news.list);

@@ -1,6 +1,6 @@
 'use client';
 
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import {
     Search,
     MoreHorizontal,
@@ -112,7 +112,7 @@ export default function ApplicationsManagementPage() {
     const fetchApplications = async (page: number, limit: number, search: string) => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.APPLICATIONS, {
+            const res = await $api.get(API_ROUTES.APPLICATIONS, {
                 params: {
                     page,
                     limit,
@@ -133,7 +133,7 @@ export default function ApplicationsManagementPage() {
 
     const fetchStats = async () => {
         try {
-            const res = await api.get(API_ROUTES.STATS);
+            const res = await $api.get(API_ROUTES.STATS);
             setStats(res.data.data);
         } catch (error) {
             console.error('Failed to fetch recruitment stats', error);
@@ -149,7 +149,7 @@ export default function ApplicationsManagementPage() {
         if (!itemToDelete) return;
         setIsDeleting(true);
         try {
-            await api.delete(`${API_ROUTES.APPLICATIONS}/${itemToDelete.id}`);
+            await $api.delete(`${API_ROUTES.APPLICATIONS}/${itemToDelete.id}`);
             toast.success('Đã xóa hồ sơ ứng viên');
             fetchApplications(currentPage, pageSize, debouncedSearch);
             fetchStats();
@@ -164,7 +164,7 @@ export default function ApplicationsManagementPage() {
 
     const handleUpdateStatus = async (id: string, status: string) => {
         try {
-            await api.patch(`${API_ROUTES.APPLICATIONS}/${id}`, { status });
+            await $api.patch(`${API_ROUTES.APPLICATIONS}/${id}`, { status });
             toast.success('Đã cập nhật trạng thái hồ sơ');
             fetchApplications(currentPage, pageSize, debouncedSearch);
             fetchStats();

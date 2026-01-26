@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { ArrowLeft, Save, Settings, Loader2, Layout, ExternalLink, SortAsc } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -40,13 +40,13 @@ export function ModuleForm({ initialData, isEditing = false }: ModuleFormProps) 
         setIsSubmitting(true);
         try {
             if (isEditing && initialData) {
-                await api.patch(`${API_ROUTES.MODULES}/${initialData.id}`, {
+                await $api.patch(`${API_ROUTES.MODULES}/${initialData.id}`, {
                     ...formData,
                     route: formData.route.trim(),
                 });
                 toast.success('Cập nhật module thành công');
             } else {
-                await api.post(API_ROUTES.MODULES, {
+                await $api.post(API_ROUTES.MODULES, {
                     ...formData,
                     route: formData.route.trim(),
                 });

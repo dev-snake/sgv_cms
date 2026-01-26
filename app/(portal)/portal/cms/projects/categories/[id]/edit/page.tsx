@@ -1,13 +1,13 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import { CategoryForm, CategoryFormData } from '@/components/portal/category-form';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
@@ -24,7 +24,7 @@ export default function EditProjectCategoryPage() {
     useEffect(() => {
         const fetchCategory = async () => {
             try {
-                const res = await api.get(`${API_ROUTES.CATEGORIES}/${categoryId}`);
+                const res = await $api.get(`${API_ROUTES.CATEGORIES}/${categoryId}`);
                 setCategory(res.data.data);
             } catch (error) {
                 console.error(error);
@@ -40,7 +40,7 @@ export default function EditProjectCategoryPage() {
     const handleFormSubmit = async (data: CategoryFormData) => {
         setIsSubmitting(true);
         try {
-            await api.patch(`${API_ROUTES.CATEGORIES}/${categoryId}`, {
+            await $api.patch(`${API_ROUTES.CATEGORIES}/${categoryId}`, {
                 ...data,
                 type: 'project',
             });

@@ -1,6 +1,6 @@
 'use client';
 
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import {
     ArrowLeft,
     Mail,
@@ -65,7 +65,7 @@ export default function ApplicationDetailPage() {
     const fetchApplication = async () => {
         setIsLoading(true);
         try {
-            const res = await api.get(`${API_ROUTES.APPLICATIONS}/${id}`);
+            const res = await $api.get(`${API_ROUTES.APPLICATIONS}/${id}`);
             setApplication(res.data.data);
         } catch (error) {
             console.error(error);
@@ -84,7 +84,7 @@ export default function ApplicationDetailPage() {
         if (!application) return;
         setIsUpdating(true);
         try {
-            await api.patch(`${API_ROUTES.APPLICATIONS}/${application.id}`, { status });
+            await $api.patch(`${API_ROUTES.APPLICATIONS}/${application.id}`, { status });
             setApplication({ ...application, status });
             toast.success('Đã cập nhật trạng thái hồ sơ');
         } catch {
@@ -98,7 +98,7 @@ export default function ApplicationDetailPage() {
         if (!application) return;
         setIsDeleting(true);
         try {
-            await api.delete(`${API_ROUTES.APPLICATIONS}/${application.id}`);
+            await $api.delete(`${API_ROUTES.APPLICATIONS}/${application.id}`);
             toast.success('Đã xóa hồ sơ ứng viên');
             router.push(PORTAL_ROUTES.cms.applications.list);
         } catch {

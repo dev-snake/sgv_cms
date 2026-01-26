@@ -1,8 +1,6 @@
 import { Server } from 'socket.io';
 
 class ChatStreamManager {
-    // We use a global variable to store the io instance
-    // to ensure it is shared between the custom server process and Next.js internal context
     private get io(): Server | null {
         return (global as any).chatIo || null;
     }
@@ -11,7 +9,6 @@ class ChatStreamManager {
         (global as any).chatIo = val;
     }
 
-    // Set the io instance after server is initialized
     setIo(io: Server) {
         this.io = io;
         console.log('Socket.io instance attached to ChatStreamManager');
@@ -23,9 +20,7 @@ class ChatStreamManager {
             return;
         }
         console.log(`Broadcasting message: ${message.id} to session ${message.session_id}`);
-        // Broadcast to specific session room (for guest and admin focusing on it)
         this.io.to(message.session_id).emit('message', message);
-        // Also broadcast to all admins (for the session list update/real-time arrival)
         if (message.sender_type === 'guest') {
             this.io.to('admins').emit('message', message);
         }
@@ -52,12 +47,10 @@ class ChatStreamManager {
     broadcastTyping(sessionId: string, senderType: 'guest' | 'admin', isTyping: boolean) {
         if (!this.io) return;
         this.io.to(sessionId).emit('typing', { sessionId, senderType, isTyping });
-        // Also notify admins so they see the indicator even if not focusing
         if (senderType === 'guest') {
             this.io.to('admins').emit('typing', { sessionId, senderType, isTyping });
         }
     }
 }
 
-// Global instance for the application
 export const chatStreamManager = new ChatStreamManager();

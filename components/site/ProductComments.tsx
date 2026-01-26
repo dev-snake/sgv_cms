@@ -16,8 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import api from '@/utils/axios';
-import { cn } from '@/lib/utils';
+import $api from '@/utils/axios';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useAuth } from '@/hooks/use-auth';
@@ -57,7 +56,7 @@ export function ProductComments({ productId, productSlug }: ProductCommentsProps
 
     const fetchComments = React.useCallback(async () => {
         try {
-            const response = await api.get(`/api/products/${productSlug}/comments`);
+            const response = await $api.get(`/api/products/${productSlug}/comments`);
             if (response.data.success) {
                 let fetchedComments = response.data.data || [];
 
@@ -110,7 +109,7 @@ export function ProductComments({ productId, productSlug }: ProductCommentsProps
 
         setIsSubmitting(true);
         try {
-            const response = await api.post(`/api/products/${productSlug}/comments`, formData);
+            const response = await $api.post(`/api/products/${productSlug}/comments`, formData);
             if (response.data.success) {
                 toast.success('Cảm ơn bạn! Bình luận của bạn đã được gửi và đang chờ duyệt.');
 
@@ -151,7 +150,7 @@ export function ProductComments({ productId, productSlug }: ProductCommentsProps
         if (!adminReply.trim()) return;
         setIsReplying(true);
         try {
-            const response = await api.patch(`/api/portal/comments/${commentId}`, {
+            const response = await $api.patch(`/api/portal/comments/${commentId}`, {
                 reply_content: adminReply,
                 is_approved: true, // Auto approve when admin replies
             });

@@ -10,7 +10,7 @@ import {
     CarouselPrevious,
 } from '@/components/ui/carousel';
 import { motion } from 'motion/react';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 
 export default function ProductSpotlight() {
     const [products, setProducts] = React.useState<any[]>([]);
@@ -19,7 +19,7 @@ export default function ProductSpotlight() {
     React.useEffect(() => {
         const fetchFeaturedProducts = async () => {
             try {
-                const response = await api.get('/api/products?isFeatured=true');
+                const response = await $api.get('/api/products?isFeatured=true');
                 if (response.data.success) {
                     setProducts(response.data.data);
                 }

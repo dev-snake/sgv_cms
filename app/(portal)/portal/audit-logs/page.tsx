@@ -24,7 +24,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { TablePagination } from '@/components/portal/table-pagination';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -51,7 +51,7 @@ export default function AuditLogsPage() {
     const fetchLogs = async () => {
         setIsLoading(true);
         try {
-            const res = await api.get('/api/audit-logs', {
+            const res = await $api.get('/api/audit-logs', {
                 params: {
                     page,
                     limit: pageSize,

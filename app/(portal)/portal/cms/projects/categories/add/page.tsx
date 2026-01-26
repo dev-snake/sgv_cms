@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import { CategoryForm, CategoryFormData } from '@/components/portal/category-form';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
@@ -17,7 +17,7 @@ export default function AddProjectCategoryPage() {
     const handleFormSubmit = async (data: CategoryFormData) => {
         setIsSubmitting(true);
         try {
-            await api.post(API_ROUTES.CATEGORIES, {
+            await $api.post(API_ROUTES.CATEGORIES, {
                 ...data,
                 type: 'project',
             });

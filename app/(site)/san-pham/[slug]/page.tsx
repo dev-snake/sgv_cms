@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 import { SITE_ROUTES } from '@/constants/routes';
 import Lightbox from '@/components/shared/Lightbox';
 
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { ProductComments } from '@/components/site/ProductComments';
 
 export default function ProductDetailPage() {
@@ -35,7 +35,7 @@ export default function ProductDetailPage() {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await api.get(`/api/products/${params.slug}`);
+                const response = await $api.get(`/api/products/${params.slug}`);
                 if (response.data.success) {
                     setProduct(response.data.data);
                 }

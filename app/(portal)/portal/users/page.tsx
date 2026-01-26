@@ -1,6 +1,6 @@
 'use client';
 
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { User } from '@/types';
 import {
     Plus,
@@ -13,7 +13,7 @@ import {
     Activity,
     Users,
 } from 'lucide-react';
-import  {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
     DropdownMenu,
@@ -47,7 +47,7 @@ export default function UsersManagementPage() {
     const fetchUsers = async () => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.USERS);
+            const res = await $api.get(API_ROUTES.USERS);
             setUsers(res.data.data || []);
         } catch (error) {
             console.error(error);
@@ -59,7 +59,7 @@ export default function UsersManagementPage() {
 
     const fetchStats = async () => {
         try {
-            const res = await api.get(API_ROUTES.STATS);
+            const res = await $api.get(API_ROUTES.STATS);
             setStats(res.data.data);
         } catch (error) {
             console.error('Failed to fetch user stats', error);
@@ -79,7 +79,7 @@ export default function UsersManagementPage() {
     const handleDeleteConfirm = async () => {
         if (!itemToDelete) return;
         try {
-            await api.delete(`${API_ROUTES.USERS}/${itemToDelete.id}`);
+            await $api.delete(`${API_ROUTES.USERS}/${itemToDelete.id}`);
             toast.success('Đã xóa tài khoản thành công');
             setUsers(users.filter((u) => u.id !== itemToDelete.id));
             fetchStats();

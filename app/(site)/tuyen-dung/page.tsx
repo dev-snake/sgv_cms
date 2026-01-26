@@ -14,7 +14,7 @@ import {
     PaginationPrevious,
 } from '@/components/ui/pagination';
 import { cn } from '@/lib/utils';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
@@ -51,7 +51,7 @@ export default function RecruitmentPage() {
     const fetchJobs = async (page: number = 1) => {
         setLoading(true);
         try {
-            const response = await api.get('/api/jobs', {
+            const response = await $api.get('/api/jobs', {
                 params: {
                     status: 'open',
                     page,

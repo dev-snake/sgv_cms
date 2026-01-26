@@ -1,7 +1,7 @@
 'use client';
 
 import { Role } from '@/types';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import {
     Plus,
     Search,
@@ -38,7 +38,7 @@ export default function RolesManagementPage() {
     const fetchRoles = async () => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.ROLES);
+            const res = await $api.get(API_ROUTES.ROLES);
             setRoles(res.data.data || []);
         } catch (error) {
             console.error(error);
@@ -64,7 +64,7 @@ export default function RolesManagementPage() {
     const handleDeleteConfirm = async () => {
         if (!itemToDelete) return;
         try {
-            await api.delete(`${API_ROUTES.ROLES}/${itemToDelete.id}`);
+            await $api.delete(`${API_ROUTES.ROLES}/${itemToDelete.id}`);
             toast.success('Đã xóa vai trò thành công');
             setRoles(roles.filter((r) => r.id !== itemToDelete.id));
         } catch (error) {

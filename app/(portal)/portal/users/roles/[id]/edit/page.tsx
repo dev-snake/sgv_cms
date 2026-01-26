@@ -3,7 +3,7 @@
 import React from 'react';
 import { useParams } from 'next/navigation';
 import { RoleForm } from '@/components/portal/role-form';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { API_ROUTES } from '@/constants/routes';
 import { Role } from '@/types';
 import { Loader2 } from 'lucide-react';
@@ -18,7 +18,7 @@ export default function EditRolePage() {
     React.useEffect(() => {
         const fetchRole = async () => {
             try {
-                const res = await api.get(`${API_ROUTES.ROLES}/${roleId}`);
+                const res = await $api.get(`${API_ROUTES.ROLES}/${roleId}`);
                 setRole(res.data.data);
             } catch (error) {
                 console.error(error);

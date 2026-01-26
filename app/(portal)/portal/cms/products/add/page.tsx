@@ -3,14 +3,8 @@
 import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import api from '@/utils/axios';
-import {
-    Save,
-    ArrowLeft,
-    Loader2,
-    Image as ImageIcon,
-    Package,
-} from 'lucide-react';
+import $api from '@/utils/axios';
+import { Save, ArrowLeft, Loader2, Image as ImageIcon, Package } from 'lucide-react';
 import { generateSlug } from '@/utils/slug';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -64,7 +58,7 @@ export default function AddProductPage() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await api.get(`${API_ROUTES.CATEGORIES}?type=product`);
+                const res = await $api.get(`${API_ROUTES.CATEGORIES}?type=product`);
                 setCategories(res.data.data || []);
             } catch (error) {
                 console.error('Failed to fetch categories', error);
@@ -108,7 +102,7 @@ export default function AddProductPage() {
                 gallery: formData.gallery,
             };
 
-            await api.post(API_ROUTES.PRODUCTS, submissionData);
+            await $api.post(API_ROUTES.PRODUCTS, submissionData);
 
             toast.success('Đã tạo sản phẩm thành công');
             router.push(PORTAL_ROUTES.cms.products.list);

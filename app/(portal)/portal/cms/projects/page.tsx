@@ -1,7 +1,7 @@
 'use client';
 
 import { Project } from '@/types';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import {
     Plus,
     Search,
@@ -75,7 +75,7 @@ export default function ProjectsManagementPage() {
     ) => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.PROJECTS, {
+            const res = await $api.get(API_ROUTES.PROJECTS, {
                 params: {
                     page,
                     limit,
@@ -110,7 +110,7 @@ export default function ProjectsManagementPage() {
 
         setIsDeleting(true);
         try {
-            await api.delete(`${API_ROUTES.PROJECTS}/${itemToDelete.id}`);
+            await $api.delete(`${API_ROUTES.PROJECTS}/${itemToDelete.id}`);
             toast.success('Đã xóa dự án thành công');
             fetchProjects(currentPage, pageSize, debouncedSearch, date);
         } catch (error) {

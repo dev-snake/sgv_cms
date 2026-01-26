@@ -1,6 +1,6 @@
 'use client';
 
-import {FormEvent, useEffect, useState} from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -42,7 +42,7 @@ import { vi } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { generateSlug } from '@/utils/slug';
 import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { toast } from 'sonner';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -94,9 +94,9 @@ export default function EditNewsPage() {
             try {
                 // Fetch article, categories and authors in parallel
                 const [articleRes, catRes, authorRes] = await Promise.all([
-                    api.get(`${API_ROUTES.NEWS}/${newsId}`),
-                    api.get(`${API_ROUTES.CATEGORIES}?type=news`),
-                    api.get(`${API_ROUTES.AUTHORS}`),
+                    $api.get(`${API_ROUTES.NEWS}/${newsId}`),
+                    $api.get(`${API_ROUTES.CATEGORIES}?type=news`),
+                    $api.get(`${API_ROUTES.AUTHORS}`),
                 ]);
 
                 if (articleRes.data.success) {
@@ -121,7 +121,7 @@ export default function EditNewsPage() {
                 }
 
                 // Fetch recent articles for preview sidebar
-                const recentRes = await api.get('/api/news?limit=5');
+                const recentRes = await $api.get('/api/news?limit=5');
                 if (recentRes.data.success) {
                     setRecentArticles(recentRes.data.data);
                 }
@@ -162,7 +162,7 @@ export default function EditNewsPage() {
                 ...formData,
                 published_at: formData.published_at ? formData.published_at.toISOString() : null,
             };
-            const response = await api.patch(`${API_ROUTES.NEWS}/${newsId}`, submissionData);
+            const response = await $api.patch(`${API_ROUTES.NEWS}/${newsId}`, submissionData);
             if (response.data.success) {
                 toast.success('Cập nhật bài viết thành công!');
                 router.push(PORTAL_ROUTES.cms.news.list);

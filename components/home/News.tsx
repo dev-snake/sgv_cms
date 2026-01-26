@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CalendarDays, MoveRight, Newspaper, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 
 interface NewsItem {
     id: string;
@@ -31,7 +31,7 @@ export default function News() {
     React.useEffect(() => {
         const fetchNews = async () => {
             try {
-                const response = await api.get('/api/news?status=published&limit=3');
+                const response = await $api.get('/api/news?status=published&limit=3');
                 if (response.data.success) {
                     setNews(response.data.data || []);
                 }

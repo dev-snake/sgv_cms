@@ -1,16 +1,9 @@
 'use client';
 
-import {FormEvent, useEffect, useState} from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/utils/axios';
-import {
-    ArrowLeft,
-    UserPlus,
-    Shield,
-    Lock,
-    User as UserIcon,
-    Loader2,
-} from 'lucide-react';
+import $api from '@/utils/axios';
+import { ArrowLeft, UserPlus, Shield, Lock, User as UserIcon, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,7 +38,7 @@ export default function AddUserPage() {
     useEffect(() => {
         const fetchRoles = async () => {
             try {
-                const res = await api.get(API_ROUTES.ROLES);
+                const res = await $api.get(API_ROUTES.ROLES);
                 setAvailableRoles(res.data.data || []);
             } catch (error) {
                 console.error(error);
@@ -61,7 +54,7 @@ export default function AddUserPage() {
         setFormData({ ...formData, roleId });
         setIsLoadingDetails(true);
         try {
-            const res = await api.get(`${API_ROUTES.ROLES}/${roleId}`);
+            const res = await $api.get(`${API_ROUTES.ROLES}/${roleId}`);
             setSelectedRoleDetails(res.data.data);
         } catch (error) {
             console.error('Failed to fetch role details:', error);
@@ -80,7 +73,7 @@ export default function AddUserPage() {
 
         setIsSubmitting(true);
         try {
-            await api.post(API_ROUTES.USERS, {
+            await $api.post(API_ROUTES.USERS, {
                 ...formData,
                 roleIds: [formData.roleId],
             });

@@ -1,6 +1,6 @@
 'use client';
 
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import {
     Plus,
     Search,
@@ -105,7 +105,7 @@ export default function JobsManagementPage() {
     const fetchJobs = async (page: number, limit: number, search: string) => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.JOBS, {
+            const res = await $api.get(`${API_ROUTES.JOBS}`, {
                 params: {
                     page,
                     limit,
@@ -126,7 +126,7 @@ export default function JobsManagementPage() {
 
     const fetchStats = async () => {
         try {
-            const res = await api.get(API_ROUTES.STATS);
+            const res = await $api.get(API_ROUTES.STATS);
             setStats(res.data.data);
         } catch (error) {
             console.error('Failed to fetch job stats', error);
@@ -142,7 +142,7 @@ export default function JobsManagementPage() {
         if (!itemToDelete) return;
         setIsDeleting(true);
         try {
-            await api.delete(`${API_ROUTES.JOBS}/${itemToDelete.id}`);
+            await $api.delete(`${API_ROUTES.JOBS}/${itemToDelete.id}`);
             toast.success('Đã xóa tin tuyển dụng');
             fetchJobs(currentPage, pageSize, debouncedSearch);
             fetchStats();

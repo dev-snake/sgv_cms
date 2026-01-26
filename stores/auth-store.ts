@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
 import { decodeJwt } from 'jose';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import axios from 'axios';
 import { API_ROUTES } from '@/constants/routes';
 
@@ -67,7 +67,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         // 2. Fetch fresh data from server
         try {
-            const response = await api.get(API_ROUTES.AUTH.PROFILE);
+            const response = await $api.get(API_ROUTES.AUTH.PROFILE);
             if (response.data.success) {
                 const profileData = response.data.data;
 
@@ -178,7 +178,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         // 3. Call server to clear HttpOnly cookies (session, refreshToken)
         try {
-            await api.post(API_ROUTES.AUTH.LOGOUT);
+            await $api.post(API_ROUTES.AUTH.LOGOUT);
         } catch (error) {
             console.error('Logout API failed:', error);
         }
@@ -204,7 +204,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (!currentUser) return;
 
         try {
-            await api.patch('/api/modules/reorder', {
+            await $api.patch('/api/modules/reorder', {
                 items: currentUser.modules.map((m) => ({ id: m.id, order: m.order })),
             });
         } catch (error) {

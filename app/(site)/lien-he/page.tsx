@@ -25,7 +25,7 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 import { toast } from 'sonner';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { COMPANY_INFO } from '@/constants/site-info';
 
 const FAQS = [
@@ -69,7 +69,7 @@ export default function ContactPage() {
 
         setIsSubmitting(true);
         try {
-            await api.post('/api/contacts', formData);
+            await $api.post('/api/contacts', formData);
             toast.success('Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ lại sớm nhất.');
             setFormData({
                 name: '',

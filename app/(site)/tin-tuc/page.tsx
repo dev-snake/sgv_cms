@@ -14,7 +14,7 @@ import {
     PaginationPrevious,
 } from '@/components/ui/pagination';
 import { cn } from '@/lib/utils';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 
 interface NewsArticle {
     id: string;
@@ -52,7 +52,7 @@ export default function NewsPage() {
     const fetchNews = async (page: number = 1) => {
         setLoading(true);
         try {
-            const response = await api.get('/api/news', {
+            const response = await $api.get('/api/news', {
                 params: {
                     status: 'published',
                     page,

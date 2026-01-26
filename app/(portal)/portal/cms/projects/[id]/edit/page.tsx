@@ -25,7 +25,7 @@ import { vi } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { generateSlug } from '@/utils/slug';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { toast } from 'sonner';
 import { DateRange } from 'react-day-picker';
 
@@ -70,7 +70,7 @@ export default function EditProjectPage() {
         const fetchData = async () => {
             try {
                 // Fetch project by ID
-                const projectRes = await api.get(`${API_ROUTES.PROJECTS}/${projectId}`);
+                const projectRes = await $api.get(`${API_ROUTES.PROJECTS}/${projectId}`);
                 if (projectRes.data.success) {
                     const p = projectRes.data.data;
                     setProject(p);
@@ -89,7 +89,7 @@ export default function EditProjectPage() {
                 }
 
                 // Fetch categories
-                const catRes = await api.get(`${API_ROUTES.CATEGORIES}?type=project`);
+                const catRes = await $api.get(`${API_ROUTES.CATEGORIES}?type=project`);
                 if (catRes.data.success) {
                     setCategories(catRes.data.data || []);
                 }
@@ -113,7 +113,10 @@ export default function EditProjectPage() {
                 end_date: formData.end_date?.toISOString() || null,
                 image_url: formData.image,
             };
-            const response = await api.patch(`${API_ROUTES.PROJECTS}/${projectId}`, submissionData);
+            const response = await $api.patch(
+                `${API_ROUTES.PROJECTS}/${projectId}`,
+                submissionData,
+            );
             if (response.data.success) {
                 toast.success('Cập nhật dự án thành công!');
                 router.push(PORTAL_ROUTES.cms.projects.list);

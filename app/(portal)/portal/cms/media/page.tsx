@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useState, useRef} from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import {
     Upload,
@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DeleteConfirmationDialog } from '@/components/portal/delete-confirmation-dialog';
@@ -48,7 +48,7 @@ export default function MediaManagementPage() {
     const fetchImages = async () => {
         setIsLoading(true);
         try {
-            const response = await api.get('/api/upload');
+            const response = await $api.get('/api/upload');
             if (response.data.success) {
                 setImages(response.data.data || []);
             }
@@ -85,7 +85,7 @@ export default function MediaManagementPage() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await api.post('/api/upload', formData, {
+            const response = await $api.post('/api/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
@@ -107,7 +107,7 @@ export default function MediaManagementPage() {
 
         setIsDeleting(true);
         try {
-            await api.delete(`/api/upload?filename=${itemToDelete.filename}`);
+            await $api.delete(`/api/upload?filename=${itemToDelete.filename}`);
             toast.success('Đã xóa ảnh thành công');
             fetchImages();
         } catch (error) {

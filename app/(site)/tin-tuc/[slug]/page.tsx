@@ -1,6 +1,6 @@
 'use client';
 
-import {FormEvent, useEffect, useState} from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -28,7 +28,7 @@ import {
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 
 export default function NewsDetailPage() {
     const params = useParams();
@@ -44,10 +44,10 @@ export default function NewsDetailPage() {
         const fetchData = async () => {
             try {
                 const [articleRes, relatedRes, categoriesRes, recentRes] = await Promise.all([
-                    api.get(`/api/news/${params.slug}`),
-                    api.get('/api/news?limit=3'),
-                    api.get('/api/categories?type=news'),
-                    api.get('/api/news?limit=5'),
+                    $api.get(`/api/news/${params.slug}`),
+                    $api.get('/api/news?limit=3'),
+                    $api.get('/api/categories?type=news'),
+                    $api.get('/api/news?limit=5'),
                 ]);
 
                 if (articleRes.data.success) {

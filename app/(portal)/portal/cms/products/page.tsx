@@ -1,7 +1,7 @@
 'use client';
 
 import { Product } from '@/types';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import {
     Plus,
     Search,
@@ -75,7 +75,7 @@ export default function ProductsManagementPage() {
     ) => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.PRODUCTS, {
+            const res = await $api.get(API_ROUTES.PRODUCTS, {
                 params: {
                     page,
                     limit,
@@ -110,7 +110,7 @@ export default function ProductsManagementPage() {
 
         setIsDeleting(true);
         try {
-            await api.delete(`${API_ROUTES.PRODUCTS}/${itemToDelete.id}`);
+            await $api.delete(`${API_ROUTES.PRODUCTS}/${itemToDelete.id}`);
             toast.success('Đã xóa sản phẩm thành công');
             fetchProducts(currentPage, pageSize, debouncedSearch, date);
         } catch (error) {

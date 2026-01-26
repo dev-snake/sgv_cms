@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TablePagination } from '@/components/portal/table-pagination';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import { toast } from 'sonner';
 import { PROTECTED_MODULES } from '@/constants/rbac';
@@ -59,7 +59,7 @@ export default function ModulesPage() {
     const fetchModules = async () => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.MODULES, {
+            const res = await $api.get(API_ROUTES.MODULES, {
                 params: {
                     page,
                     limit: pageSize,
@@ -91,7 +91,7 @@ export default function ModulesPage() {
         if (!deleteId) return;
         setIsDeleting(true);
         try {
-            await api.delete(`${API_ROUTES.MODULES}/${deleteId}`);
+            await $api.delete(`${API_ROUTES.MODULES}/${deleteId}`);
             toast.success('Xóa module thành công');
 
             // Refresh user profile để cập nhật sidebar modules

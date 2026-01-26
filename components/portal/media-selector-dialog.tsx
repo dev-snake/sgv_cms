@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Upload, Loader2, ImageIcon, FolderOpen, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,7 @@ export function MediaSelectorDialog({ open, onOpenChange, onSelect }: MediaSelec
     const fetchImages = async () => {
         setIsLoading(true);
         try {
-            const response = await api.get('/api/upload');
+            const response = await $api.get('/api/upload');
             if (response.data.success) {
                 setImages(response.data.data || []);
             }
@@ -72,7 +72,7 @@ export function MediaSelectorDialog({ open, onOpenChange, onSelect }: MediaSelec
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await api.post('/api/upload', formData, {
+            const response = await $api.post('/api/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 

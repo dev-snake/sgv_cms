@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { Plus, Edit2, Trash2, FolderOpen, ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,8 +26,8 @@ export default function ProjectCategoriesPage() {
     const fetchCategories = async () => {
         setIsLoading(true);
         try {
-            const res = await api.get(`${API_ROUTES.CATEGORIES}?type=project`);
-            setCategories(res.data.data || []);
+            const response = await $api.get(`${API_ROUTES.CATEGORIES}?type=project`);
+            setCategories(response.data.data || []);
         } catch (error) {
             console.error(error);
             toast.error('Không thể tải danh mục');
@@ -49,7 +49,7 @@ export default function ProjectCategoriesPage() {
         if (!itemToDelete) return;
 
         try {
-            await api.delete(`${API_ROUTES.CATEGORIES}/${itemToDelete.id}`);
+            await $api.delete(`${API_ROUTES.CATEGORIES}/${itemToDelete.id}`);
 
             toast.success('Đã xóa danh mục thành công');
             setCategories(categories.filter((cat) => cat.id !== itemToDelete.id));

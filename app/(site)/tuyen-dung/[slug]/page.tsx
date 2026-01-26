@@ -1,6 +1,6 @@
 'use client';
 
-import {ChangeEvent, FormEvent, useEffect, useRef, useState} from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion } from 'motion/react';
@@ -18,7 +18,7 @@ import {
     Bookmark,
 } from 'lucide-react';
 import { SITE_ROUTES } from '@/constants/routes';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
@@ -62,7 +62,7 @@ export default function JobDetailPage() {
     useEffect(() => {
         const fetchJob = async () => {
             try {
-                const response = await api.get(`/api/jobs/${slug}`);
+                const response = await $api.get(`/api/jobs/${slug}`);
                 if (response.data.success) {
                     setJob(response.data.data);
                 }
@@ -451,7 +451,7 @@ function ApplyForm({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
                 data.append('cover_letter', formData.cover_letter);
             }
 
-            const response = await api.post('/api/applications', data, {
+            const response = await $api.post('/api/applications', data, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 

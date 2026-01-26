@@ -40,9 +40,7 @@ class NotificationService {
                 })
                 .returning();
 
-            // 2. Broadcast to admins via Socket.io
             if (this.io) {
-                // Diagnostic: Check if there are any admins connected
                 const adminSockets = await this.io.in('admins').fetchSockets();
                 console.log(
                     `[NotificationService] Emitting to ${adminSockets.length} admins: ${title}`,

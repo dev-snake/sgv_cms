@@ -1,7 +1,7 @@
 'use client';
 
 import { NewsArticle } from '@/types';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import {
     Plus,
     Search,
@@ -74,7 +74,7 @@ export default function NewsManagementPage() {
     ) => {
         setIsLoading(true);
         try {
-            const res = await api.get(API_ROUTES.NEWS, {
+            const res = await $api.get(API_ROUTES.NEWS, {
                 params: {
                     page,
                     limit,
@@ -109,7 +109,7 @@ export default function NewsManagementPage() {
 
         setIsDeleting(true);
         try {
-            await api.delete(`${API_ROUTES.NEWS}/${itemToDelete.id}`);
+            await $api.delete(`${API_ROUTES.NEWS}/${itemToDelete.id}`);
             toast.success('Đã xóa bài viết thành công');
             fetchNews(currentPage, pageSize, debouncedSearch, date);
         } catch (error) {

@@ -1,15 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import {
-    BarChart3,
-    Clock,
-    RefreshCcw,
-    Calendar,
-} from 'lucide-react';
+import { BarChart3, Clock, RefreshCcw, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import api from '@/utils/axios';
+import $api from '@/utils/axios';
 import { API_ROUTES } from '@/constants/routes';
 import { RadialChartGrid } from '@/components/portal/charts/RadialChartGrid';
 import { RadarChartDots } from '@/components/portal/charts/RadarChartDots';
@@ -26,7 +21,7 @@ export default function AnalyticsPage() {
     const fetchStats = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await api.get(API_ROUTES.STATS);
+            const res = await $api.get(API_ROUTES.STATS);
             setStats(res.data.data);
             setUpdateTime(format(new Date(), 'hh:mm a', { locale: vi }));
         } catch (error) {
