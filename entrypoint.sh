@@ -14,10 +14,15 @@ echo "Database is up - executing migrations"
 # Push schema transitions to the database
 npm run db:push
 
-# Optional: Seed the database if it's the first time or if you always want to ensure base data
-# You can add a check here if needed, but for now we'll run it to ensure admin exists.
-echo "Seeding database..."
-npm run db:seed || echo "Seeding skipped or failed (might already exist)"
+# Check if seeding is already done
+SEED_FLAG="/app/data/.seeded"
+
+if [ ! -f "$SEED_FLAG" ]; then
+  echo "First run detected - Seeding database..."
+  npm run db:seed && touch "$SEED_FLAG" || echo "Seeding failed"
+else
+  echo "Database already seeded - skipping"
+fi
 
 echo "Starting application..."
 # Start the production server

@@ -41,6 +41,11 @@ COPY --from=builder /app/db ./db
 COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/utils ./utils
 COPY --from=builder /app/entrypoint.sh ./entrypoint.sh
+COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
+COPY --from=builder /app/constants ./constants
+COPY --from=builder /app/validations ./validations
+COPY --from=builder /app/types ./types
+COPY --from=builder /app/middlewares ./middlewares
 
 # Install tsx to run server.ts
 RUN npm install -g tsx && chmod +x ./entrypoint.sh
