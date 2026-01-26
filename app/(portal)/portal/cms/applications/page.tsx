@@ -1,6 +1,6 @@
 'use client';
 
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import {
     Search,
     MoreHorizontal,

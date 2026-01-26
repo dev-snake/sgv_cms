@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { API_ROUTES } from '@/constants/routes';
 import { RadialChartGrid } from '@/components/portal/charts/RadialChartGrid';
 import { RadarChartDots } from '@/components/portal/charts/RadarChartDots';

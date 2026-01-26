@@ -18,7 +18,7 @@ import {
     Bookmark,
 } from 'lucide-react';
 import { SITE_ROUTES } from '@/constants/routes';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';

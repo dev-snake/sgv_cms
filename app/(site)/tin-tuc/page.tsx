@@ -14,7 +14,7 @@ import {
     PaginationPrevious,
 } from '@/components/ui/pagination';
 import { cn } from '@/lib/utils';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 
 interface NewsArticle {
     id: string;
@@ -83,8 +83,6 @@ export default function NewsPage() {
             </div>
         );
     }
-
-
 
     return (
         <div className="flex flex-col min-h-screen bg-white">

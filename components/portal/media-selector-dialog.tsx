@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Upload, Loader2, ImageIcon, FolderOpen, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';

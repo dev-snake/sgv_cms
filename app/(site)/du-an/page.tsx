@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { MapPin, ExternalLink, MoveRight } from 'lucide-react';
 import { SITE_ROUTES } from '@/constants/routes';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { cn } from '@/lib/utils';
 import {
     Pagination,

@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TablePagination } from '@/components/portal/table-pagination';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import { toast } from 'sonner';
 import { PROTECTED_MODULES } from '@/constants/rbac';

@@ -25,7 +25,7 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 import { toast } from 'sonner';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { COMPANY_INFO } from '@/constants/site-info';
 
 const FAQS = [

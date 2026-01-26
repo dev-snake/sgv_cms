@@ -1,7 +1,7 @@
 'use client';
 
 import { Role } from '@/types';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import {
     Plus,
     Search,

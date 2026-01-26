@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils';
 import { SITE_ROUTES } from '@/constants/routes';
 import Lightbox from '@/components/shared/Lightbox';
 
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { ProductComments } from '@/components/site/ProductComments';
 
 export default function ProductDetailPage() {

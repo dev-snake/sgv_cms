@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Upload, X, Loader2, ImagePlus, Check, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import {
     Dialog,
     DialogContent,

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { ArrowLeft, Save, Settings, Loader2, Layout, ExternalLink, SortAsc } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';

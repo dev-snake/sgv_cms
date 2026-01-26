@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import {
     ArrowLeft,
     Save,

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 

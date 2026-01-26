@@ -41,7 +41,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { usePathname, useRouter } from 'next/navigation';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { toast } from 'sonner';
 import { useAuth, SidebarModule } from '@/hooks/use-auth';
 import { useAuthStore } from '@/stores/auth-store';

@@ -26,7 +26,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 
 interface Product {
     id: string;
@@ -264,7 +264,10 @@ export default function ProductArchive() {
                                                     : 'text-slate-300 hover:text-brand-primary',
                                             )}
                                         >
-                                            <LayoutGrid size={16} className='hover:cursor-pointer' />
+                                            <LayoutGrid
+                                                size={16}
+                                                className="hover:cursor-pointer"
+                                            />
                                         </button>
                                         <button
                                             onClick={() => setViewMode('list')}
@@ -275,7 +278,7 @@ export default function ProductArchive() {
                                                     : 'text-slate-300 hover:text-brand-primary',
                                             )}
                                         >
-                                            <List size={16} className='hover:cursor-pointer' />
+                                            <List size={16} className="hover:cursor-pointer" />
                                         </button>
                                     </div>
                                 </div>
@@ -459,8 +462,6 @@ export default function ProductArchive() {
                     </div>
                 </div>
             </section>
-
-
         </div>
     );
 }

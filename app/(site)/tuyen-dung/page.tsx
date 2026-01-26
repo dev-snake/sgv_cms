@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/pagination';
 import { cn } from '@/lib/utils';
 import { SITE_ROUTES } from '@/constants/routes';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
@@ -286,11 +286,9 @@ export default function RecruitmentPage() {
                                 </PaginationContent>
                             </Pagination>
                         </div>
-                )}
+                    )}
                 </div>
             </section>
-
-
         </div>
     );
 }

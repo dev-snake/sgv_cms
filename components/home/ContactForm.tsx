@@ -14,7 +14,7 @@ import {
     Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { COMPANY_INFO } from '@/constants/site-info';
 
 export default function ContactForm() {

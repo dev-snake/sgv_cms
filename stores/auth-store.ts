@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
 import { decodeJwt } from 'jose';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import axios from 'axios';
 import { API_ROUTES } from '@/constants/routes';
 

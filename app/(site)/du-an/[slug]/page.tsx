@@ -27,7 +27,7 @@ import {
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-import api from '@/services/axios';
+import api from '@/utils/axios';
 
 export default function ProjectDetailPage() {
     const params = useParams();

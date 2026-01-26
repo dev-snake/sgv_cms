@@ -13,7 +13,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { useSocket } from '@/hooks/use-socket';
 import Link from 'next/link';
 import { API_ROUTES, PORTAL_ROUTES } from '@/constants/routes';

@@ -16,7 +16,7 @@ import {
 import { User, Bell, Shield, Globe, Save, Loader2 } from 'lucide-react';
 import { ImageUploader } from '@/components/portal/ImageUploader';
 import { useAuth } from '@/hooks/use-auth';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { toast } from 'sonner';
 
 export default function SettingsPage() {

@@ -24,7 +24,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { TablePagination } from '@/components/portal/table-pagination';
-import api from '@/services/axios';
+import api from '@/utils/axios';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
