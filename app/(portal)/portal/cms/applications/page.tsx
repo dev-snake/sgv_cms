@@ -18,7 +18,7 @@ import {
     Briefcase,
 } from 'lucide-react';
 import { useDebounce } from '@/hooks/use-debounce';
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -89,23 +89,23 @@ const STATUS_CONFIG: Record<
 };
 
 export default function ApplicationsManagementPage() {
-    const [applications, setApplications] = React.useState<JobApplication[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [stats, setStats] = React.useState<any>(null);
-    const [searchTerm, setSearchTerm] = React.useState('');
+    const [applications, setApplications] = useState<JobApplication[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState<any>(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
-    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-    const [itemToDelete, setItemToDelete] = React.useState<JobApplication | null>(null);
-    const [isDeleting, setIsDeleting] = React.useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<JobApplication | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const router = useRouter();
 
     // Pagination state
-    const [currentPage, setCurrentPage] = React.useState(1);
-    const [pageSize, setPageSize] = React.useState(10);
-    const [totalItems, setTotalItems] = React.useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
 
     // Reset to page 1 when search changes
-    React.useEffect(() => {
+    useEffect(() => {
         setCurrentPage(1);
     }, [debouncedSearch]);
 
@@ -140,7 +140,7 @@ export default function ApplicationsManagementPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchApplications(currentPage, pageSize, debouncedSearch);
         fetchStats();
     }, [currentPage, pageSize, debouncedSearch]);

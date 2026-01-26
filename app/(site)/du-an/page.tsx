@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
@@ -31,11 +31,11 @@ interface Project {
 const ITEMS_PER_PAGE = 8;
 
 export default function ProjectsPage() {
-    const [projects, setProjects] = React.useState<Project[]>([]);
-    const [loading, setLoading] = React.useState(true);
-    const [currentPage, setCurrentPage] = React.useState(1);
-    const [totalPages, setTotalPages] = React.useState(1);
-    const [total, setTotal] = React.useState(0);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [total, setTotal] = useState(0);
 
     const fetchProjects = async (page: number = 1) => {
         setLoading(true);
@@ -61,7 +61,7 @@ export default function ProjectsPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchProjects(currentPage);
     }, [currentPage]);
 

@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -46,24 +46,24 @@ import { PERMISSIONS } from '@/constants/rbac';
 
 export default function ProductsManagementPage() {
     const { hasPermission } = useAuth();
-    const [productsList, setProductsList] = React.useState<Product[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [searchTerm, setSearchTerm] = React.useState('');
+    const [productsList, setProductsList] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
-    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-    const [itemToDelete, setItemToDelete] = React.useState<Product | null>(null);
-    const [isDeleting, setIsDeleting] = React.useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<Product | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Pagination state
-    const [currentPage, setCurrentPage] = React.useState(1);
-    const [pageSize, setPageSize] = React.useState(10);
-    const [totalItems, setTotalItems] = React.useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
 
     // Date Filter state
-    const [date, setDate] = React.useState<DateRange | undefined>();
+    const [date, setDate] = useState<DateRange | undefined>();
 
     // Reset to page 1 when search changes
-    React.useEffect(() => {
+    useEffect(() => {
         setCurrentPage(1);
     }, [debouncedSearch]);
 
@@ -96,7 +96,7 @@ export default function ProductsManagementPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchProducts(currentPage, pageSize, debouncedSearch, date);
     }, [currentPage, pageSize, debouncedSearch, date]);
 

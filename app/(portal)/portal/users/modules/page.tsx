@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import Link from 'next/link';
 import {
     Plus,
@@ -41,18 +41,18 @@ import { useDebounce } from '@/hooks/use-debounce';
 
 export default function ModulesPage() {
     const { refreshUser } = useAuth();
-    const [modules, setModules] = React.useState<any[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [searchQuery, setSearchQuery] = React.useState('');
-    const [page, setPage] = React.useState(1);
-    const [pageSize, setPageSize] = React.useState(10);
-    const [totalItems, setTotalItems] = React.useState(0);
+    const [modules, setModules] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
     const debouncedSearch = useDebounce(searchQuery, 500);
-    const [deleteId, setDeleteId] = React.useState<string | null>(null);
-    const [isDeleting, setIsDeleting] = React.useState(false);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Reset to page 1 when search changes
-    React.useEffect(() => {
+    useEffect(() => {
         setPage(1);
     }, [debouncedSearch]);
 
@@ -76,12 +76,12 @@ export default function ModulesPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchModules();
     }, [page, pageSize, debouncedSearch]);
 
     // Handle search with debounce or simple reset
-    const handleSearch = (e: React.FormEvent) => {
+    const handleSearch = (e: FormEvent) => {
         e.preventDefault();
         setPage(1);
         fetchModules();

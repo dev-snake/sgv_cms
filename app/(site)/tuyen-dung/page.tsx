@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
@@ -42,12 +42,12 @@ const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
 };
 
 export default function RecruitmentPage() {
-    const [jobs, setJobs] = React.useState<JobPosting[]>([]);
-    const [loading, setLoading] = React.useState(true);
-    const [currentPage, setCurrentPage] = React.useState(1);
-    const [totalPages, setTotalPages] = React.useState(1);
-    const [total, setTotal] = React.useState(0);
-    const jobsListRef = React.useRef<HTMLDivElement>(null);
+    const [jobs, setJobs] = useState<JobPosting[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [total, setTotal] = useState(0);
+    const jobsListRef = useRef<HTMLDivElement>(null);
 
     const fetchJobs = async (page: number = 1) => {
         setLoading(true);
@@ -73,7 +73,7 @@ export default function RecruitmentPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchJobs(currentPage);
     }, [currentPage]);
 

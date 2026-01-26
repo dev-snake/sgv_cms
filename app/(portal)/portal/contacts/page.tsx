@@ -22,7 +22,7 @@ import {
     Filter,
     X,
 } from 'lucide-react';
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -95,31 +95,31 @@ const STATUS_CONFIG = {
 };
 
 export default function ContactsManagementPage() {
-    const [contacts, setContacts] = React.useState<Contact[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [stats, setStats] = React.useState<any>(null);
-    const [searchTerm, setSearchTerm] = React.useState('');
+    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState<any>(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
     // Pagination state
-    const [currentPage, setCurrentPage] = React.useState(1);
-    const [pageSize, setPageSize] = React.useState(10);
-    const [totalItems, setTotalItems] = React.useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
 
     // Date Filter state
-    const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
+    const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
     // Detail Sheet state
-    const [selectedContact, setSelectedContact] = React.useState<Contact | null>(null);
-    const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+    const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     // Delete Dialog state
-    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-    const [itemToDelete, setItemToDelete] = React.useState<Contact | null>(null);
-    const [isDeleting, setIsDeleting] = React.useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<Contact | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Reset to page 1 when search changes
-    React.useEffect(() => {
+    useEffect(() => {
         setCurrentPage(1);
     }, [debouncedSearch]);
 
@@ -156,7 +156,7 @@ export default function ContactsManagementPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchContacts(currentPage, pageSize, debouncedSearch, dateRange);
         fetchStats();
     }, [currentPage, pageSize, debouncedSearch, dateRange]);

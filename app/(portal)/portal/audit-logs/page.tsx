@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useState, useEffect } from 'react';
 import {
     Search,
     Calendar,
@@ -32,19 +32,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useDebounce } from '@/hooks/use-debounce';
 
 export default function AuditLogsPage() {
-    const [logs, setLogs] = React.useState<any[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [searchQuery, setSearchQuery] = React.useState('');
+    const [logs, setLogs] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
     const debouncedSearch = useDebounce(searchQuery, 500);
-    const [page, setPage] = React.useState(1);
-    const [pageSize, setPageSize] = React.useState(10);
-    const [totalItems, setTotalItems] = React.useState(0);
-    const [moduleFilter, setModuleFilter] = React.useState('all');
-    const [actionFilter, setActionFilter] = React.useState('all');
-    const [selectedLog, setSelectedLog] = React.useState<any>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
+    const [moduleFilter, setModuleFilter] = useState('all');
+    const [actionFilter, setActionFilter] = useState('all');
+    const [selectedLog, setSelectedLog] = useState<any>(null);
 
     // Reset to page 1 when search changes
-    React.useEffect(() => {
+    useEffect(() => {
         setPage(1);
     }, [debouncedSearch]);
 
@@ -70,7 +70,7 @@ export default function AuditLogsPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchLogs();
     }, [page, pageSize, debouncedSearch, moduleFilter, actionFilter]);
 

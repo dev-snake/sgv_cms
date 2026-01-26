@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
@@ -43,11 +43,11 @@ function formatDate(dateString: string | null): string {
 }
 
 export default function NewsPage() {
-    const [news, setNews] = React.useState<NewsArticle[]>([]);
-    const [loading, setLoading] = React.useState(true);
-    const [currentPage, setCurrentPage] = React.useState(1);
-    const [totalPages, setTotalPages] = React.useState(1);
-    const [total, setTotal] = React.useState(0);
+    const [news, setNews] = useState<NewsArticle[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [total, setTotal] = useState(0);
 
     const fetchNews = async (page: number = 1) => {
         setLoading(true);
@@ -73,7 +73,7 @@ export default function NewsPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchNews(currentPage);
     }, [currentPage]);
 

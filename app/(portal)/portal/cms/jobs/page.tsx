@@ -20,7 +20,7 @@ import {
     Calendar,
 } from 'lucide-react';
 import Link from 'next/link';
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -83,22 +83,22 @@ const STATUS_CONFIG = {
 
 export default function JobsManagementPage() {
     const { hasPermission } = useAuth();
-    const [jobs, setJobs] = React.useState<JobPosting[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [stats, setStats] = React.useState<any>(null);
-    const [searchTerm, setSearchTerm] = React.useState('');
+    const [jobs, setJobs] = useState<JobPosting[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState<any>(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
-    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-    const [itemToDelete, setItemToDelete] = React.useState<JobPosting | null>(null);
-    const [isDeleting, setIsDeleting] = React.useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<JobPosting | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Pagination state
-    const [currentPage, setCurrentPage] = React.useState(1);
-    const [pageSize, setPageSize] = React.useState(10);
-    const [totalItems, setTotalItems] = React.useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
 
     // Reset to page 1 when search changes
-    React.useEffect(() => {
+    useEffect(() => {
         setCurrentPage(1);
     }, [debouncedSearch]);
 
@@ -133,7 +133,7 @@ export default function JobsManagementPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchJobs(currentPage, pageSize, debouncedSearch);
         fetchStats();
     }, [currentPage, pageSize, debouncedSearch]);
