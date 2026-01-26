@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { useDebounce } from '@/hooks/use-debounce';
 
 export default function ModulesPage() {
     const { refreshUser } = useAuth();
@@ -46,18 +47,14 @@ export default function ModulesPage() {
     const [page, setPage] = React.useState(1);
     const [pageSize, setPageSize] = React.useState(10);
     const [totalItems, setTotalItems] = React.useState(0);
-    const [debouncedSearch, setDebouncedSearch] = React.useState('');
+    const debouncedSearch = useDebounce(searchQuery, 500);
     const [deleteId, setDeleteId] = React.useState<string | null>(null);
     const [isDeleting, setIsDeleting] = React.useState(false);
 
-    // Debounce search query
+    // Reset to page 1 when search changes
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(searchQuery);
-            setPage(1); // Reset to page 1 on search
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
+        setPage(1);
+    }, [debouncedSearch]);
 
     const fetchModules = async () => {
         setIsLoading(true);

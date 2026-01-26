@@ -40,6 +40,7 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
+import { useDebounce } from '@/hooks/use-debounce';
 import { PERMISSIONS } from '@/constants/rbac';
 
 export default function NewsManagementPage() {
@@ -47,7 +48,7 @@ export default function NewsManagementPage() {
     const [newsList, setNewsList] = React.useState<NewsArticle[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [searchTerm, setSearchTerm] = React.useState('');
-    const [debouncedSearch, setDebouncedSearch] = React.useState('');
+    const debouncedSearch = useDebounce(searchTerm, 500);
     const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
     const [itemToDelete, setItemToDelete] = React.useState<NewsArticle | null>(null);
     const [isDeleting, setIsDeleting] = React.useState(false);
@@ -60,14 +61,10 @@ export default function NewsManagementPage() {
     // Date Filter state
     const [date, setDate] = React.useState<DateRange | undefined>();
 
-    // Debounce search term
+    // Reset to page 1 when search changes
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(searchTerm);
-            setCurrentPage(1);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
+        setCurrentPage(1);
+    }, [debouncedSearch]);
 
     const fetchNews = async (
         page: number,

@@ -38,6 +38,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useAuth } from '@/hooks/use-auth';
+import { useDebounce } from '@/hooks/use-debounce';
 import { PERMISSIONS } from '@/constants/rbac';
 import { cn } from '@/lib/utils';
 import { PieChartLabel } from '@/components/portal/charts/PieChartLabel';
@@ -86,7 +87,7 @@ export default function JobsManagementPage() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [stats, setStats] = React.useState<any>(null);
     const [searchTerm, setSearchTerm] = React.useState('');
-    const [debouncedSearch, setDebouncedSearch] = React.useState('');
+    const debouncedSearch = useDebounce(searchTerm, 500);
     const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
     const [itemToDelete, setItemToDelete] = React.useState<JobPosting | null>(null);
     const [isDeleting, setIsDeleting] = React.useState(false);
@@ -96,14 +97,10 @@ export default function JobsManagementPage() {
     const [pageSize, setPageSize] = React.useState(10);
     const [totalItems, setTotalItems] = React.useState(0);
 
-    // Debounce search term
+    // Reset to page 1 when search changes
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(searchTerm);
-            setCurrentPage(1);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
+        setCurrentPage(1);
+    }, [debouncedSearch]);
 
     const fetchJobs = async (page: number, limit: number, search: string) => {
         setIsLoading(true);

@@ -41,6 +41,7 @@ import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
+import { useDebounce } from '@/hooks/use-debounce';
 import { PERMISSIONS } from '@/constants/rbac';
 
 export default function ProductsManagementPage() {
@@ -48,7 +49,7 @@ export default function ProductsManagementPage() {
     const [productsList, setProductsList] = React.useState<Product[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [searchTerm, setSearchTerm] = React.useState('');
-    const [debouncedSearch, setDebouncedSearch] = React.useState('');
+    const debouncedSearch = useDebounce(searchTerm, 500);
     const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
     const [itemToDelete, setItemToDelete] = React.useState<Product | null>(null);
     const [isDeleting, setIsDeleting] = React.useState(false);
@@ -61,14 +62,10 @@ export default function ProductsManagementPage() {
     // Date Filter state
     const [date, setDate] = React.useState<DateRange | undefined>();
 
-    // Debounce search term
+    // Reset to page 1 when search changes
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(searchTerm);
-            setCurrentPage(1);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
+        setCurrentPage(1);
+    }, [debouncedSearch]);
 
     const fetchProducts = async (
         page: number,

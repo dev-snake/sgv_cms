@@ -55,7 +55,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useDebounce } from '@/hooks/use-debounce';
 import { DeleteConfirmationDialog } from '@/components/portal/delete-confirmation-dialog';
 import { TablePagination } from '@/components/portal/table-pagination';
 import { API_ROUTES } from '@/constants/routes';
@@ -99,7 +99,7 @@ export default function ContactsManagementPage() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [stats, setStats] = React.useState<any>(null);
     const [searchTerm, setSearchTerm] = React.useState('');
-    const [debouncedSearch, setDebouncedSearch] = React.useState('');
+    const debouncedSearch = useDebounce(searchTerm, 500);
 
     // Pagination state
     const [currentPage, setCurrentPage] = React.useState(1);
@@ -118,14 +118,10 @@ export default function ContactsManagementPage() {
     const [itemToDelete, setItemToDelete] = React.useState<Contact | null>(null);
     const [isDeleting, setIsDeleting] = React.useState(false);
 
-    // Debounce search term
+    // Reset to page 1 when search changes
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(searchTerm);
-            setCurrentPage(1);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
+        setCurrentPage(1);
+    }, [debouncedSearch]);
 
     const fetchContacts = async (page: number, limit: number, search: string, dr?: DateRange) => {
         setIsLoading(true);

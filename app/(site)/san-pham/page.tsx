@@ -27,6 +27,7 @@ import {
     PaginationPrevious,
 } from '@/components/ui/pagination';
 import api from '@/utils/axios';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface Product {
     id: string;
@@ -47,20 +48,16 @@ export default function ProductArchive() {
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('Tất cả');
     const [searchQuery, setSearchQuery] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const debouncedSearch = useDebounce(searchQuery, 500);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-    // Debounce search query
+    // Reset to page 1 when search changes
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(searchQuery);
-            setCurrentPage(1);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
+        setCurrentPage(1);
+    }, [debouncedSearch]);
 
     const fetchProducts = async (page: number = 1) => {
         setLoading(true);

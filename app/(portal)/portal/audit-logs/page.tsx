@@ -29,12 +29,13 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useDebounce } from '@/hooks/use-debounce';
 
 export default function AuditLogsPage() {
     const [logs, setLogs] = React.useState<any[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [searchQuery, setSearchQuery] = React.useState('');
-    const [debouncedSearch, setDebouncedSearch] = React.useState('');
+    const debouncedSearch = useDebounce(searchQuery, 500);
     const [page, setPage] = React.useState(1);
     const [pageSize, setPageSize] = React.useState(10);
     const [totalItems, setTotalItems] = React.useState(0);
@@ -42,14 +43,10 @@ export default function AuditLogsPage() {
     const [actionFilter, setActionFilter] = React.useState('all');
     const [selectedLog, setSelectedLog] = React.useState<any>(null);
 
-    // Debounce search
+    // Reset to page 1 when search changes
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(searchQuery);
-            setPage(1);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
+        setPage(1);
+    }, [debouncedSearch]);
 
     const fetchLogs = async () => {
         setIsLoading(true);
