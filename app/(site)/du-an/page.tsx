@@ -40,12 +40,12 @@ export default function ProjectsPage() {
     const fetchProjects = async (page: number = 1) => {
         setLoading(true);
         try {
-            const params = new URLSearchParams({
-                page: String(page),
-                limit: String(ITEMS_PER_PAGE),
+            const response = await api.get('/api/projects', {
+                params: {
+                    page,
+                    limit: ITEMS_PER_PAGE,
+                },
             });
-
-            const response = await api.get(`/api/projects?${params.toString()}`);
             if (response.data.success) {
                 setProjects(response.data.data || []);
 

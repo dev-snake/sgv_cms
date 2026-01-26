@@ -130,16 +130,15 @@ export default function ContactsManagementPage() {
     const fetchContacts = async (page: number, limit: number, search: string, dr?: DateRange) => {
         setIsLoading(true);
         try {
-            const params = new URLSearchParams({
-                page: String(page),
-                limit: String(limit),
+            const res = await api.get(API_ROUTES.CONTACTS, {
+                params: {
+                    page,
+                    limit,
+                    search: search || undefined,
+                    startDate: dr?.from?.toISOString(),
+                    endDate: dr?.to?.toISOString(),
+                },
             });
-
-            if (search) params.append('search', search);
-            if (dr?.from) params.append('startDate', dr.from.toISOString());
-            if (dr?.to) params.append('endDate', dr.to.toISOString());
-
-            const res = await api.get(`${API_ROUTES.CONTACTS}?${params.toString()}`);
             setContacts(res.data.data || []);
             if (res.data.meta) {
                 setTotalItems(res.data.meta.total || 0);

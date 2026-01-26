@@ -52,12 +52,13 @@ export default function NewsPage() {
     const fetchNews = async (page: number = 1) => {
         setLoading(true);
         try {
-            const params = new URLSearchParams({
-                status: 'published',
-                page: String(page),
-                limit: String(ITEMS_PER_PAGE + 1), // +1 for featured
+            const response = await api.get('/api/news', {
+                params: {
+                    status: 'published',
+                    page,
+                    limit: ITEMS_PER_PAGE + 1,
+                },
             });
-            const response = await api.get(`/api/news?${params.toString()}`);
             if (response.data.success) {
                 setNews(response.data.data || []);
                 if (response.data.meta) {

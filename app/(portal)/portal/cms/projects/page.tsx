@@ -78,16 +78,15 @@ export default function ProjectsManagementPage() {
     ) => {
         setIsLoading(true);
         try {
-            const params = new URLSearchParams({
-                page: String(page),
-                limit: String(limit),
+            const res = await api.get(API_ROUTES.PROJECTS, {
+                params: {
+                    page,
+                    limit,
+                    search: search || undefined,
+                    startDate: dateRange?.from?.toISOString(),
+                    endDate: dateRange?.to?.toISOString(),
+                },
             });
-
-            if (search) params.append('search', search);
-            if (dateRange?.from) params.append('startDate', dateRange.from.toISOString());
-            if (dateRange?.to) params.append('endDate', dateRange.to.toISOString());
-
-            const res = await api.get(`${API_ROUTES.PROJECTS}?${params.toString()}`);
             setProjectsList(res.data.data || []);
             if (res.data.meta) {
                 setTotalItems(res.data.meta.total || 0);

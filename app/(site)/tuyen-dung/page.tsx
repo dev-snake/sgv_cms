@@ -52,12 +52,13 @@ export default function RecruitmentPage() {
     const fetchJobs = async (page: number = 1) => {
         setLoading(true);
         try {
-            const params = new URLSearchParams({
-                status: 'open',
-                page: String(page),
-                limit: '10',
+            const response = await api.get('/api/jobs', {
+                params: {
+                    status: 'open',
+                    page,
+                    limit: 10,
+                },
             });
-            const response = await api.get(`/api/jobs?${params.toString()}`);
             if (response.data.success) {
                 setJobs(response.data.data || []);
                 if (response.data.meta) {

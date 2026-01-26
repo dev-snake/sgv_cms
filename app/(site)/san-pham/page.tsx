@@ -65,23 +65,15 @@ export default function ProductArchive() {
     const fetchProducts = async (page: number = 1) => {
         setLoading(true);
         try {
-            const params = new URLSearchParams({
-                status: 'active',
-                page: String(page),
-                limit: String(ITEMS_PER_PAGE),
+            const response = await api.get('/api/products', {
+                params: {
+                    status: 'active',
+                    page,
+                    limit: ITEMS_PER_PAGE,
+                    search: debouncedSearch || undefined,
+                    category: selectedCategory !== 'Tất cả' ? selectedCategory : undefined,
+                },
             });
-
-            // Add search query to API params
-            if (debouncedSearch) {
-                params.append('search', debouncedSearch);
-            }
-
-            // Add category filter to API params
-            if (selectedCategory !== 'Tất cả') {
-                params.append('category', selectedCategory);
-            }
-
-            const response = await api.get(`/api/products?${params.toString()}`);
             if (response.data.success) {
                 const data = response.data.data || [];
                 setProducts(data);

@@ -108,14 +108,13 @@ export default function JobsManagementPage() {
     const fetchJobs = async (page: number, limit: number, search: string) => {
         setIsLoading(true);
         try {
-            const params = new URLSearchParams({
-                page: String(page),
-                limit: String(limit),
+            const res = await api.get(API_ROUTES.JOBS, {
+                params: {
+                    page,
+                    limit,
+                    search: search || undefined,
+                },
             });
-
-            if (search) params.append('search', search);
-
-            const res = await api.get(`${API_ROUTES.JOBS}?${params.toString()}`);
             setJobs(res.data.data || []);
             if (res.data.meta) {
                 setTotalItems(res.data.meta.total || 0);
