@@ -1,7 +1,4 @@
-/**
- * Centralized Route Definitions
- * Use these constants instead of hard-coded strings throughout the app.
- */
+
 
 export const SITE_ROUTES = {
     HOME: '/',
@@ -71,7 +68,6 @@ export const PORTAL_ROUTES = {
         media: '/portal/cms/media',
     },
 
-    // Users
     users: {
         list: '/portal/users',
         add: '/portal/users/add',
@@ -87,14 +83,8 @@ export const PORTAL_ROUTES = {
             edit: (id: string) => `/portal/users/modules/${id}/edit`,
         },
     },
-
-    // Contacts
     contacts: '/portal/contacts',
-
-    // Notifications
     notifications: '/portal/notifications',
-
-    // Settings
     settings: '/portal/settings',
 } as const;
 

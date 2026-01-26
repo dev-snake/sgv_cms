@@ -1,7 +1,4 @@
-/**
- * Audit Log Constants
- * Centralized constants for Audit Logging actions and modules
- */
+
 
 export const AUDIT_ACTIONS = {
     CREATE: 'CREATE',
