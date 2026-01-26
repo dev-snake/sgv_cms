@@ -142,11 +142,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
                 set({ user: synchronizedUser, isInitialized: true });
             } else {
-                set({ user: null, isInitialized: true });
+                // If success: false, treat as unauthorized
+                await get().logout();
             }
         } catch (error: any) {
-            console.error('Failed to fetch profile', error);
-            if (axios.isAxiosError(error) && error.response?.status === 401) {
+            console.error('Auth check failed:', error);
+            // If any 401, 403, 404 or missing response, force logout
+            if (
+                axios.isAxiosError(error) &&
+                (error.response?.status === 401 ||
+                    error.response?.status === 404 ||
+                    error.response?.status === 403)
+            ) {
+                await get().logout();
+            } else {
                 set({ user: null, isInitialized: true });
             }
         } finally {
@@ -160,8 +169,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 
-    logout: () => {
-        set({ user: null, isInitialized: false });
+    logout: async () => {
+        // 1. Clear State
+        set({ user: null, isInitialized: true, isLoading: false });
+
+        // 2. Clear Client-side non-HttpOnly cookies
+        Cookies.remove('accessToken', { path: '/' });
+
+        // 3. Call server to clear HttpOnly cookies (session, refreshToken)
+        try {
+            await api.post(API_ROUTES.AUTH.LOGOUT);
+        } catch (error) {
+            console.error('Logout API failed:', error);
+        }
+
+        // 4. Force redirect if in portal
+        if (typeof window !== 'undefined' && window.location.pathname.startsWith('/portal')) {
+            window.location.href = '/login';
+        }
     },
     setModulesOrder: (newModules: SidebarModule[]) => {
         const currentUser = get().user;

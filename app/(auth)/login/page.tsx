@@ -25,9 +25,7 @@ export default function LoginPage() {
         setIsLoading(true);
 
         try {
-            const res = await api.post(API_ROUTES.AUTH.LOGIN, formData);
-            // Tokens are now stored in httpOnly cookies by the server
-            // No need to manually store them in localStorage
+            await api.post(API_ROUTES.AUTH.LOGIN, formData);
 
             toast.success('Đăng nhập thành công! Đang chuyển hướng...');
             await useAuthStore.getState().refreshUser();
