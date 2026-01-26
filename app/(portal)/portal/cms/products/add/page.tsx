@@ -1,23 +1,16 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/axios';
 import {
-    Plus,
-    Trash2,
     Save,
     ArrowLeft,
     Loader2,
-    X,
-    PlusCircle,
-    FileText,
-    Settings,
     Image as ImageIcon,
     Package,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { generateSlug } from '@/utils/slug';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,10 +36,10 @@ interface Category {
 
 export default function AddProductPage() {
     const router = useRouter();
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [categories, setCategories] = React.useState<Category[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
 
-    const [formData, setFormData] = React.useState({
+    const [formData, setFormData] = useState({
         name: '',
         slug: '',
         description: '',
@@ -68,7 +61,7 @@ export default function AddProductPage() {
         gallery: [] as string[],
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const res = await api.get(`${API_ROUTES.CATEGORIES}?type=product`);
@@ -92,7 +85,7 @@ export default function AddProductPage() {
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!formData.category_id) {
             toast.error('Vui lòng chọn danh mục');

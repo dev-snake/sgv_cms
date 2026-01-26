@@ -17,7 +17,7 @@ import {
     ExternalLink,
     ChevronRight,
 } from 'lucide-react';
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,11 +56,11 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
 export default function ApplicationDetailPage() {
     const { id } = useParams();
     const router = useRouter();
-    const [application, setApplication] = React.useState<JobApplication | null>(null);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-    const [isDeleting, setIsDeleting] = React.useState(false);
-    const [isUpdating, setIsUpdating] = React.useState(false);
+    const [application, setApplication] = useState<JobApplication | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
 
     const fetchApplication = async () => {
         setIsLoading(true);
@@ -76,7 +76,7 @@ export default function ApplicationDetailPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (id) fetchApplication();
     }, [id]);
 

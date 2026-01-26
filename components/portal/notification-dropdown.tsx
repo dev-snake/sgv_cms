@@ -1,6 +1,5 @@
 'use client';
-
-import * as React from 'react';
+import { useState, useEffect, useCallback } from 'react'
 import { Bell, MessageSquare, Mail, UserPlus, CheckCheck, ChevronRight } from 'lucide-react';
 import {
     DropdownMenu,
@@ -30,20 +29,20 @@ interface Notification {
 }
 
 export function NotificationDropdown() {
-    const [notifications, setNotifications] = React.useState<Notification[]>([]);
-    const [unreadCount, setUnreadCount] = React.useState(0);
-    const [isOpen, setIsOpen] = React.useState(false);
-    const [isMounted, setIsMounted] = React.useState(false);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [isOpen, setIsOpen] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
 
     const { socket } = useSocket({
         query: { isAdmin: 'true' },
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    const fetchNotifications = React.useCallback(async () => {
+    const fetchNotifications = useCallback(async () => {
         try {
             const response = await api.get(API_ROUTES.NOTIFICATIONS);
             if (response.data.success) {
@@ -55,11 +54,11 @@ export function NotificationDropdown() {
         }
     }, []);
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchNotifications();
     }, [fetchNotifications]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!socket) return;
 
         socket.on('new-notification', (notification: Notification) => {

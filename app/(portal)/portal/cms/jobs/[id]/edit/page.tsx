@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import {FormEvent, useEffect, useState} from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/utils/axios';
@@ -31,10 +31,10 @@ export default function EditJobPage() {
     const router = useRouter();
     const jobId = params.id as string;
 
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [formData, setFormData] = React.useState({
+    const [formData, setFormData] = useState({
         title: '',
         slug: '',
         description: '',
@@ -49,7 +49,7 @@ export default function EditJobPage() {
         deadline: undefined as Date | undefined,
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchJob = async () => {
             setIsLoading(true);
             try {
@@ -93,7 +93,7 @@ export default function EditJobPage() {
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!formData.title || !formData.slug || !formData.description) {
             toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');

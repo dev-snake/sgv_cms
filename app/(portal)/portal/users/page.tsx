@@ -13,7 +13,7 @@ import {
     Activity,
     Users,
 } from 'lucide-react';
-import * as React from 'react';
+import  {useEffect, useState} from 'react';
 import Link from 'next/link';
 import {
     DropdownMenu,
@@ -37,12 +37,12 @@ import { PieChartLabel } from '@/components/portal/charts/PieChartLabel';
 import { AreaChartGradient } from '@/components/portal/charts/AreaChartGradient';
 
 export default function UsersManagementPage() {
-    const [users, setUsers] = React.useState<User[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [stats, setStats] = React.useState<any>(null);
-    const [searchTerm, setSearchTerm] = React.useState('');
-    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-    const [itemToDelete, setItemToDelete] = React.useState<User | null>(null);
+    const [users, setUsers] = useState<User[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState<any>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<User | null>(null);
     const { user: currentUser, hasPermission } = useAuth();
 
     const fetchUsers = async () => {
@@ -67,7 +67,7 @@ export default function UsersManagementPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchUsers();
         fetchStats();
     }, []);

@@ -14,7 +14,6 @@ import {
     PaginationPrevious,
 } from '@/components/ui/pagination';
 import { cn } from '@/lib/utils';
-import { SITE_ROUTES } from '@/constants/routes';
 import api from '@/utils/axios';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';

@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import {useEffect, useState} from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -15,11 +15,11 @@ export default function EditProductCategoryPage() {
     const router = useRouter();
     const categoryId = params.id as string;
 
-    const [category, setCategory] = React.useState<CategoryFormData | null>(null);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [category, setCategory] = useState<CategoryFormData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchCategory = async () => {
             setIsLoading(true);
             try {

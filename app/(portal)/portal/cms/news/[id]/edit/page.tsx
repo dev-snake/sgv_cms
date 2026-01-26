@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import {FormEvent, useEffect, useState} from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -19,9 +19,7 @@ import {
     Twitter,
     Bookmark,
     MoveRight,
-    LayoutGrid,
     FileEdit,
-    Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -70,12 +68,12 @@ export default function EditNewsPage() {
     const router = useRouter();
     const newsId = params.id as string;
 
-    const [loading, setLoading] = React.useState(true);
-    const [saving, setSaving] = React.useState(false);
-    const [article, setArticle] = React.useState<NewsArticle | null>(null);
-    const [categories, setCategories] = React.useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [article, setArticle] = useState<NewsArticle | null>(null);
+    const [categories, setCategories] = useState<any[]>([]);
 
-    const [formData, setFormData] = React.useState({
+    const [formData, setFormData] = useState({
         title: '',
         slug: '',
         summary: '',
@@ -88,10 +86,10 @@ export default function EditNewsPage() {
         published_at: undefined as Date | undefined,
     });
 
-    const [viewMode, setViewMode] = React.useState<'edit' | 'preview'>('edit');
-    const [recentArticles, setRecentArticles] = React.useState<any[]>([]);
+    const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+    const [recentArticles, setRecentArticles] = useState<any[]>([]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 // Fetch article, categories and authors in parallel
@@ -156,7 +154,7 @@ export default function EditNewsPage() {
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setSaving(true);
         try {

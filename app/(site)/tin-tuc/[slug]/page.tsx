@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import {FormEvent, useEffect, useState} from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -8,15 +8,14 @@ import {
     CalendarDays,
     User,
     Clock,
-    Share2,
     ArrowLeft,
     Facebook,
     Linkedin,
     Twitter,
-    Search,
     MoveRight,
     Bookmark,
     Printer,
+    Share2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -34,14 +33,14 @@ import api from '@/utils/axios';
 export default function NewsDetailPage() {
     const params = useParams();
     const router = useRouter();
-    const [article, setArticle] = React.useState<any>(null);
-    const [loading, setLoading] = React.useState(true);
-    const [relatedArticles, setRelatedArticles] = React.useState<any[]>([]);
-    const [recentArticles, setRecentArticles] = React.useState<any[]>([]);
-    const [categories, setCategories] = React.useState<any[]>([]);
-    const [searchQuery, setSearchQuery] = React.useState('');
+    const [article, setArticle] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [relatedArticles, setRelatedArticles] = useState<any[]>([]);
+    const [recentArticles, setRecentArticles] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 const [articleRes, relatedRes, categoriesRes, recentRes] = await Promise.all([
@@ -74,7 +73,7 @@ export default function NewsDetailPage() {
         fetchData();
     }, [params.slug]);
 
-    const handleSearch = (e: React.FormEvent) => {
+    const handleSearch = (e: FormEvent) => {
         e.preventDefault();
         if (searchQuery.trim()) {
             router.push(`/tin-tuc?search=${encodeURIComponent(searchQuery)}`);

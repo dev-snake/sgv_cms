@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import {useEffect, useState} from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -17,11 +17,11 @@ export default function EditNewsCategoryPage() {
     const router = useRouter();
     const categoryId = params.id as string;
 
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [category, setCategory] = React.useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [category, setCategory] = useState<any>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchCategory = async () => {
             try {
                 const res = await api.get(`${API_ROUTES.CATEGORIES}/${categoryId}`);

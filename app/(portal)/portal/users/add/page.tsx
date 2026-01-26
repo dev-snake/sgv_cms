@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import {FormEvent, useEffect, useState} from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/axios';
 import {
@@ -30,8 +30,8 @@ import { cn } from '@/lib/utils';
 
 export default function AddUserPage() {
     const router = useRouter();
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [formData, setFormData] = React.useState({
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formData, setFormData] = useState({
         username: '',
         password: '',
         fullName: '',
@@ -39,12 +39,12 @@ export default function AddUserPage() {
         phone: '',
         roleId: '' as string,
     });
-    const [availableRoles, setAvailableRoles] = React.useState<Role[]>([]);
-    const [isLoadingRoles, setIsLoadingRoles] = React.useState(true);
-    const [selectedRoleDetails, setSelectedRoleDetails] = React.useState<any>(null);
-    const [isLoadingDetails, setIsLoadingDetails] = React.useState(false);
+    const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
+    const [isLoadingRoles, setIsLoadingRoles] = useState(true);
+    const [selectedRoleDetails, setSelectedRoleDetails] = useState<any>(null);
+    const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchRoles = async () => {
             try {
                 const res = await api.get(API_ROUTES.ROLES);
@@ -73,7 +73,7 @@ export default function AddUserPage() {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!formData.username || !formData.password || !formData.roleId) {
             toast.error('Vui lòng nhập đầy đủ thông tin bắt buộc');

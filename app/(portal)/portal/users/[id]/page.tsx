@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import {FormEvent, useEffect, useState} from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import api from '@/utils/axios';
 import {
@@ -10,7 +10,6 @@ import {
     Lock,
     User as UserIcon,
     Loader2,
-    AlertCircle,
     CheckCircle2,
     Circle,
 } from 'lucide-react';
@@ -28,10 +27,10 @@ export default function EditUserPage() {
     const params = useParams();
     const userId = params.id as string;
 
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [isSuperAdmin, setIsSuperAdmin] = React.useState(false);
-    const [formData, setFormData] = React.useState({
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+    const [formData, setFormData] = useState({
         username: '',
         password: '', // Optional for edit
         fullName: '',
@@ -39,9 +38,9 @@ export default function EditUserPage() {
         phone: '',
         roleIds: [] as string[],
     });
-    const [availableRoles, setAvailableRoles] = React.useState<Role[]>([]);
+    const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 const [userRes, rolesRes] = await Promise.all([
@@ -74,7 +73,7 @@ export default function EditUserPage() {
         fetchData();
     }, [userId, router]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!formData.username) {
             toast.error('Username không được để trống');

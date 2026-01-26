@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/axios';
 import { ArrowLeft, Save, Settings, Loader2, Layout, ExternalLink, SortAsc } from 'lucide-react';
@@ -20,9 +20,9 @@ interface ModuleFormProps {
 export function ModuleForm({ initialData, isEditing = false }: ModuleFormProps) {
     const router = useRouter();
     const { refreshUser } = useAuth();
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [formData, setFormData] = React.useState({
+    const [formData, setFormData] = useState({
         name: initialData?.name || '',
         code: initialData?.code || '',
         icon: initialData?.icon || '',
@@ -30,7 +30,7 @@ export function ModuleForm({ initialData, isEditing = false }: ModuleFormProps) 
         order: initialData?.order || 0,
     });
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!formData.name || !formData.code) {
             toast.error('Vui lòng nhập đầy đủ tên và mã module');

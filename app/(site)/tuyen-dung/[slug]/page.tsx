@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import {ChangeEvent, FormEvent, useEffect, useRef, useState} from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion } from 'motion/react';
@@ -56,10 +56,10 @@ const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
 export default function JobDetailPage() {
     const params = useParams();
     const slug = params.slug as string;
-    const [job, setJob] = React.useState<JobPosting | null>(null);
-    const [loading, setLoading] = React.useState(true);
+    const [job, setJob] = useState<JobPosting | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchJob = async () => {
             try {
                 const response = await api.get(`/api/jobs/${slug}`);
@@ -401,18 +401,18 @@ export default function JobDetailPage() {
 }
 
 function ApplyForm({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [formData, setFormData] = React.useState({
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formData, setFormData] = useState({
         full_name: '',
         email: '',
         phone: '',
         cv_url: '',
         cover_letter: '',
     });
-    const [cvFile, setCvFile] = React.useState<File | null>(null);
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [cvFile, setCvFile] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             if (file.size > 5 * 1024 * 1024) {
@@ -432,7 +432,7 @@ function ApplyForm({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!formData.full_name || !formData.email || !formData.phone || !cvFile) {
             toast.error('Vui lòng điền đủ thông tin và đính kèm CV');

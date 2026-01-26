@@ -1,18 +1,11 @@
 'use client';
 
-import * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     BarChart3,
-    TrendingUp,
     Clock,
-    FileText,
-    Briefcase,
-    Box,
-    Users,
-    ChevronRight,
     RefreshCcw,
     Calendar,
-    Filter,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -27,11 +20,11 @@ import { AreaChartGradient } from '@/components/portal/charts/AreaChartGradient'
 import { cn } from '@/lib/utils';
 
 export default function AnalyticsPage() {
-    const [stats, setStats] = React.useState<any>(null);
-    const [loading, setLoading] = React.useState(true);
-    const [updateTime, setUpdateTime] = React.useState<string>('');
+    const [stats, setStats] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [updateTime, setUpdateTime] = useState<string>('');
 
-    const fetchStats = React.useCallback(async () => {
+    const fetchStats = useCallback(async () => {
         setLoading(true);
         try {
             const res = await api.get(API_ROUTES.STATS);
@@ -44,7 +37,7 @@ export default function AnalyticsPage() {
         }
     }, []);
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchStats();
     }, [fetchStats]);
 

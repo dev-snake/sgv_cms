@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import api from '@/utils/axios';
 import { Plus, Edit2, Trash2, FolderOpen, ArrowLeft, Loader2 } from 'lucide-react';
@@ -18,10 +18,10 @@ interface Category {
 }
 
 export default function ProjectCategoriesPage() {
-    const [categories, setCategories] = React.useState<Category[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-    const [itemToDelete, setItemToDelete] = React.useState<Category | null>(null);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<Category | null>(null);
 
     const fetchCategories = async () => {
         setIsLoading(true);
@@ -36,7 +36,7 @@ export default function ProjectCategoriesPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchCategories();
     }, []);
 

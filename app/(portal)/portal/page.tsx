@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
     FileText,
@@ -23,11 +23,11 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
 export default function DashboardPage() {
-    const [stats, setStats] = React.useState<any>(null);
-    const [loading, setLoading] = React.useState(true);
-    const [updateTime, setUpdateTime] = React.useState<string>('');
+    const [stats, setStats] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [updateTime, setUpdateTime] = useState<string>('');
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchStats = async () => {
             try {
                 const res = await api.get(API_ROUTES.STATS);

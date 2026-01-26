@@ -1,10 +1,9 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Package, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { generateSlug } from '@/utils/slug';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,11 +33,11 @@ export default function EditProductPage() {
     const router = useRouter();
     const productId = params.id as string;
 
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [categories, setCategories] = React.useState<Category[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
 
-    const [formData, setFormData] = React.useState({
+    const [formData, setFormData] = useState({
         name: '',
         slug: '',
         sku: '',
@@ -60,7 +59,7 @@ export default function EditProductPage() {
         gallery: [] as string[],
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
@@ -127,7 +126,7 @@ export default function EditProductPage() {
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {

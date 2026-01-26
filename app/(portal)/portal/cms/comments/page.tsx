@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     MessageSquare,
     Search,
@@ -16,7 +16,7 @@ import {
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -67,23 +67,23 @@ interface Comment {
 }
 
 export default function CommentsManagementPage() {
-    const [comments, setComments] = React.useState<Comment[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [stats, setStats] = React.useState<any>(null);
-    const [page, setPage] = React.useState(1);
-    const [total, setTotal] = React.useState(0);
-    const [search, setSearch] = React.useState('');
-    const [status, setStatus] = React.useState<string>('all');
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState<any>(null);
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [search, setSearch] = useState('');
+    const [status, setStatus] = useState<string>('all');
 
     // Reply Dialog State
-    const [replyingTo, setReplyingTo] = React.useState<Comment | null>(null);
-    const [replyContent, setReplyContent] = React.useState('');
-    const [isSubmittingReply, setIsSubmittingReply] = React.useState(false);
+    const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
+    const [replyContent, setReplyContent] = useState('');
+    const [isSubmittingReply, setIsSubmittingReply] = useState(false);
 
     // Delete confirmation state
-    const [commentToDelete, setCommentToDelete] = React.useState<string | null>(null);
+    const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
-    const fetchComments = React.useCallback(async () => {
+    const fetchComments = useCallback(async () => {
         setIsLoading(true);
         try {
             const response = await api.get('/api/portal/comments', {
@@ -115,7 +115,7 @@ export default function CommentsManagementPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchComments();
         fetchStats();
     }, [fetchComments]);

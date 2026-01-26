@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, Lock, User, Loader2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,13 +14,13 @@ import { useAuthStore } from '@/stores/auth-store';
 
 export default function LoginPage() {
     const router = useRouter();
-    const [isLoading, setIsLoading] = React.useState(false);
-    const [formData, setFormData] = React.useState({
+    const [isLoading, setIsLoading] = useState(false);
+    const [formData, setFormData] = useState({
         username: '',
         password: '',
     });
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 

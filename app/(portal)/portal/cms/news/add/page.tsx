@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import {useEffect, useState, FormEvent} from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/axios';
@@ -20,9 +20,7 @@ import {
     Twitter,
     Bookmark,
     MoveRight,
-    LayoutGrid,
     FileEdit,
-    Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,10 +56,10 @@ interface Category {
 
 export default function AddNewsPage() {
     const router = useRouter();
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [categories, setCategories] = React.useState<Category[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
 
-    const [formData, setFormData] = React.useState({
+    const [formData, setFormData] = useState({
         title: '',
         slug: '',
         summary: '',
@@ -74,10 +72,10 @@ export default function AddNewsPage() {
         published_at: undefined as Date | undefined,
     });
 
-    const [viewMode, setViewMode] = React.useState<'edit' | 'preview'>('edit');
-    const [recentArticles, setRecentArticles] = React.useState<any[]>([]);
+    const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+    const [recentArticles, setRecentArticles] = useState<any[]>([]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 const [catsRes, authorsRes] = await Promise.all([
@@ -115,7 +113,7 @@ export default function AddNewsPage() {
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!formData.category_id || !formData.author_id) {
             toast.error('Vui lòng chọn danh mục');

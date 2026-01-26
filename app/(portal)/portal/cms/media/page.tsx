@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import {useEffect, useState, useRef} from 'react';
 import Image from 'next/image';
 import {
     Upload,
@@ -10,10 +10,7 @@ import {
     Maximize2,
     Loader2,
     Image as ImageIcon,
-    Check,
     X,
-    FileText,
-    Clock,
     HardDrive,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -32,21 +29,21 @@ interface UploadedImage {
 }
 
 export default function MediaManagementPage() {
-    const [images, setImages] = React.useState<UploadedImage[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [searchTerm, setSearchTerm] = React.useState('');
-    const [isUploading, setIsUploading] = React.useState(false);
-    const [uploadDialogOpen, setUploadDialogOpen] = React.useState(false);
-    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-    const [itemToDelete, setItemToDelete] = React.useState<UploadedImage | null>(null);
-    const [isDeleting, setIsDeleting] = React.useState(false);
-    const [isDragging, setIsDragging] = React.useState(false);
+    const [images, setImages] = useState<UploadedImage[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<UploadedImage | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
 
     // Lightbox state
-    const [lightboxOpen, setLightboxOpen] = React.useState(false);
-    const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const fetchImages = async () => {
         setIsLoading(true);
@@ -63,7 +60,7 @@ export default function MediaManagementPage() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchImages();
     }, []);
 
