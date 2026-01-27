@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import axios from 'axios';
+import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import { io, Socket } from 'socket.io-client';
 import { SimpleConfirmDialog } from '@/components/shared/simple-confirm-dialog';
 
@@ -61,12 +62,14 @@ export default function ChatWidget() {
 
         const initSession = async () => {
             try {
-                const res = await axios.post('/api/chat/sessions', { guestId });
+                const res = await $api.post(API_ROUTES.CHAT.SESSIONS, { guestId });
                 const sessionPayload = res.data.data;
                 setSessionId(sessionPayload.id);
                 setSessionData(sessionPayload);
 
-                const msgRes = await axios.get(`/api/chat/messages?sessionId=${sessionPayload.id}`);
+                const msgRes = await $api.get(
+                    `${API_ROUTES.CHAT.MESSAGES}?sessionId=${sessionPayload.id}`,
+                );
                 setMessages(msgRes.data.data || []);
                 handleUpdateSeen(sessionPayload.id);
             } catch (error) {
@@ -83,7 +86,7 @@ export default function ChatWidget() {
 
     const handleUpdateSeen = async (id: string) => {
         try {
-            await axios.patch(`/api/chat/sessions/${id}`, { guestLastSeen: true });
+            await $api.patch(`${API_ROUTES.CHAT.SESSIONS}/${id}`, { guestLastSeen: true });
         } catch (error) {
             // Silently fail
         }
@@ -166,7 +169,7 @@ export default function ChatWidget() {
         sendTypingStatus(false);
 
         try {
-            const res = await axios.post('/api/chat/messages', {
+            const res = await $api.post(API_ROUTES.CHAT.MESSAGES, {
                 sessionId,
                 content,
                 isFromWidget: true,
@@ -195,7 +198,7 @@ export default function ChatWidget() {
     const confirmClearHistory = async () => {
         if (!sessionId) return;
         try {
-            await axios.delete(`/api/chat/sessions/${sessionId}`);
+            await $api.delete(`${API_ROUTES.CHAT.SESSIONS}/${sessionId}`);
             setIsClearDialogOpen(false);
         } catch (error) {
             console.error('Failed to clear history:', error);

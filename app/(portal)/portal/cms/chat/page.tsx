@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import { toast } from 'sonner';
 import { useSocket } from '@/hooks/use-socket';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -64,7 +65,7 @@ export default function ChatAdminPage() {
     const fetchSessions = async () => {
         setIsLoadingSessions(true);
         try {
-            const res = await $api.get('/api/chat/sessions/admin');
+            const res = await $api.get(`${API_ROUTES.CHAT.SESSIONS}/admin`);
             setSessions(res.data.data || []);
         } catch (error) {
             console.error('Failed to fetch sessions:', error);
@@ -84,7 +85,9 @@ export default function ChatAdminPage() {
         const fetchMessages = async () => {
             setIsLoadingMessages(true);
             try {
-                const res = await $api.get(`/api/chat/messages?sessionId=${selectedSession.id}`);
+                const res = await $api.get(
+                    `${API_ROUTES.CHAT.MESSAGES}?sessionId=${selectedSession.id}`,
+                );
                 setMessages(res.data.data || []);
                 // Mark as seen when opening
                 handleUpdateSeen(selectedSession.id);
@@ -101,7 +104,7 @@ export default function ChatAdminPage() {
 
     const handleUpdateSeen = async (sessionId: string) => {
         try {
-            await $api.patch(`/api/chat/sessions/${sessionId}`, { adminLastSeen: true });
+            await $api.patch(`${API_ROUTES.CHAT.SESSIONS}/${sessionId}`, { adminLastSeen: true });
         } catch (error) {
             console.error('Failed to update seen status:', error);
         }
@@ -214,7 +217,7 @@ export default function ChatAdminPage() {
         sendTypingStatus(false);
 
         try {
-            await $api.post('/api/chat/messages', {
+            await $api.post(API_ROUTES.CHAT.MESSAGES, {
                 sessionId: selectedSession.id,
                 content,
                 replyToId: replyId,
@@ -236,7 +239,7 @@ export default function ChatAdminPage() {
 
         setIsDeletingSession(true);
         try {
-            await $api.delete(`/api/chat/sessions/${sessionToDelete}`);
+            await $api.delete(`${API_ROUTES.CHAT.SESSIONS}/${sessionToDelete}`);
             // Optimistically update UI
             setSessions((prev) => prev.filter((s) => s.id !== sessionToDelete));
             if (selectedSession?.id === sessionToDelete) {
@@ -260,7 +263,7 @@ export default function ChatAdminPage() {
     const confirmDeleteMessage = async () => {
         if (!messageToDelete) return;
         try {
-            await $api.delete(`/api/chat/messages/${messageToDelete}`);
+            await $api.delete(`${API_ROUTES.CHAT.MESSAGES}/${messageToDelete}`);
             setMessageToDelete(null);
         } catch (error) {
             console.error('Failed to delete message:', error);

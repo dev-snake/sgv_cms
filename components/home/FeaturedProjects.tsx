@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { MoveRight, MapPin, Loader2 } from 'lucide-react';
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import { Project } from '@/types';
 
 export default function FeaturedProjects() {
@@ -13,7 +14,7 @@ export default function FeaturedProjects() {
     React.useEffect(() => {
         const fetchFeaturedProjects = async () => {
             try {
-                const response = await $api.get('/api/projects?limit=4');
+                const response = await $api.get(`${API_ROUTES.PROJECTS}?limit=4`);
                 if (response.data.success) {
                     setProjects(response.data.data);
                 }

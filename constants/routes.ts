@@ -1,5 +1,3 @@
-
-
 export const SITE_ROUTES = {
     HOME: '/',
     ABOUT: '/gioi-thieu',
@@ -95,27 +93,33 @@ export const ADMIN_ROUTES = {
 
 export const API_ROUTES = {
     AUTH: {
-        LOGIN: '/api/auth/login',
-        LOGOUT: '/api/auth/logout',
-        REFRESH: '/api/auth/refresh',
-        PROFILE: '/api/auth/profile',
+        LOGIN: '/auth/login',
+        LOGOUT: '/auth/logout',
+        REFRESH: '/auth/refresh',
+        PROFILE: '/auth/profile',
     },
-    PRODUCTS: '/api/products',
-    NEWS: '/api/news',
-    PROJECTS: '/api/projects',
-    CONTACTS: '/api/contacts',
-    CATEGORIES: '/api/categories',
-    USERS: '/api/users',
-    AUTHORS: '/api/authors',
-    MEDIA: '/api/media',
-    STATS: '/api/stats',
-    JOBS: '/api/jobs',
-    APPLICATIONS: '/api/applications',
-    ROLES: '/api/roles',
-    PERMISSIONS: '/api/permissions',
-    MODULES: '/api/modules',
-    COMMENTS: '/api/portal/comments',
-    NOTIFICATIONS: '/api/portal/notifications',
+    PRODUCTS: '/products',
+    NEWS: '/news',
+    PROJECTS: '/projects',
+    CONTACTS: '/contacts',
+    CATEGORIES: '/categories',
+    USERS: '/users',
+    AUTHORS: '/authors',
+    MEDIA: '/media',
+    STATS: '/stats',
+    JOBS: '/jobs',
+    APPLICATIONS: '/applications',
+    ROLES: '/roles',
+    PERMISSIONS: '/permissions',
+    MODULES: '/modules',
+    COMMENTS: '/portal/comments',
+    NOTIFICATIONS: '/portal/notifications',
+    UPLOAD: '/upload',
+    CHAT: {
+        SESSIONS: '/chat/sessions',
+        MESSAGES: '/chat/messages',
+    },
+    AUDIT_LOGS: '/audit-logs',
 } as const;
 
 export type PortalRoute = typeof PORTAL_ROUTES;

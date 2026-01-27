@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/breadcrumb';
 
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 
 export default function NewsDetailPage() {
     const params = useParams();
@@ -44,10 +45,10 @@ export default function NewsDetailPage() {
         const fetchData = async () => {
             try {
                 const [articleRes, relatedRes, categoriesRes, recentRes] = await Promise.all([
-                    $api.get(`/api/news/${params.slug}`),
-                    $api.get('/api/news?limit=3'),
-                    $api.get('/api/categories?type=news'),
-                    $api.get('/api/news?limit=5'),
+                    $api.get(`${API_ROUTES.NEWS}/${params.slug}`),
+                    $api.get(`${API_ROUTES.NEWS}?limit=3`),
+                    $api.get(`${API_ROUTES.CATEGORIES}?type=news`),
+                    $api.get(`${API_ROUTES.NEWS}?limit=5`),
                 ]);
 
                 if (articleRes.data.success) {

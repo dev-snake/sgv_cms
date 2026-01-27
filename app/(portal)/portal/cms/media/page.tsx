@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DeleteConfirmationDialog } from '@/components/portal/delete-confirmation-dialog';
@@ -48,7 +49,7 @@ export default function MediaManagementPage() {
     const fetchImages = async () => {
         setIsLoading(true);
         try {
-            const response = await $api.get('/api/upload');
+            const response = await $api.get(API_ROUTES.UPLOAD);
             if (response.data.success) {
                 setImages(response.data.data || []);
             }
@@ -85,7 +86,7 @@ export default function MediaManagementPage() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await $api.post('/api/upload', formData, {
+            const response = await $api.post(API_ROUTES.UPLOAD, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
@@ -107,7 +108,7 @@ export default function MediaManagementPage() {
 
         setIsDeleting(true);
         try {
-            await $api.delete(`/api/upload?filename=${itemToDelete.filename}`);
+            await $api.delete(`${API_ROUTES.UPLOAD}?filename=${itemToDelete.filename}`);
             toast.success('Đã xóa ảnh thành công');
             fetchImages();
         } catch (error) {

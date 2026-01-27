@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/carousel';
 import { motion } from 'motion/react';
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 
 export default function ProductSpotlight() {
     const [products, setProducts] = React.useState<any[]>([]);
@@ -19,7 +20,7 @@ export default function ProductSpotlight() {
     React.useEffect(() => {
         const fetchFeaturedProducts = async () => {
             try {
-                const response = await $api.get('/api/products?isFeatured=true');
+                const response = await $api.get(`${API_ROUTES.PRODUCTS}?isFeatured=true`);
                 if (response.data.success) {
                     setProducts(response.data.data);
                 }

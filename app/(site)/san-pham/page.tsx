@@ -27,6 +27,7 @@ import {
     PaginationPrevious,
 } from '@/components/ui/pagination';
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import { useDebounce } from '@/hooks/use-debounce';
 
 interface Product {
@@ -62,7 +63,7 @@ export default function ProductArchive() {
     const fetchProducts = async (page: number = 1) => {
         setLoading(true);
         try {
-            const response = await $api.get('/api/products', {
+            const response = await $api.get(API_ROUTES.PRODUCTS, {
                 params: {
                     status: 'active',
                     page,
@@ -92,7 +93,7 @@ export default function ProductArchive() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await $api.get('/api/products?status=active&limit=100');
+                const response = await $api.get(`${API_ROUTES.PRODUCTS}?status=active&limit=100`);
                 if (response.data.success) {
                     const data = response.data.data || [];
                     const uniqueCategories = [

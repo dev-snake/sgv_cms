@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/pagination';
 import { cn } from '@/lib/utils';
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 
 interface NewsArticle {
     id: string;
@@ -52,7 +53,7 @@ export default function NewsPage() {
     const fetchNews = async (page: number = 1) => {
         setLoading(true);
         try {
-            const response = await $api.get('/api/news', {
+            const response = await $api.get(API_ROUTES.NEWS, {
                 params: {
                     status: 'published',
                     page,

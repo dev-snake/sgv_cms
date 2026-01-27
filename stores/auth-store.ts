@@ -204,7 +204,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (!currentUser) return;
 
         try {
-            await $api.patch('/api/modules/reorder', {
+            await $api.patch(`${API_ROUTES.MODULES}/reorder`, {
                 items: currentUser.modules.map((m) => ({ id: m.id, order: m.order })),
             });
         } catch (error) {

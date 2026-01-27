@@ -6,6 +6,7 @@ import { Upload, X, Loader2, ImagePlus, Check, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import {
     Dialog,
     DialogContent,
@@ -51,7 +52,7 @@ export function ImageUploader({
     const fetchUploadedImages = async () => {
         setIsLoadingImages(true);
         try {
-            const response = await $api.get('/api/upload');
+            const response = await $api.get(API_ROUTES.UPLOAD);
             if (response.data.success) {
                 setUploadedImages(response.data.data || []);
             }
@@ -89,7 +90,7 @@ export function ImageUploader({
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await $api.post('/api/upload', formData, {
+            const response = await $api.post(API_ROUTES.UPLOAD, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 

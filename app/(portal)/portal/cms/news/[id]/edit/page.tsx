@@ -3,6 +3,8 @@
 import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { API_ROUTES, PORTAL_ROUTES } from '@/constants/routes';
+import $api from '@/utils/axios';
 import {
     ArrowLeft,
     Save,
@@ -121,7 +123,7 @@ export default function EditNewsPage() {
                 }
 
                 // Fetch recent articles for preview sidebar
-                const recentRes = await $api.get('/api/news?limit=5');
+                const recentRes = await $api.get(`${API_ROUTES.NEWS}?limit=5`);
                 if (recentRes.data.success) {
                     setRecentArticles(recentRes.data.data);
                 }

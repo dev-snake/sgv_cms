@@ -19,7 +19,7 @@ import {
     Maximize2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SITE_ROUTES } from '@/constants/routes';
+import { SITE_ROUTES, API_ROUTES } from '@/constants/routes';
 import Lightbox from '@/components/shared/Lightbox';
 
 import $api from '@/utils/axios';
@@ -35,7 +35,7 @@ export default function ProductDetailPage() {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await $api.get(`/api/products/${params.slug}`);
+                const response = await $api.get(`${API_ROUTES.PRODUCTS}/${params.slug}`);
                 if (response.data.success) {
                     setProduct(response.data.data);
                 }

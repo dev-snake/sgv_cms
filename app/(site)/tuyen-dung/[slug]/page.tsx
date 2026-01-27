@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { SITE_ROUTES } from '@/constants/routes';
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
@@ -62,7 +63,7 @@ export default function JobDetailPage() {
     useEffect(() => {
         const fetchJob = async () => {
             try {
-                const response = await $api.get(`/api/jobs/${slug}`);
+                const response = await $api.get(`${API_ROUTES.JOBS}/${slug}`);
                 if (response.data.success) {
                     setJob(response.data.data);
                 }
@@ -451,7 +452,7 @@ function ApplyForm({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
                 data.append('cover_letter', formData.cover_letter);
             }
 
-            const response = await $api.post('/api/applications', data, {
+            const response = await $api.post(API_ROUTES.APPLICATIONS, data, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 

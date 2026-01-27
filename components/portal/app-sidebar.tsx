@@ -47,7 +47,7 @@ import { useAuth, SidebarModule } from '@/hooks/use-auth';
 import { useAuthStore } from '@/stores/auth-store';
 
 import { cn } from '@/lib/utils';
-import { PORTAL_ROUTES } from '@/constants/routes';
+import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 
 const DynamicIcon = React.memo(
@@ -156,7 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     const handleLogout = async () => {
         try {
-            await $api.post('/api/auth/logout');
+            await $api.post(API_ROUTES.AUTH.LOGOUT);
             useAuthStore.getState().logout(); // Reset auth store state
             toast.success('Đã đăng xuất');
             router.push('/login');

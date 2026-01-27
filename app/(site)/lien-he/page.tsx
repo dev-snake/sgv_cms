@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/accordion';
 import { toast } from 'sonner';
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import { COMPANY_INFO } from '@/constants/site-info';
 
 const FAQS = [
@@ -69,7 +70,7 @@ export default function ContactPage() {
 
         setIsSubmitting(true);
         try {
-            await $api.post('/api/contacts', formData);
+            await $api.post(API_ROUTES.CONTACTS, formData);
             toast.success('Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ lại sớm nhất.');
             setFormData({
                 name: '',

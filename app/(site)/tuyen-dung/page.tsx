@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/pagination';
 import { cn } from '@/lib/utils';
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
@@ -51,7 +52,7 @@ export default function RecruitmentPage() {
     const fetchJobs = async (page: number = 1) => {
         setLoading(true);
         try {
-            const response = await $api.get('/api/jobs', {
+            const response = await $api.get(API_ROUTES.JOBS, {
                 params: {
                     status: 'open',
                     page,

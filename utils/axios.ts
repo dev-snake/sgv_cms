@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 import { SITE_ROUTES, API_ROUTES } from '@/constants/routes';
 
 const $api = axios.create({
-    baseURL: '/',
+    baseURL: '/api',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -38,7 +38,7 @@ $api.interceptors.response.use(
             }
 
             try {
-                const refreshRes = await axios.post(API_ROUTES.AUTH.REFRESH);
+                const refreshRes = await axios.post('/api' + API_ROUTES.AUTH.REFRESH);
 
                 if (refreshRes.data.success) {
                     return $api(originalRequest);

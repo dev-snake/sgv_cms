@@ -46,11 +46,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 import { SimpleConfirmDialog } from '@/components/shared/simple-confirm-dialog';
-import { API_ROUTES } from '@/constants/routes';
 import { RadialChartGrid } from '@/components/portal/charts/RadialChartGrid';
 import { AreaChartGradient } from '@/components/portal/charts/AreaChartGradient';
 
@@ -86,7 +85,7 @@ export default function CommentsManagementPage() {
     const fetchComments = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await $api.get('/api/portal/comments', {
+            const response = await $api.get(API_ROUTES.COMMENTS, {
                 params: {
                     page,
                     limit: 10,
@@ -122,7 +121,7 @@ export default function CommentsManagementPage() {
 
     const handleApprove = async (id: string, currentStatus: boolean) => {
         try {
-            const response = await $api.patch(`/api/portal/comments/${id}`, {
+            const response = await $api.patch(`${API_ROUTES.COMMENTS}/${id}`, {
                 is_approved: !currentStatus,
             });
             if (response.data.success) {
@@ -142,7 +141,7 @@ export default function CommentsManagementPage() {
     const confirmDeleteComment = async () => {
         if (!commentToDelete) return;
         try {
-            const response = await $api.delete(`/api/portal/comments/${commentToDelete}`);
+            const response = await $api.delete(`${API_ROUTES.COMMENTS}/${commentToDelete}`);
             if (response.data.success) {
                 toast.success('Đã xóa bình luận');
                 fetchComments();
@@ -159,7 +158,7 @@ export default function CommentsManagementPage() {
         if (!replyingTo || !replyContent.trim()) return;
         setIsSubmittingReply(true);
         try {
-            const response = await $api.patch(`/api/portal/comments/${replyingTo.id}`, {
+            const response = await $api.patch(`${API_ROUTES.COMMENTS}/${replyingTo.id}`, {
                 reply_content: replyContent,
                 is_approved: true,
             });
