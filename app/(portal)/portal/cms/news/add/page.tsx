@@ -10,7 +10,6 @@ import {
     Save,
     Loader2,
     Eye,
-    X,
     User,
     CalendarDays,
     Clock,
@@ -35,7 +34,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import { StatusFormSection } from '@/components/portal/status-form-section';
 import { ImageUploader } from '@/components/portal/ImageUploader';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -47,7 +45,6 @@ import { generateSlug } from '@/utils/slug';
 import { toast } from 'sonner';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import Image from 'next/image';
 
 interface Category {
