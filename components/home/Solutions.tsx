@@ -56,7 +56,7 @@ export default function Solutions() {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
     return (
-        <section className="bg-[#001d4a] overflow-hidden">
+        <section className="bg-brand overflow-hidden">
             {/* Header Area */}
             <div className="pt-24 pb-12 text-center relative z-20">
                 <motion.h2
@@ -110,7 +110,7 @@ export default function Solutions() {
                                     animate={{ y: 0 }}
                                     exit={{ y: '-100%' }}
                                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                                    className="absolute inset-0 z-10 flex flex-col items-center justify-center p-12 text-center  backdrop-blur-xl border-b border-white/10"
+                                    className="absolute inset-0 z-10 flex flex-col items-center justify-center p-12 text-center backdrop-blur-3xl border-b border-white/10 bg-white/5"
                                 >
                                     <motion.div
                                         initial={{ opacity: 0, scale: 0.9 }}
@@ -155,7 +155,7 @@ export default function Solutions() {
                                         <div className="pt-10">
                                             <Link
                                                 href={item.href}
-                                                className="group/btn relative inline-flex items-center gap-4 px-12 py-4 bg-white text-[#001d4a] font-black text-[10px] tracking-[0.2em] uppercase transition-all hover:bg-brand-primary hover:text-white shadow-2xl overflow-hidden"
+                                                className="group/btn relative inline-flex items-center gap-4 px-12 py-4 bg-white text-brand font-black text-[10px] tracking-[0.2em] uppercase transition-all hover:bg-brand-primary hover:text-white shadow-2xl overflow-hidden"
                                             >
                                                 <span className="relative z-10">XEM CHI TIẾT</span>
                                                 <ChevronRight
