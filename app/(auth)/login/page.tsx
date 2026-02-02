@@ -57,7 +57,7 @@ export default function LoginPage() {
                 className="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-2 bg-white border border-slate-100 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] overflow-hidden relative z-10"
             >
                 {/* Visual Brand Section */}
-                <div className="hidden lg:flex flex-col justify-between p-16 bg-slate-900/50 text-white relative overflow-hidden">
+                <div className="hidden lg:flex flex-col justify-between p-16 bg-slate-900 text-white relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
                         <div className="absolute top-0 right-0 w-[150%] h-[150%] bg-gradient-to-bl from-brand-primary via-transparent to-transparent opacity-50 rotate-12" />
                     </div>
@@ -70,7 +70,7 @@ export default function LoginPage() {
                             <span className="text-2xl font-black uppercase tracking-widest text-white leading-none">
                                 SG VALVE
                                 <br />
-                                <span className="text-xs text-brand-primary font-bold">
+                                <span className="text-xs text-accent font-bold">
                                     MANAGEMENT SYSTEM
                                 </span>
                             </span>
@@ -78,7 +78,7 @@ export default function LoginPage() {
 
                         <h2 className="text-5xl font-black leading-[1.1] uppercase tracking-tight mb-8">
                             Xây dựng <br />
-                            <span className="text-brand-primary">giá trị</span> vững bền.
+                            <span className="text-accent">giá trị</span> vững bền.
                         </h2>
                         <p className="text-slate-300 text-lg font-medium leading-relaxed max-w-md">
                             Hệ thống quản trị nội dung chuyên nghiệp dành cho đội ngũ vận hành Sài

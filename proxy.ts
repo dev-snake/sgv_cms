@@ -8,9 +8,9 @@ import { SITE_ROUTES, ADMIN_ROUTES, API_ROUTES } from '@/constants/routes';
 // Add paths that don't require authentication
 const publicPaths = [
     SITE_ROUTES.LOGIN,
-    API_ROUTES.AUTH.LOGIN,
-    API_ROUTES.AUTH.REFRESH,
-    API_ROUTES.AUTH.LOGOUT,
+    '/api' + API_ROUTES.AUTH.LOGIN,
+    '/api' + API_ROUTES.AUTH.REFRESH,
+    '/api' + API_ROUTES.AUTH.LOGOUT,
 ];
 
 export default async function proxy(request: NextRequest) {
@@ -19,10 +19,10 @@ export default async function proxy(request: NextRequest) {
 
     // ===== RATE LIMITING =====
     // Apply rate limits based on endpoint type
-    if (pathname.startsWith(API_ROUTES.AUTH.LOGIN)) {
+    if (pathname.startsWith('/api' + API_ROUTES.AUTH.LOGIN)) {
         const rateLimitError = checkRateLimit(request, RATE_LIMITS.AUTH);
         if (rateLimitError) return rateLimitError;
-    } else if (pathname === API_ROUTES.CONTACTS && method === 'POST') {
+    } else if (pathname === '/api' + API_ROUTES.CONTACTS && method === 'POST') {
         const rateLimitError = checkRateLimit(request, RATE_LIMITS.CONTACT);
         if (rateLimitError) return rateLimitError;
     } else if (pathname.startsWith('/api/upload')) {
@@ -61,7 +61,7 @@ export default async function proxy(request: NextRequest) {
     }
 
     // 3. Special case: POST /api/contacts is public (with rate limit already applied)
-    if (pathname === API_ROUTES.CONTACTS && method === 'POST') {
+    if (pathname === '/api' + API_ROUTES.CONTACTS && method === 'POST') {
         return NextResponse.next();
     }
 
