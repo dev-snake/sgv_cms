@@ -10,7 +10,6 @@ import {
     Maximize2,
     Loader2,
     Image as ImageIcon,
-    X,
     HardDrive,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -263,97 +262,81 @@ export default function MediaManagementPage() {
 
             {/* Upload Dialog */}
             <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-                <DialogContent className="max-w-xl p-0 overflow-hidden rounded-none border-none">
-                    <div className="bg-slate-900 p-8 text-white relative">
-                        <div className="flex items-center gap-4 mb-2">
-                            <Upload className="text-brand-accent" size={20} />
-                            <DialogTitle className="text-lg font-black uppercase tracking-tight italic text-white">
-                                Tải tài sản mới
-                            </DialogTitle>
-                        </div>
-                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                            Hỗ trợ định dạng JPEG, PNG, WebP (Tối đa 10MB)
+                <DialogContent className="max-w-md p-6 bg-white">
+                    <DialogHeader>
+                        <DialogTitle className="text-lg font-semibold text-slate-900">
+                            Tải ảnh mới
+                        </DialogTitle>
+                        <p className="text-sm text-slate-500">
+                            Hỗ trợ JPEG, PNG, WebP, GIF (Tối đa 10MB)
                         </p>
-                        <button
-                            onClick={() => setUploadDialogOpen(false)}
-                            className="absolute top-8 right-8 text-white/40 hover:text-white transition-all"
-                        >
-                            <X size={20} />
-                        </button>
+                    </DialogHeader>
+
+                    <div
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            setIsDragging(true);
+                        }}
+                        onDragLeave={(e) => {
+                            e.preventDefault();
+                            setIsDragging(false);
+                        }}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            setIsDragging(false);
+                            const file = e.dataTransfer.files[0];
+                            if (file) handleUpload(file);
+                        }}
+                        onClick={() => fileInputRef.current?.click()}
+                        className={cn(
+                            'h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all group',
+                            isDragging
+                                ? 'border-brand-primary bg-brand-primary/5'
+                                : 'border-slate-200 hover:border-brand-primary/50 hover:bg-slate-50',
+                        )}
+                    >
+                        {isUploading ? (
+                            <div className="flex flex-col items-center gap-3">
+                                <Loader2 className="h-10 w-10 animate-spin text-brand-primary" />
+                                <span className="text-sm text-slate-500">Đang tải lên...</span>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center gap-3">
+                                <div className="p-3 rounded-full bg-slate-100 group-hover:bg-brand-primary/10 transition-colors">
+                                    <Upload className="h-6 w-6 text-slate-400 group-hover:text-brand-primary transition-colors" />
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-sm font-medium text-slate-700">
+                                        Kéo thả hoặc{' '}
+                                        <span className="text-brand-primary">nhấn để chọn</span>
+                                    </p>
+                                    <p className="text-xs text-slate-400 mt-1">
+                                        Tự động tối ưu hóa cho web
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            className="hidden"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleUpload(file);
+                                e.target.value = '';
+                            }}
+                        />
                     </div>
 
-                    <div className="p-8 bg-white">
-                        <div
-                            onDragOver={(e) => {
-                                e.preventDefault();
-                                setIsDragging(true);
-                            }}
-                            onDragLeave={(e) => {
-                                e.preventDefault();
-                                setIsDragging(false);
-                            }}
-                            onDrop={(e) => {
-                                e.preventDefault();
-                                setIsDragging(false);
-                                const file = e.dataTransfer.files[0];
-                                if (file) handleUpload(file);
-                            }}
-                            onClick={() => fileInputRef.current?.click()}
-                            className={cn(
-                                'h-64 border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all duration-300 group',
-                                isDragging
-                                    ? 'border-brand-primary bg-brand-primary/5'
-                                    : 'border-slate-100 hover:border-brand-primary/40 hover:bg-slate-50/50',
-                            )}
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button
+                            variant="outline"
+                            onClick={() => setUploadDialogOpen(false)}
+                            className="text-sm"
                         >
-                            {isUploading ? (
-                                <div className="flex flex-col items-center gap-4">
-                                    <Loader2 className="h-12 w-12 animate-spin text-brand-primary" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                        Đang xử lý dữ liệu...
-                                    </span>
-                                </div>
-                            ) : (
-                                <div className="flex flex-col items-center gap-6">
-                                    <div className="relative">
-                                        <ImageIcon className="h-16 w-16 text-slate-100 group-hover:text-brand-primary/10 transition-colors" />
-                                        <Upload className="absolute -bottom-2 -right-2 h-8 w-8 text-brand-primary group-hover:scale-110 transition-transform" />
-                                    </div>
-                                    <div className="space-y-2 text-center">
-                                        <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
-                                            Kéo thả hoặc{' '}
-                                            <span className="text-brand-primary italic">
-                                                Nhấn để chọn file
-                                            </span>
-                                        </p>
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
-                                            Hệ thống tự động tối ưu hóa dung lượng cho Web
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/jpeg,image/png,image/webp,image/gif"
-                                className="hidden"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) handleUpload(file);
-                                    e.target.value = '';
-                                }}
-                            />
-                        </div>
-
-                        <div className="mt-8 flex justify-end gap-3">
-                            <Button
-                                variant="ghost"
-                                onClick={() => setUploadDialogOpen(false)}
-                                className="text-[10px] font-black uppercase tracking-widest rounded-none h-14 px-8 border-transparent"
-                            >
-                                Hủy bỏ
-                            </Button>
-                        </div>
+                            Hủy
+                        </Button>
                     </div>
                 </DialogContent>
             </Dialog>

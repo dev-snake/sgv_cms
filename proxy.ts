@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { decrypt } from '@/services/auth';
-import { checkRateLimit, RATE_LIMITS } from '@/middlewares/rate-limit';
 
 import { SITE_ROUTES, ADMIN_ROUTES, API_ROUTES } from '@/constants/routes';
 
@@ -15,28 +14,6 @@ const publicPaths = [
 
 export default async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const method = request.method;
-
-    // ===== RATE LIMITING =====
-    // Apply rate limits based on endpoint type
-    if (pathname.startsWith('/api' + API_ROUTES.AUTH.LOGIN)) {
-        const rateLimitError = checkRateLimit(request, RATE_LIMITS.AUTH);
-        if (rateLimitError) return rateLimitError;
-    } else if (pathname === '/api' + API_ROUTES.CONTACTS && method === 'POST') {
-        const rateLimitError = checkRateLimit(request, RATE_LIMITS.CONTACT);
-        if (rateLimitError) return rateLimitError;
-    } else if (pathname.startsWith('/api/upload')) {
-        const rateLimitError = checkRateLimit(request, RATE_LIMITS.UPLOAD);
-        if (rateLimitError) return rateLimitError;
-    } else if (method === 'GET') {
-        // Relaxed rate limit for public reads
-        const rateLimitError = checkRateLimit(request, RATE_LIMITS.PUBLIC);
-        if (rateLimitError) return rateLimitError;
-    } else if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
-        // Moderate rate limit for writes
-        const rateLimitError = checkRateLimit(request, RATE_LIMITS.WRITE);
-        if (rateLimitError) return rateLimitError;
-    }
 
     // 1. Allow public paths explicitly
     if (publicPaths.some((path) => pathname === path || pathname.startsWith(path))) {
