@@ -31,7 +31,7 @@ export const productSchema = z.object({
     .max(100, "SKU không được quá 100 ký tự")
     .trim(),
   
-  stock: z.number()
+  stock: z.coerce.number()
     .int("Số lượng phải là số nguyên")
     .min(0, "Số lượng không được âm")
     .default(0),
@@ -44,8 +44,7 @@ export const productSchema = z.object({
   }).default('active'),
   
   image_url: z.string()
-    .url("URL hình ảnh không hợp lệ")
-    .max(255, "URL không được quá 255 ký tự")
+    .max(255, "Đường dẫn không được quá 255 ký tự")
     .nullable()
     .optional(),
   
@@ -57,16 +56,16 @@ export const productSchema = z.object({
   features: z.array(z.string()).nullable().optional(),
   
   gallery: z.array(
-    z.string().url("URL trong gallery phải hợp lệ")
+    z.string()
   ).nullable().optional(),
   
   tech_summary: z.string().max(5000, "Tóm tắt kỹ thuật quá dài").nullable().optional(),
   
   catalog_url: z.string()
-    .url("URL catalog không hợp lệ")
     .max(255)
     .nullable()
-    .optional(),
+    .optional()
+    .transform(val => val === "" ? null : val),
   
   warranty: z.string().max(100).nullable().optional(),
   

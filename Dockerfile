@@ -50,6 +50,9 @@ COPY --from=builder /app/middlewares ./middlewares
 # Install tsx to run server.ts
 RUN npm install -g tsx && chmod +x ./entrypoint.sh
 
+# Create uploads directory and set permissions
+RUN mkdir -p /app/public/uploads && chmod -R 777 /app/public/uploads
+
 EXPOSE 3000
 
 # Start application using the entrypoint script
