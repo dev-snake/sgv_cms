@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 const SLIDES = [
   {
-    image: "/images/hero/hero-iot-1.png",
+    image: "/uploads/images/2026/01/19/1768814857344-hfho0c.png",
     fallback: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=2000",
     title: "GIÁM SÁT",
     highlight: "QUY TRÌNH THÔNG MINH",
@@ -17,24 +17,24 @@ const SLIDES = [
     desc: "Sài Gòn Valve mang đến giải pháp giám sát lưu lượng và áp suất nước theo thời gian thực, giúp tối ưu hóa vận hành và ngăn ngừa thất thoát tài nguyên.",
     accent: "Công nghệ Quản lý Nước 4.0"
   },
-  {
-    image: "/images/hero/hero-iot-2.png",
-    fallback: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&q=80&w=2000",
-    title: "KẾT NỐI",
-    highlight: "HẠ TẦNG KỸ THUẬT SỐ",
-    titleSuffix: "TOÀN DIỆN",
-    desc: "Xây dựng mạng lưới hạ tầng nước thông minh với hệ thống Datalogger và cảm biến tiên tiến, kết nối dữ liệu trực tiếp lên nền tảng Cloud.",
-    accent: "Giải pháp Số hóa Hạ tầng"
-  },
-  {
-    image: "/images/hero/hero-iot-3.png",
-    fallback: "https://images.unsplash.com/photo-1516937941184-75140537280d?auto=format&fit=crop&q=80&w=2000",
-    title: "VAN THÔNG MINH",
-    highlight: "ĐIỀU KHIỂN CHÍNH XÁC",
-    titleSuffix: "HIỆU SUẤT CAO",
-    desc: "Phân phối độc quyền các loại van điều khiển điện và khí nén tích hợp IoT, đảm bảo độ chính xác tuyệt đối trong mọi quy trình công nghiệp.",
-    accent: "Thiết bị Điều khiển Hiện đại"
-  }
+  // {
+  //   image: "/images/hero/hero-iot-2.png",
+  //   fallback: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&q=80&w=2000",
+  //   title: "KẾT NỐI",
+  //   highlight: "HẠ TẦNG KỸ THUẬT SỐ",
+  //   titleSuffix: "TOÀN DIỆN",
+  //   desc: "Xây dựng mạng lưới hạ tầng nước thông minh với hệ thống Datalogger và cảm biến tiên tiến, kết nối dữ liệu trực tiếp lên nền tảng Cloud.",
+  //   accent: "Giải pháp Số hóa Hạ tầng"
+  // },
+  // {
+  //   image: "/images/hero/hero-iot-3.png",
+  //   fallback: "https://images.unsplash.com/photo-1516937941184-75140537280d?auto=format&fit=crop&q=80&w=2000",
+  //   title: "VAN THÔNG MINH",
+  //   highlight: "ĐIỀU KHIỂN CHÍNH XÁC",
+  //   titleSuffix: "HIỆU SUẤT CAO",
+  //   desc: "Phân phối độc quyền các loại van điều khiển điện và khí nén tích hợp IoT, đảm bảo độ chính xác tuyệt đối trong mọi quy trình công nghiệp.",
+  //   accent: "Thiết bị Điều khiển Hiện đại"
+  // }
 ];
 
 export default function Hero() {
