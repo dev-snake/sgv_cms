@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import axios from 'axios';
+import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import { io, Socket } from 'socket.io-client';
 import { SimpleConfirmDialog } from '@/components/shared/simple-confirm-dialog';
 
@@ -41,6 +42,7 @@ export default function ChatWidget() {
     const [isClearDialogOpen, setIsClearDialogOpen] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const socketRef = useRef<Socket | null>(null);
 
     // Initialize Guest ID
     useEffect(() => {
@@ -60,13 +62,16 @@ export default function ChatWidget() {
 
         const initSession = async () => {
             try {
-                const res = await axios.post('/api/chat/sessions', { guestId });
-                setSessionId(res.data.id);
-                setSessionData(res.data);
+                const res = await $api.post(API_ROUTES.CHAT.SESSIONS, { guestId });
+                const sessionPayload = res.data.data;
+                setSessionId(sessionPayload.id);
+                setSessionData(sessionPayload);
 
-                const msgRes = await axios.get(`/api/chat/messages?sessionId=${res.data.id}`);
-                setMessages(msgRes.data);
-                handleUpdateSeen(res.data.id);
+                const msgRes = await $api.get(
+                    `${API_ROUTES.CHAT.MESSAGES}?sessionId=${sessionPayload.id}`,
+                );
+                setMessages(msgRes.data.data || []);
+                handleUpdateSeen(sessionPayload.id);
             } catch (error) {
                 console.error('Failed to init chat session:', error);
             }
@@ -81,7 +86,7 @@ export default function ChatWidget() {
 
     const handleUpdateSeen = async (id: string) => {
         try {
-            await axios.patch(`/api/chat/sessions/${id}`, { guestLastSeen: true });
+            await $api.patch(`${API_ROUTES.CHAT.SESSIONS}/${id}`, { guestLastSeen: true });
         } catch (error) {
             // Silently fail
         }
@@ -95,6 +100,8 @@ export default function ChatWidget() {
             query: { sessionId },
             transports: ['websocket'],
         });
+
+        socketRef.current = socket;
 
         socket.on('message', (data: any) => {
             if (data.id && data.session_id === sessionId) {
@@ -139,6 +146,7 @@ export default function ChatWidget() {
 
         return () => {
             socket.disconnect();
+            socketRef.current = null;
         };
     }, [sessionId, isOpen]);
 
@@ -161,17 +169,18 @@ export default function ChatWidget() {
         sendTypingStatus(false);
 
         try {
-            const res = await axios.post('/api/chat/messages', {
+            const res = await $api.post(API_ROUTES.CHAT.MESSAGES, {
                 sessionId,
                 content,
                 isFromWidget: true,
                 replyToId: replyId,
             });
 
-            if (res.data && res.data.id) {
+            const newMessage = res.data.data;
+            if (newMessage && newMessage.id) {
                 setMessages((prev) => {
-                    if (prev.find((m) => m.id === res.data.id)) return prev;
-                    return [...prev, res.data];
+                    if (prev.find((m) => m.id === newMessage.id)) return prev;
+                    return [...prev, newMessage];
                 });
             }
         } catch (error) {
@@ -189,24 +198,20 @@ export default function ChatWidget() {
     const confirmClearHistory = async () => {
         if (!sessionId) return;
         try {
-            await axios.delete(`/api/chat/sessions/${sessionId}`);
+            await $api.delete(`${API_ROUTES.CHAT.SESSIONS}/${sessionId}`);
             setIsClearDialogOpen(false);
         } catch (error) {
             console.error('Failed to clear history:', error);
         }
     };
 
-    const sendTypingStatus = async (isTyping: boolean) => {
-        if (!sessionId) return;
-        try {
-            await axios.post('/api/chat/typing', {
-                sessionId,
-                senderType: 'guest',
-                isTyping,
-            });
-        } catch (error) {
-            // Silently fail
-        }
+    const sendTypingStatus = (isTyping: boolean) => {
+        if (!sessionId || !socketRef.current) return;
+        socketRef.current.emit('typing', {
+            sessionId,
+            senderType: 'guest',
+            isTyping,
+        });
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

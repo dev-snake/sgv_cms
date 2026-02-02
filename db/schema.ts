@@ -130,6 +130,8 @@ export const users = pgTable('users', {
     phone: varchar('phone', { length: 20 }),
     is_active: boolean('is_active').default(true).notNull(),
     is_locked: boolean('is_locked').default(false).notNull(),
+    is_super: boolean('is_super').default(false).notNull(),
+    avatar_url: varchar('avatar_url', { length: 255 }),
     created_at: timestamp('created_at').defaultNow().notNull(),
     updated_at: timestamp('updated_at').defaultNow().notNull(),
     deleted_at: timestamp('deleted_at'),
@@ -190,6 +192,7 @@ export const roles = pgTable('roles', {
     code: varchar('code', { length: 50 }).notNull().unique(),
     name: varchar('name', { length: 255 }).notNull(),
     description: text('description'),
+    is_super: boolean('is_super').default(false).notNull(),
     created_at: timestamp('created_at').defaultNow().notNull(),
     updated_at: timestamp('updated_at').defaultNow().notNull(),
     deleted_at: timestamp('deleted_at'),
@@ -199,6 +202,9 @@ export const modules = pgTable('modules', {
     id: uuid('id').primaryKey().defaultRandom(),
     code: varchar('code', { length: 50 }).notNull().unique(),
     name: varchar('name', { length: 255 }).notNull(),
+    icon: varchar('icon', { length: 100 }), // Lucide icon name
+    route: varchar('route', { length: 255 }), // Portal route path
+    order: integer('order').default(0).notNull(), // Display order in sidebar
     created_at: timestamp('created_at').defaultNow().notNull(),
     updated_at: timestamp('updated_at').defaultNow().notNull(),
     deleted_at: timestamp('deleted_at'),
@@ -277,5 +283,30 @@ export const chatMessages = pgTable('chat_messages', {
     content: text('content').notNull(),
     reply_to_id: uuid('reply_to_id'), // Self-reference for replies
     is_deleted: boolean('is_deleted').default(false).notNull(),
+    created_at: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Admin Notification System
+export const notifications = pgTable('notifications', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    type: varchar('type', { length: 50 }).notNull(), // 'comment', 'contact', 'application'
+    title: varchar('title', { length: 255 }).notNull(),
+    content: text('content').notNull(),
+    link: varchar('link', { length: 255 }),
+    is_read: boolean('is_read').default(false).notNull(),
+    created_at: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Audit Logs System
+export const auditLogs = pgTable('audit_logs', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    user_id: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    action: varchar('action', { length: 50 }).notNull(), // 'CREATE', 'UPDATE', 'DELETE', 'LOGIN', etc.
+    module: varchar('module', { length: 50 }).notNull(), // 'USERS', 'ROLES', 'NEWS', etc.
+    target_id: varchar('target_id', { length: 255 }), // ID of the affected record
+    description: text('description'),
+    changes: jsonb('changes'), // { old: {}, new: {} }
+    ip_address: varchar('ip_address', { length: 50 }),
+    user_agent: text('user_agent'),
     created_at: timestamp('created_at').defaultNow().notNull(),
 });

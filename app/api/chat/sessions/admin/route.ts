@@ -1,23 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { db } from '@/db';
 import { chatSessions } from '@/db/schema';
-import { desc, eq } from 'drizzle-orm';
-import { getSession } from '@/services/auth';
+import { desc } from 'drizzle-orm';
+import { withAuth, hasPermission } from '@/middlewares/middleware';
+import { PERMISSIONS } from '@/constants/rbac';
+import { apiResponse, apiError } from '@/utils/api-response';
 
-export async function GET(req: NextRequest) {
+export const GET = withAuth(async (req: NextRequest, session) => {
+    // Check for either CHAT_VIEW or CHAT_MANAGEMENT_VIEW
+    const canViewChat =
+        hasPermission(session.user, PERMISSIONS.CHAT_VIEW) ||
+        hasPermission(session.user, PERMISSIONS.CHAT_MANAGEMENT_VIEW);
+
+    if (!canViewChat) {
+        return apiError('Forbidden - Required chat permission', 403);
+    }
+
     try {
-        const session = await getSession();
-        if (!session?.user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
         const sessions = await db.query.chatSessions.findMany({
             orderBy: [desc(chatSessions.last_message_at)],
         });
 
-        return NextResponse.json(sessions);
+        return apiResponse(sessions);
     } catch (error) {
         console.error('Chat Sessions Admin Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return apiError('Internal Server Error', 500);
     }
-}
+});

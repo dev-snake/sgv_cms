@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -52,10 +52,10 @@ const SOLUTIONS = [
 ];
 
 export default function Solutions() {
-  const [activeIndex, setActiveIndex] = React.useState(0);
-  const [isPaused, setIsPaused] = React.useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % SOLUTIONS.length);

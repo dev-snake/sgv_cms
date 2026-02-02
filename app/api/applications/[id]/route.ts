@@ -7,7 +7,7 @@ import { withAuth, UserSession } from "@/middlewares/middleware";
 import { PERMISSIONS } from "@/constants/rbac";
 
 // GET /api/applications/[id] - View application details
-export const GET = withAuth(async (request: NextRequest, session, { params }) => {
+export const GET = withAuth(async (_request: NextRequest, _session, { params }) => {
   try {
     const { id } = await params;
     

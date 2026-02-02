@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { Upload, X, Loader2, ImagePlus, Check, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import api from '@/services/axios';
+import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import {
     Dialog,
     DialogContent,
@@ -29,6 +30,7 @@ interface ImageUploaderProps {
     gallery?: string[];
     onGalleryChange?: (urls: string[]) => void;
     className?: string;
+    aspectRatio?: 'video' | 'square';
 }
 
 export function ImageUploader({
@@ -37,6 +39,7 @@ export function ImageUploader({
     gallery = [],
     onGalleryChange,
     className,
+    aspectRatio = 'video',
 }: ImageUploaderProps) {
     const [isUploading, setIsUploading] = React.useState(false);
     const [isDragging, setIsDragging] = React.useState(false);
@@ -49,7 +52,7 @@ export function ImageUploader({
     const fetchUploadedImages = async () => {
         setIsLoadingImages(true);
         try {
-            const response = await api.get('/api/upload');
+            const response = await $api.get(API_ROUTES.UPLOAD);
             if (response.data.success) {
                 setUploadedImages(response.data.data || []);
             }
@@ -87,7 +90,7 @@ export function ImageUploader({
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await api.post('/api/upload', formData, {
+            const response = await $api.post(API_ROUTES.UPLOAD, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
@@ -164,13 +167,21 @@ export function ImageUploader({
                     Ảnh đại diện
                 </label>
                 {value ? (
-                    <div className="relative aspect-video w-full group border border-slate-100">
+                    <div
+                        className={cn(
+                            'relative w-full group border border-slate-100 rounded-none',
+                            aspectRatio === 'video' ? 'aspect-video' : 'aspect-square',
+                        )}
+                    >
                         <Image
                             src={value}
-                            alt="Product image"
+                            alt="Preview image"
                             fill
                             unoptimized
-                            className="object-contain"
+                            className={cn(
+                                'rounded-none',
+                                aspectRatio === 'video' ? 'object-contain' : 'object-cover',
+                            )}
                         />
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                             <Button
@@ -232,7 +243,7 @@ export function ImageUploader({
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveGalleryImage(index)}
-                                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-none opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                                 >
                                     <X size={12} />
                                 </button>
@@ -312,7 +323,7 @@ export function ImageUploader({
                                             />
                                             {(value === image.url ||
                                                 gallery.includes(image.url)) && (
-                                                <div className="absolute top-1 right-1 p-1 bg-brand-primary text-white rounded-full">
+                                                <div className="absolute top-1 right-1 p-1 bg-brand-primary text-white rounded-none">
                                                     <Check size={10} />
                                                 </div>
                                             )}

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description: "Sài Gòn Valve chuyên cung cấp valve và phụ kiện đường ống, giải pháp IOT quản trị tập trung cho ngành nước.",
   keywords: ["Sài Gòn Valve", "Van công nghiệp", "Giải pháp IoT", "Ngành nước"],
   icons: {
-    icon: "https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png",
+    icon: "/images/logo/logo.png",
   },
 };
 

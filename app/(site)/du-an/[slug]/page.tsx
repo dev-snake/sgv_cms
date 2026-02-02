@@ -1,213 +1,407 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { motion } from "motion/react";
-import { 
-  ChevronRight, 
-  ArrowLeft, 
-  ArrowRight,
-  ExternalLink,
-  Info
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import * as React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import {
+    ArrowLeft,
+    ArrowRight,
+    Share2,
+    Printer,
+    MapPin,
+    Calendar,
+    Building,
+    MoveRight,
+    Facebook,
+    Linkedin,
+    Twitter,
+    Bookmark,
+} from 'lucide-react';
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
-import api from "@/services/axios";
+import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 
 export default function ProjectDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const [project, setProject] = React.useState<any>(null);
-  const [loading, setLoading] = React.useState(true);
+    const params = useParams();
+    const router = useRouter();
+    const [project, setProject] = React.useState<any>(null);
+    const [loading, setLoading] = React.useState(true);
+    const [relatedProjects, setRelatedProjects] = React.useState<any[]>([]);
 
-  React.useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        const response = await api.get(`/api/projects/${params.slug}`);
-        if (response.data.success) {
-          setProject(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching project details:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProject();
-  }, [params.slug]);
+    React.useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [projectRes, relatedRes] = await Promise.all([
+                    $api.get(`${API_ROUTES.PROJECTS}/${params.slug}`),
+                    $api.get(`${API_ROUTES.PROJECTS}?limit=3`),
+                ]);
 
-  if (loading) {
+                if (projectRes.data.success) {
+                    setProject(projectRes.data.data);
+                }
+                if (relatedRes.data.success) {
+                    setRelatedProjects(
+                        relatedRes.data.data.filter((p: any) => p.slug !== params.slug).slice(0, 3),
+                    );
+                }
+            } catch (error) {
+                console.error('Error fetching project details:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [params.slug]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+            </div>
+        );
+    }
+
+    if (!project) return <div className="pt-44 text-center">Không tìm thấy dự án</div>;
+
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
-      </div>
+        <div className="flex flex-col min-h-screen bg-white">
+            {/* Breadcrumbs */}
+            <section className="pt-44 pb-6 border-b border-slate-100">
+                <div className="container mx-auto px-4 lg:px-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <Breadcrumb>
+                            <BreadcrumbList>
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink asChild>
+                                        <Link href="/">Trang chủ</Link>
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator />
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink asChild>
+                                        <Link href="/du-an">Dự án</Link>
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator />
+                                <BreadcrumbItem>
+                                    <BreadcrumbPage className="max-w-[200px] truncate">
+                                        {project.name}
+                                    </BreadcrumbPage>
+                                </BreadcrumbItem>
+                            </BreadcrumbList>
+                        </Breadcrumb>
+
+                        <button
+                            onClick={() => router.back()}
+                            className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-brand-primary transition-colors"
+                        >
+                            <ArrowLeft size={14} /> Quay lại
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* Project Header */}
+            <section className="py-12 sm:py-16">
+                <div className="container mx-auto px-4 lg:px-8">
+                    <div className="space-y-6">
+                        <div className="inline-flex items-center bg-brand-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-primary rounded-none">
+                            {project.category || 'DỰ ÁN'}
+                        </div>
+
+                        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-[1.1]">
+                            {project.name}
+                        </h1>
+
+                        <div className="flex flex-wrap items-center gap-y-4 gap-6 pt-4 border-t border-slate-100 text-slate-500">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 bg-slate-50 flex items-center justify-center text-slate-400 rounded-none border border-slate-100">
+                                    <Building size={20} />
+                                </div>
+                                <div>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                        Khách hàng
+                                    </div>
+                                    <div className="text-xs font-bold text-slate-900">
+                                        {project.client_name || 'Đang cập nhật'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 bg-slate-50 flex items-center justify-center text-slate-400 rounded-none border border-slate-100">
+                                    <MapPin size={20} />
+                                </div>
+                                <div>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                        Vị trí
+                                    </div>
+                                    <div className="text-xs font-bold text-slate-900">
+                                        {project.location || 'Việt Nam'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 bg-slate-50 flex items-center justify-center text-slate-400 rounded-none border border-slate-100">
+                                    <Calendar size={20} />
+                                </div>
+                                <div>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                        Thời gian
+                                    </div>
+                                    <div className="text-xs font-bold text-slate-900">
+                                        {project.start_date
+                                            ? new Date(project.start_date).getFullYear()
+                                            : '2024'}
+                                        {project.end_date
+                                            ? ` - ${new Date(project.end_date).getFullYear()}`
+                                            : ''}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="ml-auto flex items-center gap-2">
+                                <button
+                                    title="Chia sẻ"
+                                    className="h-9 w-9 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all rounded-none"
+                                >
+                                    <Share2 size={16} />
+                                </button>
+                                <button
+                                    title="In"
+                                    className="h-9 w-9 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all rounded-none"
+                                >
+                                    <Printer size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Content Area */}
+            <section className="pb-16 sm:pb-24">
+                <div className="container mx-auto px-4 lg:px-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                        {/* Main Content */}
+                        <div className="lg:col-span-8">
+                            <div className="space-y-8">
+                                {/* Main Image */}
+                                {project.image_url && (
+                                    <div className="relative aspect-video w-full bg-slate-100 overflow-hidden">
+                                        <Image
+                                            src={project.image_url}
+                                            alt={project.name}
+                                            fill
+                                            className="object-cover"
+                                            priority
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Project Summary */}
+                                {project.summary && (
+                                    <p className="text-lg text-slate-600 font-medium leading-relaxed italic border-l-4 border-brand-primary pl-8">
+                                        {project.summary}
+                                    </p>
+                                )}
+
+                                {/* Project Content */}
+                                <div
+                                    className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-a:text-brand-primary hover:prose-a:text-brand-secondary prose-img:rounded-none"
+                                    dangerouslySetInnerHTML={{
+                                        __html:
+                                            project.description ||
+                                            '<p>Nội dung đang được cập nhật...</p>',
+                                    }}
+                                />
+
+                                {/* Share & Actions */}
+                                <div className="mt-16 pt-10 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-8">
+                                    <div className="flex gap-4 items-center">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                            Chia sẻ:
+                                        </span>
+                                        <div className="flex gap-2">
+                                            {[Facebook, Linkedin, Twitter].map((Icon, i) => (
+                                                <button
+                                                    key={i}
+                                                    className="h-8 w-8 flex items-center justify-center bg-slate-50 text-slate-400 hover:bg-brand-primary hover:text-white transition-all rounded-none border border-slate-100"
+                                                >
+                                                    <Icon size={14} />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600 bg-slate-50 px-5 py-2.5 hover:bg-slate-200 transition-all rounded-none border border-slate-100">
+                                            <Bookmark size={14} /> Lưu dự án
+                                        </button>
+                                        <Link
+                                            href="/lien-he"
+                                            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white bg-brand-primary px-5 py-2.5 hover:bg-brand-secondary transition-all rounded-none"
+                                        >
+                                            Liên hệ tư vấn <MoveRight size={14} />
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sidebar */}
+                        <aside className="lg:col-span-4 space-y-12">
+                            {/* Project Info Card */}
+                            <div className="bg-slate-50 border border-slate-100 p-6 space-y-6">
+                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-3">
+                                    <span className="w-8 h-[2px] bg-brand-primary"></span> Thông tin
+                                    dự án
+                                </h3>
+
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center py-3 border-b border-slate-200">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                            Loại dự án
+                                        </span>
+                                        <span className="text-xs font-bold text-slate-900">
+                                            {project.category || 'Hạ tầng nước'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-3 border-b border-slate-200">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                            Khách hàng
+                                        </span>
+                                        <span className="text-xs font-bold text-slate-900">
+                                            {project.client_name || 'Đang cập nhật'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-3 border-b border-slate-200">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                            Vị trí
+                                        </span>
+                                        <span className="text-xs font-bold text-slate-900">
+                                            {project.location || 'Việt Nam'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-3 border-b border-slate-200">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                            Trạng thái
+                                        </span>
+                                        <span
+                                            className={`text-xs font-bold ${project.status === 'completed' ? 'text-green-600' : 'text-amber-600'}`}
+                                        >
+                                            {project.status === 'completed'
+                                                ? 'Đã hoàn thành'
+                                                : 'Đang triển khai'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-3">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                            Thời gian
+                                        </span>
+                                        <span className="text-xs font-bold text-slate-900">
+                                            {project.start_date
+                                                ? new Date(project.start_date).getFullYear()
+                                                : '2024'}
+                                            {project.end_date
+                                                ? ` - ${new Date(project.end_date).getFullYear()}`
+                                                : ''}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* CTA */}
+                            <div className="bg-brand-primary p-6 text-white space-y-4">
+                                <h3 className="text-sm font-black uppercase tracking-tight">
+                                    Bạn có dự án tương tự?
+                                </h3>
+                                <p className="text-xs text-white/80 leading-relaxed">
+                                    Liên hệ ngay để được tư vấn giải pháp phù hợp nhất cho dự án của
+                                    bạn.
+                                </p>
+                                <Link
+                                    href="/lien-he"
+                                    className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white text-brand-primary px-4 py-2 hover:bg-slate-100 transition-all"
+                                >
+                                    Liên hệ ngay <ArrowRight size={12} />
+                                </Link>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+
+            {/* Related Projects */}
+            {relatedProjects.length > 0 && (
+                <section className="py-24 bg-slate-50">
+                    <div className="container mx-auto px-4 lg:px-8">
+                        <div className="mb-12 flex items-center justify-between">
+                            <div>
+                                <h2 className="text-2xl font-black uppercase tracking-tight text-slate-900">
+                                    DỰ ÁN LIÊN QUAN
+                                </h2>
+                                <div className="h-1 w-20 bg-brand-primary mt-2"></div>
+                            </div>
+                            <Link
+                                href="/du-an"
+                                className="text-[10px] font-black uppercase tracking-widest text-brand-primary border-b-2 border-brand-primary/20 pb-1 hover:border-brand-primary transition-all"
+                            >
+                                TẤT CẢ DỰ ÁN
+                            </Link>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {relatedProjects.map((proj) => (
+                                <Link
+                                    key={proj.id}
+                                    href={`/du-an/${proj.slug}`}
+                                    className="group bg-white overflow-hidden hover:translate-y-[-4px] transition-all duration-500 border border-slate-100 flex flex-col rounded-none"
+                                >
+                                    <div className="relative aspect-[4/3] overflow-hidden bg-slate-100 rounded-none">
+                                        {proj.image_url ? (
+                                            <Image
+                                                src={proj.image_url}
+                                                alt={proj.name}
+                                                fill
+                                                className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                            />
+                                        ) : (
+                                            <div className="flex items-center justify-center h-full text-slate-300">
+                                                <Building size={32} />
+                                            </div>
+                                        )}
+                                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[8px] font-black uppercase tracking-widest text-brand-primary rounded-none">
+                                            {proj.category || 'DỰ ÁN'}
+                                        </div>
+                                    </div>
+                                    <div className="p-6 flex flex-col grow">
+                                        <div className="text-[9px] font-bold text-slate-400 mb-2 flex items-center gap-2">
+                                            <MapPin size={10} /> {proj.location || 'Việt Nam'}
+                                        </div>
+                                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-brand-primary transition-colors uppercase line-clamp-2 leading-tight mb-4 grow tracking-tight">
+                                            {proj.name}
+                                        </h4>
+                                        <div className="flex items-center text-[9px] font-black uppercase tracking-widest text-brand-primary gap-1 group-hover:gap-2 transition-all">
+                                            Xem chi tiết <MoveRight size={12} />
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+        </div>
     );
-  }
-
-  if (!project) return <div className="pt-44 text-center">Không tìm thấy dự án</div>;
-
-  const prevProject: any = null;
-  const nextProject: any = null;
-
-  return (
-    <div className="flex flex-col min-h-screen bg-white">
-      {/* Top Header & Breadcrumbs */}
-      <section className="bg-slate-50 pt-44 pb-8 border-b border-slate-200">
-        <div className="container mx-auto px-4 lg:px-8">
-          <nav className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8">
-            <Link href="/" className="hover:text-brand-primary transition-colors">TRANG CHỦ</Link>
-            <ChevronRight size={10} />
-            <Link href="/du-an" className="hover:text-brand-primary transition-colors">DỰ ÁN</Link>
-            <ChevronRight size={10} />
-            <span className="text-slate-600 uppercase tracking-tighter">{project.category || "CÔNG TRÌNH"}</span>
-          </nav>
-
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter uppercase leading-tight max-w-5xl"
-          >
-            {project.name}
-          </motion.h1>
-        </div>
-      </section>
-
-      {/* Main Image */}
-      <section className="container mx-auto px-4 lg:px-8 py-8">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative h-[50vh] min-h-[400px] w-full bg-slate-100 overflow-hidden"
-        >
-          {project.image_url ? (
-            <Image
-              src={project.image_url}
-              alt={project.name}
-              fill
-              className="object-cover"
-              priority
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full w-full bg-slate-100 text-slate-300 italic font-medium">Đang cập nhật hình ảnh...</div>
-          )}
-        </motion.div>
-      </section>
-
-      {/* Project at a Glance Box */}
-      <section className="container mx-auto px-4 lg:px-8 py-8">
-        <div className="bg-[#416991] text-white overflow-hidden shadow-2xl">
-          <div className="px-8 py-4 bg-[#2b4c6b] flex items-center justify-between border-b border-white/10">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2">
-              <Info size={14} /> SƠ LƯỢC DỰ ÁN
-            </h3>
-            <button className="text-[10px] font-black uppercase tracking-widest hover:text-brand-primary transition-colors flex items-center gap-2">
-              XEM TẤT CẢ <ExternalLink size={12} />
-            </button>
-          </div>
-          
-          <div className="p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-16">
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">LOẠI DỰ ÁN</p>
-                <p className="text-sm font-bold uppercase">{project.category || "Hạ tầng nước"}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">KHÁCH HÀNG</p>
-                <p className="text-sm font-bold uppercase">{project.client_name || "Đang cập nhật"}</p>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">VỊ TRÍ</p>
-                <p className="text-sm font-bold uppercase">{project.location || "Việt Nam"}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">TRẠNG THÁI</p>
-                <p className="text-sm font-bold uppercase">{project.status === "completed" ? "ĐÃ HOÀN THÀNH" : "ĐANG TRIỂN KHAI"}</p>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">THỜI GIAN THI CÔNG</p>
-                <p className="text-sm font-bold uppercase">
-                  {project.start_date ? new Date(project.start_date).getFullYear() : "2024"} 
-                  {project.end_date ? ` - ${new Date(project.end_date).getFullYear()}` : ""}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Box */}
-      <section className="container mx-auto px-4 lg:px-8 py-4">
-        <Link 
-          href="/lien-he"
-          className="group flex flex-col sm:flex-row items-center justify-between p-8 bg-[#4c92b1] hover:bg-[#3d768f] transition-all"
-        >
-          <div className="flex items-center gap-6">
-             <div className="size-12 border-2 border-white flex items-center justify-center shrink-0">
-                <ArrowRight className="text-white transform group-hover:translate-x-1 transition-transform" />
-             </div>
-             <div>
-                <h4 className="text-lg font-black text-white uppercase tracking-tight">HÃY ĐỂ CHÚNG TÔI HỖ TRỢ DỰ ÁN TIẾP THEO CỦA BẠN</h4>
-                <p className="text-xs text-white/80 font-medium uppercase tracking-widest mt-1">GỬI YÊU CẦU TƯ VẤN NGAY HÔM NAY</p>
-             </div>
-          </div>
-          <div className="mt-6 sm:mt-0 px-6 py-2 border border-white/30 text-white text-[10px] font-black uppercase tracking-widest">
-             LIÊN HỆ
-          </div>
-        </Link>
-      </section>
-
-      {/* Project Content */}
-      <section className="container mx-auto px-4 lg:px-8 py-16">
-        <div className="space-y-12">
-           <div 
-             className="prose prose-slate max-w-none prose-p:text-slate-600 prose-p:leading-relaxed prose-p:text-lg prose-p:font-medium prose-headings:font-black prose-headings:text-slate-900"
-             dangerouslySetInnerHTML={{ __html: project.description || '<p>Nội dung đang được cập nhật...</p>' }}
-           />
-        </div>
-      </section>
-
-      {/* Project Navigation Footer */}
-      <section className="border-t border-slate-200 mt-20">
-        <div className="container mx-auto px-4 lg:px-8 py-12 flex items-center justify-between">
-           {prevProject ? (
-             <Link 
-              href={`/du-an/${prevProject.slug}`}
-              className="group flex items-center gap-6 text-slate-400 hover:text-brand-primary transition-colors"
-             >
-                <div className="size-12 border-2 border-slate-200 flex items-center justify-center group-hover:border-brand-primary transition-colors">
-                  <ArrowLeft size={20} />
-                </div>
-                <div>
-                   <p className="text-[10px] font-black uppercase tracking-widest mb-1">DỰ ÁN TRƯỚC</p>
-                   <p className="text-sm font-bold text-slate-800 uppercase hidden sm:block">{prevProject.name}</p>
-                </div>
-             </Link>
-           ) : <div />}
-
-           {nextProject ? (
-             <Link 
-              href={`/du-an/${nextProject.slug}`}
-              className="group flex items-center gap-6 text-slate-400 text-right hover:text-brand-primary transition-colors"
-             >
-                <div>
-                   <p className="text-[10px] font-black uppercase tracking-widest mb-1">DỰ ÁN TIẾP THEO</p>
-                   <p className="text-sm font-bold text-slate-800 uppercase hidden sm:block">{nextProject.name}</p>
-                </div>
-                <div className="size-12 border-2 border-slate-200 flex items-center justify-center group-hover:border-brand-primary transition-colors">
-                  <ArrowRight size={20} />
-                </div>
-             </Link>
-           ) : <div />}
-        </div>
-      </section>
-    </div>
-  );
 }

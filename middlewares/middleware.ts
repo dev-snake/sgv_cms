@@ -7,7 +7,8 @@ import { NextRequest } from 'next/server';
 import { decrypt } from '@/services/auth';
 import { ZodSchema, ZodError } from 'zod';
 import { apiError } from '@/utils/api-response';
-import { SUPER_ADMIN_ROLE } from '@/constants/rbac';
+import { RBAC_ROLES } from '@/constants/rbac';
+// SUPER_ADMIN_ROLE removed, using is_super flag instead
 
 /**
  * User session interface
@@ -17,7 +18,7 @@ export interface UserSession {
         id: string;
         username: string;
         full_name?: string | null;
-        role: string; // Legacy role string
+        is_super?: boolean;
         roles: string[];
         permissions: string[];
     };
@@ -65,8 +66,8 @@ export function hasRole(user: UserSession['user'], allowedRoles: string[]): bool
  * Check if user has specific permission
  */
 export function hasPermission(user: UserSession['user'], permission: string): boolean {
-    // Only admins in RBAC roles array bypass permission checks
-    if (user.roles?.includes(SUPER_ADMIN_ROLE)) return true;
+    // Check is_super flag instead of hardcoded role name
+    if (user.is_super) return true;
 
     return user.permissions?.includes(permission) || false;
 }
@@ -167,8 +168,15 @@ export function sanitizeHtml(html: string): string {
 }
 
 export function isAdmin(user: UserSession['user']): boolean {
-    // Only check RBAC roles array
-    return user.roles?.includes(SUPER_ADMIN_ROLE) || false;
+    // Check is_super flag OR ADMIN role code
+    return user.is_super || user.roles?.includes(RBAC_ROLES.ADMIN) || false;
+}
+
+/**
+ * Check if user is a TRUE SuperAdmin (is_super flag)
+ */
+export function isSuperAdmin(user: UserSession['user']): boolean {
+    return user.is_super || false;
 }
 
 /**
@@ -176,7 +184,7 @@ export function isAdmin(user: UserSession['user']): boolean {
  */
 export function canEdit(user: UserSession['user']): boolean {
     if (isAdmin(user)) return true;
-    return ['editor'].includes(user.role) || user.roles?.includes('editor');
+    return user.roles?.some((r) => r.toLowerCase() === 'editor') || false;
 }
 
 /**

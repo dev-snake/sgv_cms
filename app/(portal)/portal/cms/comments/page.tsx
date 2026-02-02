@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     MessageSquare,
     Search,
@@ -16,7 +16,7 @@ import {
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -45,11 +45,13 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import api from '@/services/axios';
+import $api from '@/utils/axios';
+import { API_ROUTES } from '@/constants/routes';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 import { SimpleConfirmDialog } from '@/components/shared/simple-confirm-dialog';
+import { RadialChartGrid } from '@/components/portal/charts/RadialChartGrid';
+import { AreaChartGradient } from '@/components/portal/charts/AreaChartGradient';
 
 interface Comment {
     id: string;
@@ -64,25 +66,26 @@ interface Comment {
 }
 
 export default function CommentsManagementPage() {
-    const [comments, setComments] = React.useState<Comment[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [page, setPage] = React.useState(1);
-    const [total, setTotal] = React.useState(0);
-    const [search, setSearch] = React.useState('');
-    const [status, setStatus] = React.useState<string>('all');
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState<any>(null);
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [search, setSearch] = useState('');
+    const [status, setStatus] = useState<string>('all');
 
     // Reply Dialog State
-    const [replyingTo, setReplyingTo] = React.useState<Comment | null>(null);
-    const [replyContent, setReplyContent] = React.useState('');
-    const [isSubmittingReply, setIsSubmittingReply] = React.useState(false);
+    const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
+    const [replyContent, setReplyContent] = useState('');
+    const [isSubmittingReply, setIsSubmittingReply] = useState(false);
 
     // Delete confirmation state
-    const [commentToDelete, setCommentToDelete] = React.useState<string | null>(null);
+    const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
-    const fetchComments = React.useCallback(async () => {
+    const fetchComments = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await api.get('/api/portal/comments', {
+            const response = await $api.get(API_ROUTES.COMMENTS, {
                 params: {
                     page,
                     limit: 10,
@@ -102,18 +105,29 @@ export default function CommentsManagementPage() {
         }
     }, [page, search, status]);
 
-    React.useEffect(() => {
+    const fetchStats = async () => {
+        try {
+            const res = await $api.get(API_ROUTES.STATS);
+            setStats(res.data.data);
+        } catch (error) {
+            console.error('Failed to fetch comment stats', error);
+        }
+    };
+
+    useEffect(() => {
         fetchComments();
+        fetchStats();
     }, [fetchComments]);
 
     const handleApprove = async (id: string, currentStatus: boolean) => {
         try {
-            const response = await api.patch(`/api/portal/comments/${id}`, {
+            const response = await $api.patch(`${API_ROUTES.COMMENTS}/${id}`, {
                 is_approved: !currentStatus,
             });
             if (response.data.success) {
                 toast.success(currentStatus ? 'Đã ẩn bình luận' : 'Đã duyệt bình luận');
                 fetchComments();
+                fetchStats();
             }
         } catch (error) {
             toast.error('Thao tác thất bại');
@@ -127,10 +141,11 @@ export default function CommentsManagementPage() {
     const confirmDeleteComment = async () => {
         if (!commentToDelete) return;
         try {
-            const response = await api.delete(`/api/portal/comments/${commentToDelete}`);
+            const response = await $api.delete(`${API_ROUTES.COMMENTS}/${commentToDelete}`);
             if (response.data.success) {
                 toast.success('Đã xóa bình luận');
                 fetchComments();
+                fetchStats();
             }
         } catch (error) {
             toast.error('Xóa thất bại');
@@ -143,7 +158,7 @@ export default function CommentsManagementPage() {
         if (!replyingTo || !replyContent.trim()) return;
         setIsSubmittingReply(true);
         try {
-            const response = await api.patch(`/api/portal/comments/${replyingTo.id}`, {
+            const response = await $api.patch(`${API_ROUTES.COMMENTS}/${replyingTo.id}`, {
                 reply_content: replyContent,
                 is_approved: true,
             });
@@ -152,6 +167,7 @@ export default function CommentsManagementPage() {
                 setReplyingTo(null);
                 setReplyContent('');
                 fetchComments();
+                fetchStats();
             }
         } catch (error) {
             toast.error('Không thể gửi phản hồi');
@@ -160,44 +176,124 @@ export default function CommentsManagementPage() {
         }
     };
 
+    // Prepare chart data
+    const commentChartData = [
+        {
+            browser: 'approved',
+            visitors: stats?.commentStats?.approved || 0,
+            fill: '#10b981',
+        },
+        {
+            browser: 'pending',
+            visitors: stats?.commentStats?.pending || 0,
+            fill: '#f59e0b',
+        },
+    ];
+
+    const commentTrendData =
+        stats?.trends?.map((t: any) => ({
+            month: t.month.toUpperCase(),
+            comments: t.comments || 0,
+        })) || [];
+
     return (
-        <div className="flex-1 space-y-4 p-8 pt-6">
-            <div className="flex items-center justify-between space-y-2">
-                <div>
-                    <h2 className="text-3xl font-black tracking-tighter uppercase italic text-[#002d6b]">
+        <div className="flex-1 space-y-10 py-8 pt-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="px-2 py-0.5 bg-[#002d6b] text-white text-[8px] font-black uppercase tracking-widest">
+                            Customer Feedback
+                        </span>
+                        <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-1">
+                            <span className="size-1.5 bg-emerald-500 rounded-full animate-pulse" />{' '}
+                            Interactive Monitoring
+                        </span>
+                    </div>
+                    <h2 className="text-4xl font-black tracking-tighter uppercase italic text-[#002d6b] border-l-8 border-[#002d6b] pl-6 leading-none">
                         Quản lý Bình luận
                     </h2>
-                    <p className="text-muted-foreground font-medium italic">
-                        Theo dõi, phê duyệt và phản hồi các thắc mắc của khách hàng về sản phẩm.
+                    <p className="text-slate-500 font-medium italic text-xs max-w-2xl leading-relaxed">
+                        Hệ thống phê duyệt và phản hồi tương tác khách hàng. Theo dõi mức độ quan
+                        tâm về sản phẩm qua biểu đồ xu hướng và trạng thái xử lý bình luận.
                     </p>
                 </div>
             </div>
 
+            {/* Visual Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <RadialChartGrid
+                    title="Trạng thái phê duyệt"
+                    description="Tỷ lệ bình luận đã duyệt vs chờ xử lý"
+                    data={commentChartData}
+                    config={{
+                        visitors: { label: 'Bình luận' },
+                        approved: { label: 'Đã duyệt', color: '#10b981' },
+                        pending: { label: 'Chờ duyệt', color: '#f59e0b' },
+                    }}
+                    footerTitle="Mức độ tương tác"
+                    footerDescription="Cập nhật tự động từ hệ thống"
+                    className="lg:col-span-1"
+                />
+                <AreaChartGradient
+                    title="Mật độ thảo luận"
+                    description="Số lượng bình luận mới được gửi qua các tháng"
+                    data={commentTrendData}
+                    config={{
+                        comments: { label: 'Bình luận', color: '#002d6b' },
+                    }}
+                    dataKeys={['comments']}
+                    xAxisKey="month"
+                    footerTitle="Xu hướng quan tâm"
+                    footerDescription="Dựa trên dữ liệu 6 tháng gần nhất"
+                    className="lg:col-span-2"
+                />
+            </div>
+
             <div className="grid gap-4">
-                <Card className="rounded-none border-none shadow-sm">
-                    <CardHeader className="bg-slate-50/50 pb-4">
+                <Card className="rounded-none border border-slate-100 shadow-sm overflow-hidden">
+                    <CardHeader className="bg-slate-50/50 pb-6 border-b border-slate-100">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div className="flex items-center gap-2 flex-1 max-w-md">
                                 <div className="relative w-full">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <Input
-                                        placeholder="Tìm theo tên, email, nội dung..."
-                                        className="pl-10 h-10 rounded-none border-slate-200 focus-visible:ring-brand-primary"
+                                        placeholder="TÌM THEO TÊN, EMAIL, NỘI DUNG..."
+                                        className="pl-12 h-12 rounded-none border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest placeholder:text-slate-300 focus-visible:ring-brand-primary focus-visible:ring-offset-0"
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                     />
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Filter size={16} className="text-slate-400" />
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <Filter size={16} className="text-slate-400" />
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                        Lọc:
+                                    </span>
+                                </div>
                                 <Select value={status} onValueChange={setStatus}>
-                                    <SelectTrigger className="h-10 w-[180px] rounded-none border-slate-200 focus:ring-brand-primary">
+                                    <SelectTrigger className="h-12 w-[200px] rounded-none border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest focus:ring-0 focus:ring-offset-0">
                                         <SelectValue placeholder="Tất cả trạng thái" />
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-none border-slate-200">
-                                        <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                                        <SelectItem value="pending">Chờ duyệt</SelectItem>
-                                        <SelectItem value="approved">Đã duyệt</SelectItem>
+                                    <SelectContent className="rounded-none border-slate-100">
+                                        <SelectItem
+                                            value="all"
+                                            className="text-[10px] font-black uppercase tracking-widest"
+                                        >
+                                            Tất cả trạng thái
+                                        </SelectItem>
+                                        <SelectItem
+                                            value="pending"
+                                            className="text-[10px] font-black uppercase tracking-widest"
+                                        >
+                                            Chờ duyệt
+                                        </SelectItem>
+                                        <SelectItem
+                                            value="approved"
+                                            className="text-[10px] font-black uppercase tracking-widest"
+                                        >
+                                            Đã duyệt
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -207,52 +303,61 @@ export default function CommentsManagementPage() {
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center py-20 opacity-30">
                                 <div className="h-12 w-12 border-4 border-[#002d6b] border-t-transparent rounded-full animate-spin mb-4" />
-                                <p className="text-xs font-black uppercase tracking-widest">
+                                <p className="text-[10px] font-black uppercase tracking-widest">
                                     Đang tải dữ liệu...
                                 </p>
                             </div>
                         ) : comments.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                                <MessageSquare size={48} className="mb-4 opacity-20" />
-                                <p className="font-bold italic">Không tìm thấy bình luận nào.</p>
+                                <MessageSquare size={48} className="mb-4 opacity-10" />
+                                <p className="text-[10px] font-black uppercase tracking-widest">
+                                    Không tìm thấy bình luận nào.
+                                </p>
                             </div>
                         ) : (
                             <div className="divide-y divide-slate-100">
                                 {comments.map((comment) => (
                                     <div
                                         key={comment.id}
-                                        className="p-6 hover:bg-slate-50/50 transition-colors"
+                                        className="p-8 hover:bg-slate-50/30 transition-colors"
                                     >
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="flex-1 space-y-3">
+                                        <div className="flex items-start justify-between gap-8">
+                                            <div className="flex-1 space-y-4">
                                                 {/* Header: Guest Info & Product */}
-                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="size-8 rounded-full bg-[#002d6b]/10 flex items-center justify-center text-[#002d6b]">
-                                                            <User size={16} />
+                                                <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="size-10 rounded-none bg-[#002d6b]/5 flex items-center justify-center text-[#002d6b] border border-[#002d6b]/10">
+                                                            <User size={18} />
                                                         </div>
-                                                        <span className="text-sm font-black text-slate-900">
-                                                            {comment.guest_name}
-                                                        </span>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm font-black text-slate-900 uppercase tracking-tight">
+                                                                {comment.guest_name}
+                                                            </span>
+                                                            <span className="text-[10px] text-slate-400 font-medium">
+                                                                {comment.guest_email}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <span className="text-xs text-slate-400 font-medium">
-                                                        {comment.guest_email}
-                                                    </span>
-                                                    <div className="px-2 py-0.5 bg-slate-100 text-[10px] font-bold text-slate-500 rounded uppercase tracking-tighter flex items-center gap-1">
-                                                        <Clock size={10} />
+
+                                                    <div className="px-3 py-1 bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-tight flex items-center gap-2">
+                                                        <Clock
+                                                            size={12}
+                                                            className="text-slate-300"
+                                                        />
                                                         {format(
                                                             new Date(comment.created_at),
-                                                            'HH:mm dd/MM/yyyy',
+                                                            'HH:mm - dd/MM/yyyy',
                                                             { locale: vi },
                                                         )}
                                                     </div>
+
                                                     <Badge
                                                         variant={
                                                             comment.is_approved
                                                                 ? 'default'
                                                                 : 'secondary'
                                                         }
-                                                        className="rounded-none text-[9px] uppercase tracking-widest font-black py-0.5 h-auto border-none"
+                                                        className="rounded-none text-[9px] uppercase tracking-widest font-black py-1 px-3 h-auto border-none"
                                                         style={{
                                                             backgroundColor: comment.is_approved
                                                                 ? '#10b981'
@@ -267,26 +372,26 @@ export default function CommentsManagementPage() {
                                                     <a
                                                         href={`/san-pham/${comment.product_slug}`}
                                                         target="_blank"
-                                                        className="text-[10px] font-black uppercase text-[#002d6b] hover:underline flex items-center gap-1"
+                                                        className="text-[10px] font-black uppercase text-[#002d6b] hover:text-[#002d6b]/80 flex items-center gap-1.5 transition-colors"
                                                     >
-                                                        SP: {comment.product_name}{' '}
-                                                        <ExternalLink size={10} />
+                                                        <ExternalLink size={12} /> SP:{' '}
+                                                        {comment.product_name}
                                                     </a>
                                                 </div>
 
                                                 {/* Content */}
-                                                <div className="bg-white border border-slate-100 p-4 rounded-xl text-sm text-slate-700 shadow-sm leading-relaxed">
-                                                    {comment.content}
+                                                <div className="bg-slate-50/50 border-l-4 border-l-[#002d6b] p-6 text-sm text-slate-700 leading-relaxed italic">
+                                                    "{comment.content}"
                                                 </div>
 
                                                 {/* Reply */}
                                                 {comment.reply_content && (
-                                                    <div className="pl-6 border-l-2 border-[#fbbf24] mt-2 space-y-1">
-                                                        <div className="text-[10px] font-black uppercase text-[#fbbf24] tracking-widest italic flex items-center gap-2">
-                                                            <CheckCircle2 size={12} /> SÀI GÒN VALVE
-                                                            PHẢN HỒI:
+                                                    <div className="pl-8 border-l-2 border-[#fbbf24] mt-4 space-y-2">
+                                                        <div className="text-[10px] font-black uppercase text-[#fbbf24] tracking-[0.2em] flex items-center gap-2">
+                                                            <CheckCircle2 size={12} /> PHẢN HỒI TỪ
+                                                            HỆ THỐNG:
                                                         </div>
-                                                        <p className="text-sm text-slate-500 italic leading-relaxed">
+                                                        <p className="text-sm text-slate-500 italic leading-relaxed bg-amber-50/30 p-4 border border-amber-100/50">
                                                             {comment.reply_content}
                                                         </p>
                                                     </div>
@@ -294,11 +399,11 @@ export default function CommentsManagementPage() {
                                             </div>
 
                                             {/* Actions */}
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 pt-1">
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    className="h-8 rounded-none gap-2 text-[10px] font-black uppercase tracking-widest border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100"
+                                                    className="h-10 rounded-none gap-3 text-[10px] font-black uppercase tracking-widest border-slate-200 hover:bg-[#002d6b] hover:text-white hover:border-[#002d6b] transition-all"
                                                     onClick={() => {
                                                         setReplyingTo(comment);
                                                         setReplyContent(
@@ -314,21 +419,21 @@ export default function CommentsManagementPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-8 w-8 hover:bg-slate-100 rounded-none"
+                                                            className="h-10 w-10 hover:bg-slate-100 rounded-none transition-colors"
                                                         >
-                                                            <MoreHorizontal size={16} />
+                                                            <MoreHorizontal size={18} />
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent
                                                         align="end"
-                                                        className="rounded-none border-slate-200"
+                                                        className="rounded-none border-slate-100 shadow-xl w-56 p-2"
                                                     >
-                                                        <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-slate-400">
-                                                            Thao tác khác
+                                                        <DropdownMenuLabel className="text-[9px] uppercase font-black tracking-widest text-slate-400 px-3 py-2">
+                                                            Thao tác quản trị
                                                         </DropdownMenuLabel>
-                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuSeparator className="bg-slate-50" />
                                                         <DropdownMenuItem
-                                                            className="text-xs font-bold cursor-pointer gap-2"
+                                                            className="text-[10px] font-black uppercase tracking-tight cursor-pointer gap-3 px-3 py-2 transition-colors"
                                                             onSelect={() =>
                                                                 handleApprove(
                                                                     comment.id,
@@ -354,9 +459,9 @@ export default function CommentsManagementPage() {
                                                                 </>
                                                             )}
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuSeparator className="bg-slate-50" />
                                                         <DropdownMenuItem
-                                                            className="text-xs font-bold cursor-pointer gap-2 text-rose-500 focus:text-rose-500"
+                                                            className="text-[10px] font-black uppercase tracking-tight cursor-pointer gap-3 text-rose-500 focus:text-rose-500 px-3 py-2 hover:bg-rose-50"
                                                             onSelect={() =>
                                                                 handleDelete(comment.id)
                                                             }
@@ -380,23 +485,23 @@ export default function CommentsManagementPage() {
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                             Hiển thị {comments.length} / {total} bình luận
                         </p>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                             <Button
                                 variant="outline"
                                 size="icon"
-                                className="h-8 w-8 rounded-none"
+                                className="h-10 w-10 rounded-none border-slate-200 transition-all hover:bg-slate-50"
                                 onClick={() => setPage(page - 1)}
                                 disabled={page === 1}
                             >
                                 <ChevronLeft size={16} />
                             </Button>
-                            <div className="h-8 min-w-[32px] flex items-center justify-center text-[10px] font-black border border-slate-200 px-2">
+                            <div className="h-10 min-w-[60px] flex items-center justify-center text-[10px] font-black border border-slate-200 px-4 bg-white uppercase tracking-widest">
                                 TRANG {page}
                             </div>
                             <Button
                                 variant="outline"
                                 size="icon"
-                                className="h-8 w-8 rounded-none"
+                                className="h-10 w-10 rounded-none border-slate-200 transition-all hover:bg-slate-50"
                                 onClick={() => setPage(page + 1)}
                                 disabled={page * 10 >= total}
                             >
@@ -409,55 +514,61 @@ export default function CommentsManagementPage() {
 
             {/* Reply Dialog */}
             <Dialog open={!!replyingTo} onOpenChange={() => setReplyingTo(null)}>
-                <DialogContent className="max-w-2xl rounded-none border-none p-0 overflow-hidden">
-                    <DialogHeader className="p-8 bg-[#002d6b] text-white space-y-2">
-                        <DialogTitle className="text-2xl font-black uppercase tracking-tight italic flex items-center gap-4">
-                            <Reply size={24} className="text-[#fbbf24]" />
-                            Phản hồi bình luận
+                <DialogContent className="max-w-2xl rounded-none border-none p-0 overflow-hidden shadow-2xl">
+                    <DialogHeader className="p-10 bg-[#002d6b] text-white space-y-4">
+                        <DialogTitle className="text-3xl font-black uppercase tracking-tighter italic flex items-center gap-6">
+                            <Reply size={32} className="text-[#fbbf24]" />
+                            Phản hồi tương tác
                         </DialogTitle>
-                        <DialogDescription className="text-white/60 font-medium italic">
+                        <DialogDescription className="text-white/60 font-medium italic text-sm">
                             Câu trả lời của bạn sẽ được hiển thị công khai dưới bình luận của khách
-                            hàng.
+                            hàng. Hãy đảm bảo nội dung chuyên nghiệp và chính xác.
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="p-8 space-y-6">
+                    <div className="p-10 space-y-8">
                         <div className="space-y-4">
-                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                Câu hỏi của {replyingTo?.guest_name}:
+                            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                                Câu hỏi từ {replyingTo?.guest_name}:
                             </div>
-                            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 text-sm text-slate-600 italic">
+                            <div className="bg-slate-50 p-8 rounded-none border border-slate-100 text-sm text-slate-600 italic leading-relaxed border-l-4 border-l-[#fbbf24]">
                                 "{replyingTo?.content}"
                             </div>
                         </div>
 
                         <div className="space-y-4">
-                            <div className="text-[10px] font-black uppercase tracking-widest text-[#002d6b]">
-                                Nội dung phản hồi của bạn:
+                            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[#002d6b]">
+                                Nội dung trả lời hệ thống:
                             </div>
                             <Textarea
-                                placeholder="Nhập nội dung phản hồi tại đây..."
-                                className="min-h-[150px] rounded-none border-slate-200 focus-visible:ring-brand-primary text-sm leading-relaxed"
+                                placeholder="NHẬP NỘI DUNG PHẢN HỒI CHI TIẾT TẠI ĐÂY..."
+                                className="min-h-[200px] rounded-none border-slate-200 focus-visible:ring-offset-0 focus-visible:ring-brand-primary text-sm font-medium leading-relaxed italic placeholder:text-slate-200"
                                 value={replyContent}
                                 onChange={(e) => setReplyContent(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    <DialogFooter className="p-8 bg-slate-50/50 flex sm:justify-between items-center gap-4">
+                    <DialogFooter className="p-10 bg-slate-50/50 flex sm:justify-between items-center gap-6 border-t border-slate-100">
                         <Button
                             variant="ghost"
                             onClick={() => setReplyingTo(null)}
-                            className="rounded-none text-[10px] font-black uppercase tracking-widest h-12"
+                            className="rounded-none text-[10px] font-black uppercase tracking-widest h-14 px-8"
                         >
-                            Hủy bỏ
+                            Hủy thao tác
                         </Button>
                         <Button
-                            className="bg-[#002d6b] hover:bg-[#003d8b] text-white rounded-none h-12 px-8 text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-[#002d6b]/20"
+                            className="bg-[#002d6b] hover:bg-[#001d4b] text-white rounded-none h-14 px-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#002d6b]/20 flex items-center gap-3"
                             onClick={handleReplySubmit}
                             disabled={isSubmittingReply || !replyContent.trim()}
                         >
-                            {isSubmittingReply ? 'Đang gửi...' : 'Gửi phản hồi & Công khai'}
+                            {isSubmittingReply ? (
+                                <>
+                                    <Clock className="animate-spin" size={14} /> ĐANG GỬI...
+                                </>
+                            ) : (
+                                'GỬI PHẢN HỒI & PHÊ DUYỆT'
+                            )}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -468,7 +579,7 @@ export default function CommentsManagementPage() {
                 onOpenChange={(open) => !open && setCommentToDelete(null)}
                 onConfirm={confirmDeleteComment}
                 title="Xác nhận xóa bình luận?"
-                description="Bạn có chắc chắn muốn xóa bình luận này? Hành động này không thể hoàn tác."
+                description="Hành động này sẽ xóa vĩnh viễn bình luận khỏi hệ thống và không thể hoàn tác. Bạn có chắc chắn muốn tiếp tục?"
                 confirmText="Xác nhận xóa"
                 variant="destructive"
             />

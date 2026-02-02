@@ -4,7 +4,6 @@ import { decrypt } from '@/services/auth';
 import { checkRateLimit, RATE_LIMITS } from '@/middlewares/rate-limit';
 
 import { SITE_ROUTES, ADMIN_ROUTES, API_ROUTES } from '@/constants/routes';
-import { RBAC_ROLES } from '@/constants/rbac';
 
 // Add paths that don't require authentication
 const publicPaths = [
@@ -93,49 +92,10 @@ export default async function proxy(request: NextRequest) {
         }
 
         try {
-            const sessionData = await decrypt(session);
-            const userRoles = sessionData?.user?.roles || [];
-            const isSuperAdmin = userRoles.includes(RBAC_ROLES.SUPER_ADMIN);
-            const isAdmin = userRoles.includes(RBAC_ROLES.ADMIN) || isSuperAdmin;
-            const isEditor = userRoles.includes(RBAC_ROLES.EDITOR) || isAdmin;
-
-            // Check role-based permissions for sensitive operations
-            if (isProtectedApi) {
-                // DELETE operations require admin role (now checked via RBAC codes)
-                if (method === 'DELETE' && !isAdmin) {
-                    return NextResponse.json(
-                        {
-                            success: false,
-                            error: 'Forbidden - Admin role required for delete operations',
-                        },
-                        { status: 403 },
-                    );
-                }
-
-                // User management requires admin
-                if (pathname.startsWith('/api/users') && !isAdmin) {
-                    return NextResponse.json(
-                        {
-                            success: false,
-                            error: 'Forbidden - Admin role required for user management',
-                        },
-                        { status: 403 },
-                    );
-                }
-
-                // Write operations require at least editor role
-                if (['POST', 'PATCH', 'PUT'].includes(method)) {
-                    if (!isEditor) {
-                        return NextResponse.json(
-                            {
-                                success: false,
-                                error: 'Forbidden - Editor or Admin role required',
-                            },
-                            { status: 403 },
-                        );
-                    }
-                }
-            }
+            await decrypt(session);
+            // In the new RBAC system, we let the individual route handlers (using withAuth)
+            // handle granular permission checks. The global proxy should only ensure:
+            // 1. User is authenticated (done above)
 
             return NextResponse.next();
         } catch (error) {

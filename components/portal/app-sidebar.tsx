@@ -1,25 +1,25 @@
 'use client';
 
 import * as React from 'react';
-import {
-    LayoutDashboard,
-    Settings,
-    FileText,
-    Briefcase,
-    Box,
-    ChevronRight,
-    User,
-    LogOut,
-    Lock,
-    Mail,
-    Images,
-    UserRoundSearch,
-    ClipboardList,
-    ShieldCheck,
-    Layers,
-    MessageCircle,
-} from 'lucide-react';
+import { icons, ChevronRight, User, LogOut, GripVertical, FileText } from 'lucide-react';
 import Image from 'next/image';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import {
     Sidebar,
@@ -41,118 +41,123 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { usePathname, useRouter } from 'next/navigation';
-import api from '@/services/axios';
+import $api from '@/utils/axios';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth, SidebarModule } from '@/hooks/use-auth';
+import { useAuthStore } from '@/stores/auth-store';
 
 import { cn } from '@/lib/utils';
-import { PORTAL_ROUTES } from '@/constants/routes';
+import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 
-import { PERMISSIONS } from '@/constants/rbac';
+const DynamicIcon = React.memo(
+    ({ name, className }: { name: string | null; className?: string }) => {
+        if (!name) return <FileText className={className} />;
 
-const data = {
-    navMain: [
-        {
-            title: 'Dashboard',
-            url: PORTAL_ROUTES.dashboard,
-            icon: LayoutDashboard,
-        },
-        {
-            title: 'Quản lý Tin tức',
-            url: PORTAL_ROUTES.cms.news.list,
-            icon: FileText,
-            requiredPermission: PERMISSIONS.BLOG_VIEW,
-        },
-        {
-            title: 'Quản lý Dự án',
-            url: PORTAL_ROUTES.cms.projects.list,
-            icon: Briefcase,
-            requiredPermission: PERMISSIONS.PROJECTS_VIEW,
-        },
-        {
-            title: 'Quản lý Sản phẩm',
-            url: PORTAL_ROUTES.cms.products.list,
-            icon: Box,
-            requiredPermission: PERMISSIONS.PRODUCTS_VIEW,
-        },
-        {
-            title: 'Thư viện Media',
-            url: PORTAL_ROUTES.cms.media,
-            icon: Images,
-            requiredPermission: PERMISSIONS.MEDIA_VIEW,
-        },
-        {
-            title: 'Cài đặt hệ thống',
-            url: PORTAL_ROUTES.settings,
-            icon: Settings,
-            requiredPermission: PERMISSIONS.ROLES_VIEW,
-        },
-        {
-            title: 'Quản lý Liên hệ',
-            url: PORTAL_ROUTES.contacts,
-            icon: Mail,
-            requiredPermission: PERMISSIONS.CONTACTS_VIEW,
-        },
-        {
-            title: 'Quản lý Bình luận',
-            url: PORTAL_ROUTES.cms.comments.list,
-            icon: ClipboardList,
-            requiredPermission: PERMISSIONS.COMMENTS_VIEW,
-        },
-        {
-            title: 'Hỗ trợ trực tuyến',
-            url: PORTAL_ROUTES.cms.chat,
-            icon: MessageCircle,
-        },
-        {
-            title: 'Quản lý Tuyển dụng',
-            url: PORTAL_ROUTES.cms.jobs.list,
-            icon: UserRoundSearch,
-            requiredPermission: PERMISSIONS.RECRUITMENT_VIEW,
-        },
-        {
-            title: 'Danh sách Ứng viên',
-            url: PORTAL_ROUTES.cms.applications.list,
-            icon: ClipboardList,
-            requiredPermission: PERMISSIONS.RECRUITMENT_VIEW,
-        },
-        {
-            title: 'Tài khoản Admin',
-            url: PORTAL_ROUTES.users.list,
-            icon: ShieldCheck,
-            requiredPermission: PERMISSIONS.USERS_VIEW,
-        },
-        {
-            title: 'Phân quyền & Vai trò',
-            url: PORTAL_ROUTES.users.roles.list,
-            icon: Lock,
-            requiredPermission: PERMISSIONS.ROLES_VIEW,
-        },
-        {
-            title: 'Quản lý Module',
-            url: PORTAL_ROUTES.users.modules.list,
-            icon: Layers,
-            requiredPermission: PERMISSIONS.ROLES_VIEW,
-        },
-    ],
-};
+        const IconComponent = icons[name as keyof typeof icons];
+
+        if (!IconComponent) {
+            return <FileText className={className} />;
+        }
+
+        return <IconComponent className={className} />;
+    },
+);
+DynamicIcon.displayName = 'DynamicIcon';
+
+interface SortableMenuItemProps {
+    module: SidebarModule;
+    isActive: boolean;
+}
+
+function SortableMenuItem({ module, isActive }: SortableMenuItemProps) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        id: module.code,
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 1 : 0,
+    };
+
+    return (
+        <li
+            ref={setNodeRef}
+            style={style}
+            className="group/menu-item relative w-full flex justify-center list-none"
+            data-slot="sidebar-menu-item"
+            data-sidebar="menu-item"
+        >
+            <SidebarMenuButton
+                asChild
+                tooltip={module.name}
+                className={cn(
+                    'text-[10px] font-black px-4 transition-none! uppercase tracking-widest rounded-none h-auto group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center relative',
+                    isActive
+                        ? 'bg-white text-[#002d6b] hover:bg-white hover:text-[#002d6b]'
+                        : 'text-white/70 hover:bg-white/5 hover:text-white',
+                )}
+            >
+                <div className="flex items-center gap-2 w-full">
+                    {/* Drag Handle - only visible on hover and not in icon mode */}
+                    <div
+                        {...attributes}
+                        {...listeners}
+                        className="flex items-center justify-center shrink-0 opacity-0 group-hover/menu-item:opacity-40 transition-opacity cursor-grab active:cursor-grabbing group-data-[collapsible=icon]:hidden"
+                    >
+                        <GripVertical className="size-3" />
+                    </div>
+
+                    <Link
+                        href={module.route as string}
+                        className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center"
+                    >
+                        <div className="flex items-center justify-center shrink-0 size-5">
+                            <DynamicIcon
+                                name={module.icon}
+                                className={cn(
+                                    'size-4',
+                                    isActive ? 'text-[#002d6b]' : 'text-[#fbbf24]',
+                                )}
+                            />
+                        </div>
+                        <span className="truncate group-data-[collapsible=icon]:hidden">
+                            {module.name}
+                        </span>
+                    </Link>
+                </div>
+            </SidebarMenuButton>
+        </li>
+    );
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const pathname = usePathname();
     const router = useRouter();
-    const { user, hasPermission } = useAuth();
+    const { user } = useAuth();
     const [isMounted, setIsMounted] = React.useState(false);
 
-    // Prevent hydration mismatch with Radix UI DropdownMenu
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        }),
+    );
+
     React.useEffect(() => {
         setIsMounted(true);
     }, []);
 
     const handleLogout = async () => {
         try {
-            await api.post('/api/auth/logout');
-            // Cookies are cleared by the server, no need to clear localStorage
+            await $api.post(API_ROUTES.AUTH.LOGOUT);
+            useAuthStore.getState().logout(); // Reset auth store state
             toast.success('Đã đăng xuất');
             router.push('/login');
             router.refresh();
@@ -160,6 +165,55 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             console.error('Logout failed', error);
             toast.error('Lỗi khi đăng xuất');
         }
+    };
+
+    const navItems = React.useMemo(() => {
+        if (!user?.modules) return [];
+
+        return user.modules
+            .filter((module: SidebarModule) => !!module.route)
+            .map((module: SidebarModule) => ({
+                title: module.name,
+                url: module.route as string,
+                iconName: module.icon,
+                code: module.code,
+            }));
+    }, [user?.modules]);
+
+    const filteredModules = React.useMemo(() => {
+        return (user?.modules || []).filter((module: SidebarModule) => !!module.route);
+    }, [user?.modules]);
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const modules = user?.modules || [];
+            const oldIndex = modules.findIndex((m) => m.code === active.id);
+            const newIndex = modules.findIndex((m) => m.code === over.id);
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const newOrder = arrayMove(modules, oldIndex, newIndex);
+                useAuthStore.getState().setModulesOrder(newOrder);
+                useAuthStore.getState().syncModulesOrder();
+            }
+        }
+    };
+
+    const isPathActive = (url: string) => {
+        if (!url) return false;
+        if (pathname === url) return true;
+
+        if (pathname.startsWith(url + '/')) {
+            const hasBetterMatch = navItems.some(
+                (item) =>
+                    item.url !== url &&
+                    item.url.length > url.length &&
+                    (pathname === item.url || pathname.startsWith(item.url + '/')),
+            );
+            return !hasBetterMatch;
+        }
+        return false;
     };
 
     return (
@@ -183,7 +237,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarHeader className="border-b border-white/5 flex items-center justify-start px-4 bg-[#002d6b] shrink-0 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
                 <Link
                     href={PORTAL_ROUTES.dashboard}
-                    className="flex items-center gap-3 group/logo relative w-full h-full justify-center px-1"
+                    className="flex items-center gap-3 group/logo relative w-full h-full justify-center px-4"
                 >
                     <div className="relative flex items-center gap-3 group-data-[collapsible=icon]:hidden w-full px-1">
                         <div className="bg-white p-1 rounded-none flex items-center justify-center h-8 w-8 shrink-0">
@@ -213,71 +267,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
             <SidebarContent className="scrollbar-hide bg-[#002d6b] py-2 overflow-x-hidden">
                 <SidebarGroup className="p-0">
-                    <SidebarMenu className="gap-0 group-data-[collapsible=icon]:items-center">
-                        {data.navMain.map((item) => {
-                            // Strictly hide unauthorized items (lm đúng rồi)
-                            if (
-                                item.requiredPermission &&
-                                !hasPermission(item.requiredPermission)
-                            ) {
-                                return null;
-                            }
-
-                            const isActive = (() => {
-                                if (item.url === PORTAL_ROUTES.dashboard) {
-                                    return pathname === PORTAL_ROUTES.dashboard;
-                                }
-                                if (item.url === PORTAL_ROUTES.users.list) {
-                                    return (
-                                        pathname === PORTAL_ROUTES.users.list ||
-                                        (pathname.startsWith(PORTAL_ROUTES.users.list) &&
-                                            !pathname.startsWith(PORTAL_ROUTES.users.roles.list) &&
-                                            !pathname.startsWith(PORTAL_ROUTES.users.modules.list))
-                                    );
-                                }
-                                return pathname.startsWith(item.url);
-                            })();
-
-                            return (
-                                <SidebarMenuItem
-                                    key={item.title}
-                                    className="w-full flex justify-center"
-                                >
-                                    <SidebarMenuButton
-                                        asChild
-                                        tooltip={item.title}
-                                        className={cn(
-                                            'text-[10px] font-black  px-4 transition-colors duration-200 uppercase tracking-widest rounded-none h-auto group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center',
-                                            isActive
-                                                ? 'bg-white text-[#002d6b] hover:bg-white hover:text-[#002d6b]'
-                                                : 'text-white/70 hover:bg-white/5 hover:text-white',
-                                        )}
-                                    >
-                                        <Link
-                                            href={item.url}
-                                            className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center"
-                                        >
-                                            <div className="flex items-center justify-center shrink-0 size-5">
-                                                {item.icon && (
-                                                    <item.icon
-                                                        className={cn(
-                                                            'size-4',
-                                                            isActive
-                                                                ? 'text-[#002d6b]'
-                                                                : 'text-[#fbbf24]',
-                                                        )}
-                                                    />
-                                                )}
-                                            </div>
-                                            <span className="truncate group-data-[collapsible=icon]:hidden">
-                                                {item.title}
-                                            </span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            );
-                        })}
-                    </SidebarMenu>
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext
+                            items={filteredModules.map((m) => m.code)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            <ul
+                                className="flex w-full min-w-0 flex-col gap-1 group-data-[collapsible=icon]:items-center list-none p-0"
+                                data-slot="sidebar-menu"
+                                data-sidebar="menu"
+                            >
+                                {filteredModules.map((module: SidebarModule) => (
+                                    <SortableMenuItem
+                                        key={module.code}
+                                        module={module}
+                                        isActive={isPathActive(module.route as string)}
+                                    />
+                                ))}
+                            </ul>
+                        </SortableContext>
+                    </DndContext>
                 </SidebarGroup>
             </SidebarContent>
 
@@ -297,10 +310,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 size="lg"
                                 className="w-full h-14 items-center gap-3 px-4   bg-[#001d4a] hover:bg-[#001d4a] text-white rounded-none group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer"
                             >
-                                <div className="flex h-8 w-8  items-center justify-center rounded-none  bg-[#fbbf24] text-[10px] font-black text-[#002d6b] shrink-0">
-                                    {(user.fullName || user.username || '?')
-                                        .substring(0, 2)
-                                        .toUpperCase()}
+                                <div className="flex h-8 w-8  items-center justify-center rounded-none  bg-[#fbbf24] text-[10px] font-black text-[#002d6b] shrink-0 overflow-hidden">
+                                    {user.avatarUrl ? (
+                                        <Image
+                                            src={user.avatarUrl}
+                                            alt={user.fullName || user.username}
+                                            width={32}
+                                            height={32}
+                                            className="object-cover w-full h-full"
+                                        />
+                                    ) : (
+                                        (user.fullName || user.username || '?')
+                                            .substring(0, 2)
+                                            .toUpperCase()
+                                    )}
                                 </div>
                                 <div className="flex flex-col items-start leading-none group-data-[collapsible=icon]:hidden overflow-hidden ms-1">
                                     <span className="text-[10px] font-black uppercase tracking-tight truncate w-full">
@@ -325,11 +348,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 </p>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator className="bg-white/5 m-0" />
-                            <DropdownMenuItem className="px-5 py-3 focus:bg-white/10 focus:text-white cursor-pointer rounded-none group border-none outline-none">
-                                <User className="size-4 text-[#fbbf24] mr-3" />
-                                <span className="text-[10px] font-black uppercase tracking-widest">
-                                    Hồ sơ
-                                </span>
+                            <DropdownMenuItem
+                                asChild
+                                className="px-5 py-3 focus:bg-white/10 focus:text-white cursor-pointer rounded-none group border-none outline-none"
+                            >
+                                <Link
+                                    href={PORTAL_ROUTES.settings}
+                                    className="flex items-center w-full"
+                                >
+                                    <User className="size-4 text-[#fbbf24] mr-3" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">
+                                        Hồ sơ
+                                    </span>
+                                </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-white/5 m-0" />
                             <DropdownMenuItem

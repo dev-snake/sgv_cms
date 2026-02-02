@@ -9,27 +9,12 @@ import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-// Map of route prefixes to required permissions
-const ROUTE_PERMISSIONS: Record<string, string> = {
-    [PORTAL_ROUTES.cms.news.list]: PERMISSIONS.BLOG_VIEW,
-    [PORTAL_ROUTES.cms.projects.list]: PERMISSIONS.PROJECTS_VIEW,
-    [PORTAL_ROUTES.cms.products.list]: PERMISSIONS.PRODUCTS_VIEW,
-    [PORTAL_ROUTES.cms.media]: PERMISSIONS.MEDIA_VIEW,
-    [PORTAL_ROUTES.settings]: PERMISSIONS.ROLES_VIEW,
-    [PORTAL_ROUTES.contacts]: PERMISSIONS.CONTACTS_VIEW,
-    [PORTAL_ROUTES.cms.jobs.list]: PERMISSIONS.RECRUITMENT_VIEW,
-    [PORTAL_ROUTES.cms.applications.list]: PERMISSIONS.RECRUITMENT_VIEW,
-    [PORTAL_ROUTES.users.list]: PERMISSIONS.USERS_VIEW,
-    [PORTAL_ROUTES.users.roles.list]: PERMISSIONS.ROLES_VIEW,
-    [PORTAL_ROUTES.users.modules.list]: PERMISSIONS.ROLES_VIEW,
-};
-
 interface RouteGuardProps {
     children: ReactNode;
 }
 
 export function RouteGuard({ children }: RouteGuardProps) {
-    const { user, isLoading, hasPermission, isAdmin } = useAuth();
+    const { user, isLoading, isAdmin, hasPermission } = useAuth();
     const pathname = usePathname();
 
     // If loading, show spinner
@@ -41,13 +26,56 @@ export function RouteGuard({ children }: RouteGuardProps) {
         );
     }
 
-    // Find the required permission for the current route
-    const matchingRoute = Object.keys(ROUTE_PERMISSIONS)
-        .sort((a, b) => b.length - a.length) // Most specific match first
-        .find((route) => pathname.startsWith(route));
+    // Determine authorization based on static route mapping
+    const isAuthorized = (() => {
+        if (isAdmin) return true;
+        if (!user) return false;
 
-    const isAuthorized =
-        !matchingRoute || (user && (hasPermission(ROUTE_PERMISSIONS[matchingRoute]) || isAdmin));
+        // Dashboard is always accessible for logged-in users
+        if (pathname === PORTAL_ROUTES.dashboard) return true;
+
+        // Static route-to-permission mapping
+        const routePermissions: { path: string; permission: string }[] = [
+            { path: PORTAL_ROUTES.cms.news.list, permission: PERMISSIONS.BLOG_VIEW },
+            { path: PORTAL_ROUTES.cms.projects.list, permission: PERMISSIONS.PROJECTS_VIEW },
+            { path: PORTAL_ROUTES.cms.products.list, permission: PERMISSIONS.PRODUCTS_VIEW },
+            { path: PORTAL_ROUTES.cms.jobs.list, permission: PERMISSIONS.RECRUITMENT_VIEW },
+            { path: PORTAL_ROUTES.cms.applications.list, permission: PERMISSIONS.RECRUITMENT_VIEW },
+            { path: PORTAL_ROUTES.cms.comments.list, permission: PERMISSIONS.COMMENTS_VIEW },
+            { path: PORTAL_ROUTES.cms.chat, permission: PERMISSIONS.CHAT_VIEW },
+            { path: PORTAL_ROUTES.cms.chat, permission: PERMISSIONS.CHAT_MANAGEMENT_VIEW },
+            { path: PORTAL_ROUTES.cms.media, permission: PERMISSIONS.MEDIA_VIEW },
+            { path: PORTAL_ROUTES.contacts, permission: PERMISSIONS.CONTACTS_VIEW },
+            { path: PORTAL_ROUTES.users.list, permission: PERMISSIONS.USERS_VIEW },
+            { path: PORTAL_ROUTES.users.roles.list, permission: PERMISSIONS.ROLES_VIEW },
+            { path: PORTAL_ROUTES.users.modules.list, permission: PERMISSIONS.ROLES_VIEW },
+            { path: PORTAL_ROUTES.settings, permission: PERMISSIONS.ROLES_VIEW },
+        ];
+
+        // Find ALL matching routes (longest path first)
+        const matchingRoutes = routePermissions
+            .filter((r) => pathname.startsWith(r.path))
+            .sort((a, b) => b.path.length - a.path.length);
+
+        if (matchingRoutes.length === 0) return true; // Allow routes not in the list
+
+        // Get the longest matching path
+        const longestPathLength = matchingRoutes[0].path.length;
+
+        // Check if user has ANY of the permissions for this route
+        // (support multiple permission codes for same route)
+        const permissionsForRoute = matchingRoutes
+            .filter((r) => r.path.length === longestPathLength)
+            .map((r) => r.permission);
+
+        return permissionsForRoute.some((perm) => hasPermission(perm));
+    })();
+
+    // If user is not logged in, return null (handled by middleware redirect)
+    // This prevents the "Permission Denied" UI from flashing during logout
+    if (!user && !isLoading) {
+        return null;
+    }
 
     // If not authorized, show inline Permission Denied UI instead of redirecting
     if (!isAuthorized) {

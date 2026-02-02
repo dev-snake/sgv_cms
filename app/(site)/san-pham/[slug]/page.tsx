@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -16,27 +16,26 @@ import {
     FileText,
     Warehouse,
     Truck,
-    Headphones,
     Maximize2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SITE_ROUTES } from '@/constants/routes';
+import { SITE_ROUTES, API_ROUTES } from '@/constants/routes';
 import Lightbox from '@/components/shared/Lightbox';
 
-import api from '@/services/axios';
+import $api from '@/utils/axios';
 import { ProductComments } from '@/components/site/ProductComments';
 
 export default function ProductDetailPage() {
     const params = useParams();
-    const [product, setProduct] = React.useState<any>(null);
-    const [loading, setLoading] = React.useState(true);
-    const [lightboxOpen, setLightboxOpen] = React.useState(false);
-    const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+    const [product, setProduct] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await api.get(`/api/products/${params.slug}`);
+                const response = await $api.get(`${API_ROUTES.PRODUCTS}/${params.slug}`);
                 if (response.data.success) {
                     setProduct(response.data.data);
                 }
@@ -49,7 +48,7 @@ export default function ProductDetailPage() {
         fetchProduct();
     }, [params.slug]);
 
-    const allImages = React.useMemo(() => {
+    const allImages = useMemo(() => {
         if (!product) return [];
         const main =
             product.image_url || 'https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png';

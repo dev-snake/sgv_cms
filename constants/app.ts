@@ -1,11 +1,4 @@
-/**
- * Application Constants
- * Centralized configuration to avoid hard-coded values
- */
 
-// ============================================================================
-// COMPANY INFORMATION
-// ============================================================================
 export const COMPANY = {
   NAME: "Sài Gòn Valve",
   SHORT_NAME: "SGV",
@@ -13,9 +6,7 @@ export const COMPANY = {
   WEBSITE: process.env.APP_URL || "https://saigonvalve.vn",
 } as const;
 
-// ============================================================================
-// PAGINATION DEFAULTS
-// ============================================================================
+
 export const PAGINATION = {
   DEFAULT_PAGE: 1,
   DEFAULT_LIMIT: 10,
@@ -27,9 +18,7 @@ export const PAGINATION = {
   APPLICATIONS_LIMIT: 10,
 } as const;
 
-// ============================================================================
-// FILE UPLOAD
-// ============================================================================
+
 export const UPLOAD = {
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
   MAX_FILE_SIZE_MB: 5,
@@ -41,9 +30,7 @@ export const UPLOAD = {
   ],
 } as const;
 
-// ============================================================================
-// NEWS / ARTICLES
-// ============================================================================
+
 export const ARTICLE = {
   WORDS_PER_MINUTE: 200, // Average reading speed
   DEFAULT_CATEGORY: "Tin tức",
@@ -52,9 +39,7 @@ export const ARTICLE = {
   FALLBACK_IMAGE: "/uploads/images/placeholder-news.jpg",
 } as const;
 
-// ============================================================================
-// AUTHENTICATION
-// ============================================================================
+
 export const AUTH = {
   JWT_EXPIRY: "24h",
   BCRYPT_SALT_ROUNDS: 10,
@@ -62,19 +47,15 @@ export const AUTH = {
   DEFAULT_ROLE: "admin",
 } as const;
 
-// ============================================================================
-// DEFAULT ADMIN (for seeding - should use env vars in production)
-// ============================================================================
+
 export const SEED_DEFAULTS = {
-  ADMIN_USERNAME: process.env.SEED_ADMIN_USERNAME || "admin",
-  ADMIN_PASSWORD: process.env.SEED_ADMIN_PASSWORD || "admin123",
-  SUPER_ADMIN_USERNAME: process.env.SUPER_ADMIN_USERNAME || "superadmin",
-  SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD || "Super@123",
+  ADMIN_USERNAME: process.env.SEED_ADMIN_USERNAME,
+  ADMIN_PASSWORD: process.env.SEED_ADMIN_PASSWORD,
+  SUPER_ADMIN_USERNAME: process.env.SUPER_ADMIN_USERNAME,
+  SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD,
 } as const;
 
-// ============================================================================
-// RATE LIMITING
-// ============================================================================
+
 export const RATE_LIMIT = {
   WINDOW_MS: 60 * 1000, // 1 minute
   MAX_REQUESTS: 100,

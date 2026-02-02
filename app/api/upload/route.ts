@@ -51,9 +51,11 @@ export const GET = withAuth(
                             '.docx',
                         ];
                         if (allowedExtensions.some((ext) => file.toLowerCase().endsWith(ext))) {
+                            // Normalize path to use forward slashes for URL
+                            const normalizedUrlPath = relativePublic.split(path.sep).join('/');
                             results.push({
-                                filename: relativeFromUploads,
-                                url: `/${relativePublic}`,
+                                filename: relativeFromUploads.split(path.sep).join('/'),
+                                url: `/${normalizedUrlPath}`,
                                 size: fileStat.size,
                                 createdAt: fileStat.birthtime,
                             });
@@ -103,10 +105,21 @@ export const POST = withAuth(
                 return apiError(`File size exceeds ${UPLOAD.MAX_FILE_SIZE_MB}MB limit`, 400);
             }
 
-            // Determine target directory
+            // Determine target directory with date-based organization
             const category = isDoc ? 'cvs' : 'images';
-            const year = new Date().getFullYear().toString();
-            const uploadsDir = path.join(process.cwd(), 'public', 'uploads', category, year);
+            const now = new Date();
+            const year = now.getFullYear().toString();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // 01-12
+            const day = String(now.getDate()).padStart(2, '0'); // 01-31
+            const uploadsDir = path.join(
+                process.cwd(),
+                'public',
+                'uploads',
+                category,
+                year,
+                month,
+                day,
+            );
             await mkdir(uploadsDir, { recursive: true });
 
             // Generate unique filename
@@ -122,7 +135,7 @@ export const POST = withAuth(
             await writeFile(filepath, buffer);
 
             // Return public URL
-            const publicUrl = `/uploads/${category}/${year}/${filename}`;
+            const publicUrl = `/uploads/${category}/${year}/${month}/${day}/${filename}`;
 
             return apiResponse({ url: publicUrl, filename }, { status: 201 });
         } catch (error) {
@@ -146,7 +159,9 @@ export const DELETE = withAuth(
 
             // Prevent path traversal attacks
             const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-            const filepath = path.join(uploadsDir, filename);
+            // Normalize filename back to OS-specific path if it contains forward slashes
+            const safeFilename = filename.split('/').join(path.sep);
+            const filepath = path.join(uploadsDir, safeFilename);
 
             // Security check: Ensure the resolved path is inside the uploads directory
             if (!filepath.startsWith(uploadsDir)) {

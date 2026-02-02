@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { Button } from "../ui/button";
 
 const BANNERS = [
   {
@@ -10,7 +11,7 @@ const BANNERS = [
     title: "HỆ THỐNG QUICKVIC™",
     desc: "Hệ thống khớp nối đầu tiên và duy nhất được thiết kế cho súng bắn bulong hiệu suất cao.",
     btnText: "Khám phá ngay",
-    image: "https://images.unsplash.com/photo-1581093458791-9f3c3250bb8b?auto=format&fit=crop&q=80&w=2000",
+    image: "/uploads/images/2026/01/19/1768814857344-hfho0c.png",
     url: "/he-thong-quickvic",
   },
   {
@@ -45,7 +46,7 @@ export default function SystemHighlight() {
             
             <div className="absolute inset-0 container mx-auto px-12 py-16 flex flex-col justify-center space-y-6">
               <div className="space-y-4 max-w-xl">
-                <p className="text-[10px] font-black tracking-[0.2em] text-brand-primary uppercase">
+                <p className="text-[10px] font-black tracking-[0.2em] text-brand-accent uppercase">
                   {banner.tag}
                 </p>
                 <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight">
@@ -57,12 +58,17 @@ export default function SystemHighlight() {
               </div>
               
               <div className="pt-4">
-                <Link
+                {/* <Link
                   href={banner.url}
                   className="inline-flex items-center px-8 py-3 bg-brand-primary text-white text-[10px] font-black uppercase tracking-widest hover:bg-brand-primary/90 transition-colors"
                 >
                   {banner.btnText}
-                </Link>
+                </Link> */}
+                <Button
+                  className="inline-flex items-center px-8 py-3 bg-brand-primary hover:cursor-pointer  text-white text-[10px] font-black uppercase tracking-widest hover:bg-brand-primary/90 transition-colors"
+                >
+                  {banner.btnText}
+                </Button>
               </div>
             </div>
           </motion.div>

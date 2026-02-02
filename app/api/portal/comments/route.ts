@@ -21,13 +21,14 @@ export const GET = withAuth(
             const conditions = [isNull(productComments.deleted_at)];
 
             if (search) {
-                conditions.push(
-                    or(
-                        ilike(productComments.guest_name, `%${search}%`),
-                        ilike(productComments.guest_email, `%${search}%`),
-                        ilike(productComments.content, `%${search}%`),
-                    ),
+                const searchCondition = or(
+                    ilike(productComments.guest_name, `%${search}%`),
+                    ilike(productComments.guest_email, `%${search}%`),
+                    ilike(productComments.content, `%${search}%`),
                 );
+                if (searchCondition) {
+                    conditions.push(searchCondition);
+                }
             }
 
             if (status === 'approved') {

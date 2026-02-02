@@ -3,6 +3,7 @@ import { products, productComments } from '@/db/schema';
 import { eq, isNull, and, desc } from 'drizzle-orm';
 import { apiResponse, apiError } from '@/utils/api-response';
 import { verifyAuth, isAdmin } from '@/middlewares/middleware';
+import { PORTAL_ROUTES } from '@/constants/routes';
 
 // GET /api/products/[slug]/comments - List approved comments for a specific product
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
@@ -88,6 +89,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
                 is_approved: false, // New comments must be approved
             })
             .returning();
+
+        // 3. Trigger Notification (Admin)
+        try {
+            const { notificationService } = await import('@/services/notification-service');
+            await notificationService.createNotification({
+                type: 'comment',
+                title: 'Bình luận mới',
+                content: `${guest_name} đã bình luận về sản phẩm.`,
+                link: PORTAL_ROUTES.cms.comments.list,
+            });
+        } catch (error) {
+            console.error('Failed to trigger notification:', error);
+        }
 
         return apiResponse(newComment, { status: 201 });
     } catch (error) {

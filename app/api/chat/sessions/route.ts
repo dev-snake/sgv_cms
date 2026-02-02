@@ -1,14 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { db } from '@/db';
 import { chatSessions } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { apiResponse, apiError } from '@/utils/api-response';
 
 export async function POST(req: NextRequest) {
     try {
         const { guestId, guestName } = await req.json();
 
         if (!guestId) {
-            return NextResponse.json({ error: 'guestId is required' }, { status: 400 });
+            return apiError('guestId is required', 400);
         }
 
         // Check if session exists
@@ -34,10 +35,10 @@ export async function POST(req: NextRequest) {
             session.guest_name = guestName;
         }
 
-        return NextResponse.json(session);
+        return apiResponse(session);
     } catch (error) {
         console.error('Chat Session Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return apiError('Internal Server Error', 500);
     }
 }
 
@@ -46,12 +47,12 @@ export async function GET(req: NextRequest) {
     const guestId = searchParams.get('guestId');
 
     if (!guestId) {
-        return NextResponse.json({ error: 'guestId is required' }, { status: 400 });
+        return apiError('guestId is required', 400);
     }
 
     const session = await db.query.chatSessions.findFirst({
         where: and(eq(chatSessions.guest_id, guestId), eq(chatSessions.is_active, true)),
     });
 
-    return NextResponse.json(session || null);
+    return apiResponse(session || null);
 }

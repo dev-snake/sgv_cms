@@ -3,10 +3,11 @@ import { parse } from 'node:url';
 import next from 'next';
 import { Server } from 'socket.io';
 import { chatStreamManager } from './services/chat-stream';
+import { notificationService } from './services/notification-service';
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
-const port = 3000;
+const hostname = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+const port = parseInt(process.env.PORT || '3000', 10);
 
 // when using middleware `hostname` and `port` must be provided below
 const app = next({ dev, hostname, port });
@@ -34,6 +35,7 @@ app.prepare().then(() => {
 
     // Attach io instance to the chatStreamManager singleton
     chatStreamManager.setIo(io);
+    notificationService.setIo(io);
 
     io.on('connection', (socket) => {
         const sessionId = socket.handshake.query.sessionId as string;
@@ -46,10 +48,19 @@ app.prepare().then(() => {
 
         // Special room for admins to receive ALL updates (session list updates, etc.)
         const isAdmin = socket.handshake.query.isAdmin === 'true';
+        console.log(`[Socket] New connection: ${socket.id}, isAdmin: ${isAdmin}`);
+
         if (isAdmin) {
             socket.join('admins');
-            console.log(`Socket ${socket.id} joined admins room`);
+            console.log(`[Socket] Socket ${socket.id} successfully joined 'admins' room`);
         }
+
+        socket.on(
+            'typing',
+            (data: { sessionId: string; senderType: 'guest' | 'admin'; isTyping: boolean }) => {
+                chatStreamManager.broadcastTyping(data.sessionId, data.senderType, data.isTyping);
+            },
+        );
 
         socket.on('disconnect', () => {
             console.log(`Socket ${socket.id} disconnected`);
