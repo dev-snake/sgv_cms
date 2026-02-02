@@ -18,10 +18,10 @@ import { COMPANY_INFO } from '@/constants/site-info';
 
 export default function Footer() {
     return (
-        <footer className="bg-brand-secondary pt-24 pb-12 text-white relative overflow-hidden">
+        <footer className="bg-brand-primary pt-24 pb-12 text-white relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-px bg-white/10"></div>
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-primary/10 rounded-full blur-3xl -translate-y-20 translate-x-20"></div>
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-secondary/20 rounded-full blur-3xl -translate-y-20 translate-x-20"></div>
 
             <div className="container mx-auto px-4 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 pb-20 border-b border-white/5">
@@ -123,8 +123,6 @@ export default function Footer() {
                             </li>
                         </ul>
                     </div>
-
-
                 </div>
 
                 <div className="pt-12 flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">

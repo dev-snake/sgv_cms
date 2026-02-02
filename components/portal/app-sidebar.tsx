@@ -337,7 +337,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             side="top"
                             align="center"
                             sideOffset={4}
-                            className="w-60 p-0 rounded-none border border-white/10 bg-[#011c42] text-white shadow-2xl"
+                            className="w-60 p-0 rounded-none border border-white/10 bg-brand-secondary text-white shadow-2xl"
                         >
                             <DropdownMenuLabel className="px-5 py-3 bg-black/40 ">
                                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">

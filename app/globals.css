@@ -49,8 +49,8 @@
 :root {
   /* Brand hex colors - Unified with TopBar */
   --brand-primary: #004395;
-  --brand-secondary: #00112b;
-  /* Slightly darker for depth */
+  --brand-secondary: #001a3d;
+  /* Derived dark shade of primary */
   --brand-accent: #fbbf24;
   --brand-cyan: #00b2e3;
   /* Refined professional cyan */
