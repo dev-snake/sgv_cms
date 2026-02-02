@@ -53,16 +53,7 @@ const SOLUTIONS = [
 ];
 
 export default function Solutions() {
-    const [activeIndex, setActiveIndex] = useState(0);
-    const [isPaused, setIsPaused] = useState(false);
-
-    useEffect(() => {
-        if (isPaused) return;
-        const interval = setInterval(() => {
-            setActiveIndex((prev) => (prev + 1) % SOLUTIONS.length);
-        }, 5000);
-        return () => clearInterval(interval);
-    }, [isPaused]);
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
     return (
         <section className="bg-[#001d4a] overflow-hidden">
@@ -92,24 +83,13 @@ export default function Solutions() {
             {/* Interactive Strips */}
             <div className="flex flex-col lg:flex-row h-[700px] w-full border-t border-white/10 items-stretch">
                 {SOLUTIONS.map((item, idx) => (
-                    <motion.div
+                    <div
                         key={item.id}
-                        onMouseEnter={() => {
-                            setActiveIndex(idx);
-                            setIsPaused(true);
-                        }}
-                        onMouseLeave={() => setIsPaused(false)}
-                        animate={{
-                            flex: activeIndex === idx ? 3.5 : 1,
-                        }}
-                        transition={{
-                            duration: 0.8,
-                            ease: [0.22, 1, 0.36, 1],
-                            layout: { duration: 0.8 },
-                        }}
+                        onMouseEnter={() => setHoveredIndex(idx)}
+                        onMouseLeave={() => setHoveredIndex(null)}
                         className={cn(
-                            'relative overflow-hidden group cursor-pointer border-r border-white/5 last:border-0 h-[700px]',
-                            activeIndex === idx ? 'z-10' : 'z-0',
+                            'relative overflow-hidden group cursor-pointer border-r border-white/5 last:border-0 h-[700px] flex-1 min-w-0 transition-all duration-500',
+                            hoveredIndex === idx ? 'z-10' : 'z-0',
                         )}
                     >
                         {/* Background Image */}
@@ -118,27 +98,24 @@ export default function Solutions() {
                                 src={item.image}
                                 alt={item.brand}
                                 fill
-                                className={cn(
-                                    'object-cover transition-transform duration-1000',
-                                    activeIndex === idx ? 'scale-110' : 'scale-100',
-                                )}
+                                className="object-cover"
                             />
                         </div>
 
                         {/* Hover Overlay (Card revealing from top) */}
-                        <AnimatePresence mode="wait">
-                            {activeIndex === idx && (
+                        <AnimatePresence>
+                            {hoveredIndex === idx && (
                                 <motion.div
                                     initial={{ y: '-100%' }}
                                     animate={{ y: 0 }}
                                     exit={{ y: '-100%' }}
-                                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                                     className="absolute inset-0 z-10 flex flex-col items-center justify-center p-12 text-center bg-[#001d4a]/95 backdrop-blur-sm"
                                 >
                                     <motion.div
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: 0.3, duration: 0.5 }}
+                                        transition={{ delay: 0.2, duration: 0.4 }}
                                         className="mb-12 relative group/logo"
                                     >
                                         {/* Premium Logo Container */}
@@ -160,7 +137,7 @@ export default function Solutions() {
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.5 }}
+                                        transition={{ delay: 0.3 }}
                                         className="space-y-6"
                                     >
                                         <div className="space-y-2">
@@ -192,11 +169,11 @@ export default function Solutions() {
                             )}
                         </AnimatePresence>
 
-                        {/* Default Caption (Stays at the bottom or rotates) */}
+                        {/* Default Caption */}
                         <div
                             className={cn(
-                                'absolute inset-x-0 bottom-0 p-8 pt-20 transition-opacity duration-500 bg-linear-to-t from-slate-950/80 to-transparent',
-                                activeIndex === idx ? 'opacity-0' : 'opacity-100',
+                                'absolute inset-x-0 bottom-0 p-8 pt-20 transition-opacity duration-300 bg-linear-to-t from-slate-950/80 to-transparent',
+                                hoveredIndex === idx ? 'opacity-0' : 'opacity-100',
                             )}
                         >
                             <div className="lg:-rotate-90 lg:origin-left lg:absolute lg:left-8 lg:bottom-12 lg:whitespace-nowrap lg:transform lg:translate-y-full">
@@ -215,11 +192,11 @@ export default function Solutions() {
                         {/* Border Accent */}
                         <div
                             className={cn(
-                                'absolute top-0 left-0 w-full h-1 bg-brand-accent transition-transform duration-700 origin-left',
-                                activeIndex === idx ? 'scale-x-100' : 'scale-x-0',
+                                'absolute top-0 left-0 w-full h-1 bg-brand-accent transition-transform duration-500 origin-left',
+                                hoveredIndex === idx ? 'scale-x-100' : 'scale-x-0',
                             )}
                         />
-                    </motion.div>
+                    </div>
                 ))}
             </div>
         </section>
