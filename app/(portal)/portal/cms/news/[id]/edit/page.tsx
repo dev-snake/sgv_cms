@@ -43,8 +43,6 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { generateSlug } from '@/utils/slug';
-import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
-import $api from '@/utils/axios';
 import { toast } from 'sonner';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
