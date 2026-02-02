@@ -110,7 +110,7 @@ export default function Solutions() {
                                     animate={{ y: 0 }}
                                     exit={{ y: '-100%' }}
                                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                                    className="absolute inset-0 z-10 flex flex-col items-center justify-center p-12 text-center bg-[#001d4a]/75 backdrop-blur-xl border-b border-white/10"
+                                    className="absolute inset-0 z-10 flex flex-col items-center justify-center p-12 text-center  backdrop-blur-xl border-b border-white/10"
                                 >
                                     <motion.div
                                         initial={{ opacity: 0, scale: 0.9 }}
