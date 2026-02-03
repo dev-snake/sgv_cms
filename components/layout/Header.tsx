@@ -43,11 +43,11 @@ const NAV_LINKS: NavLink[] = [
         desc: "Ứng dụng IoT trong quản lý tưới tiêu và dinh dưỡng, giúp tăng năng suất và bảo vệ tài nguyên.",
         href: SITE_ROUTES.SOLUTIONS.AGRICULTURE 
       },
-      { 
-        title: "Quan trắc nuôi trồng thủy sản", 
-        desc: "Hệ thống cảnh báo sớm và kiểm soát chất lượng môi trường nước 24/7 cho trang trại.",
-        href: SITE_ROUTES.SOLUTIONS.AQUACULTURE 
-      },
+      // { 
+      //   title: "Quan trắc nuôi trồng thủy sản", 
+      //   desc: "Hệ thống cảnh báo sớm và kiểm soát chất lượng môi trường nước 24/7 cho trang trại.",
+      //   href: SITE_ROUTES.SOLUTIONS.AQUACULTURE 
+      // },
     ]
   },
   { label: "SẢN PHẨM", href: SITE_ROUTES.PRODUCTS },
