@@ -151,7 +151,7 @@ export default function Solutions() {
                                             </p>
                                         </div>
 
-                                        <div className="pt-4 sm:pt-6 lg:pt-8">
+                                        {/* <div className="pt-4 sm:pt-6 lg:pt-8">
                                             <Link
                                                 href={item.href}
                                                 className="group/btn relative inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 lg:px-10 py-2.5 sm:py-3 bg-white text-brand font-black text-[8px] sm:text-[9px] tracking-[0.15em] sm:tracking-[0.2em] uppercase transition-all hover:bg-brand-primary hover:text-white shadow-xl overflow-hidden"
@@ -162,7 +162,7 @@ export default function Solutions() {
                                                     className="relative z-10 group-hover/btn:translate-x-1 transition-transform"
                                                 />
                                             </Link>
-                                        </div>
+                                        </div> */}
                                     </motion.div>
                                 </motion.div>
                             )}
