@@ -59,6 +59,102 @@ const SOLUTIONS_DATA: Record<string, any> = {
             outro: 'Với những ưu điểm trên, SÀI GÒN VALVE WATER là giải pháp toàn diện và tối ưu, giúp các doanh nghiệp ngành nước giải quyết các thách thức, nâng cao hiệu quả hoạt động và hướng đến mục tiêu phát triển bền vững.',
         },
     },
+    'nong-nghiep-chinh-xac': {
+        brand: 'SÀI GÒN VALVE FARM',
+        title: 'NÔNG NGHIỆP CHÍNH XÁC',
+        headerTitle: 'SÀI GÒN VALVE FARM - NÔNG NGHIỆP CHÍNH XÁC',
+        description:
+            'Giải pháp nông nghiệp chính xác giúp người nông dân và các trang trại quy mô lớn tự động hóa quy trình chăm sóc cây trồng dựa trên dữ liệu thực tế từ đất và môi trường.',
+        intro: 'Bằng cách ứng dụng công nghệ IoT và cảm biến thông minh, chúng tôi giúp tối ưu hóa việc sử dụng tài nguyên, nâng cao năng suất và đảm bảo chất lượng nông sản một cách bền vững.',
+        banner: '/uploads/images/2026/02/02/1770024634433-tfvl2o.png',
+        image1: '/uploads/images/2026/02/02/1770024634433-tfvl2o.png',
+        image2: '/uploads/images/2026/02/02/1770024627773-di5jqj.png',
+        core: {
+            title: 'THÀNH PHẦN CỐT LÕI',
+            intro: 'Hệ thống nông nghiệp thông minh bao gồm các thành phần kỹ thuật then chốt:',
+            items: [
+                {
+                    title: 'Quan trắc độ ẩm đất',
+                    desc: 'Các cảm biến đa điểm đo chính xác độ ẩm, nhiệt độ và chỉ số EC trong đất theo thời gian thực.',
+                },
+                {
+                    title: 'Tưới tiêu tự động',
+                    desc: 'Hệ thống tự động lập lịch và kích hoạt tưới dựa trên ngưỡng độ ẩm thực tế của từng loại cây trồng.',
+                },
+                {
+                    title: 'Phân tích khí hậu',
+                    desc: 'Tích hợp dữ liệu trạm thời tiết để điều chỉnh lượng nước và phân bón phù hợp với điều kiện môi trường.',
+                },
+            ],
+        },
+        benefits: {
+            title: 'GIÁ TRỊ SÀI GÒN VALVE MANG LẠI',
+            intro: 'Giải pháp mang lại hiệu quả kinh tế rõ rệt thông qua việc tối ưu tài nguyên:',
+            items: [
+                {
+                    title: 'Tiết kiệm tài nguyên',
+                    desc: 'Tiết kiệm 30-50% lượng nước tưới và lượng phân bón sử dụng hàng năm.',
+                },
+                {
+                    title: 'Nâng cao năng suất',
+                    desc: 'Tăng sản lượng và cải thiện đồng nhất chất lượng nông sản thu hoạch.',
+                },
+                {
+                    title: 'Giảm thiểu rủi ro',
+                    desc: 'Phát hiện sớm các dấu hiệu bất thường của đất và cây trồng để ứng phó kịp thời.',
+                },
+            ],
+            outro: 'SÀI GÒN VALVE FARM là người đồng hành tin cậy, giúp hiện đại hóa nền nông nghiệp Việt Nam theo hướng thông minh và bền vững.',
+        },
+    },
+    'quan-trac-nuoi-trong-thuy-san': {
+        brand: 'SÀI GÒN VALVE AQUA',
+        title: 'QUAN TRẮC NUÔI TRỒNG THỦY SẢN',
+        headerTitle: 'SÀI GÒN VALVE AQUA - QUAN TRẮC NUÔI TRỒNG THỦY SẢN',
+        description:
+            'Trong nuôi trồng thủy sản, chất lượng nước là yếu tố sống còn. Giải pháp quan trắc của chúng tôi cung cấp hệ thống giám sát liên tục các chỉ số quan trọng.',
+        intro: 'Hệ thống tự động hóa việc theo dõi các chỉ số môi trường, giúp người nuôi giảm bớt lo âu và tối ưu hóa quy trình chăm sóc vật nuôi.',
+        banner: '/uploads/images/2026/02/02/1770024641404-d0g5xi.png',
+        image1: '/uploads/images/2026/02/02/1770024641404-d0g5xi.png',
+        image2: '/uploads/images/2026/02/02/1770024634433-tfvl2o.png',
+        core: {
+            title: 'THÀNH PHẦN CỐT LÕI',
+            intro: 'Các công nghệ giám sát môi trường nước tiên tiến nhất được tích hợp trong hệ thống:',
+            items: [
+                {
+                    title: 'Giám sát Oxy hòa tan (DO)',
+                    desc: 'Duy trì ngưỡng Oxy tối ưu, tự động kích hoạt máy quạt nước khi nồng độ Oxy giảm thấp.',
+                },
+                {
+                    title: 'Đo lường pH và Salinity',
+                    desc: 'Theo dõi liên tục độ pH và độ mặn để phát hiện kịp thời các tình huống sốc môi trường.',
+                },
+                {
+                    title: 'Hệ thống cảnh báo SMS/App',
+                    desc: 'Gửi thông báo tức thì đến điện thoại chủ trang trại khi có bất kỳ chỉ số nào vượt ngưỡng an toàn.',
+                },
+            ],
+        },
+        benefits: {
+            title: 'GIÁ TRỊ SÀI GÒN VALVE MANG LẠI',
+            intro: 'Giúp bảo vệ tài sản và nâng cao lợi nhuận cho các hộ nuôi trồng:',
+            items: [
+                {
+                    title: 'Giảm tỷ lệ hao hụt',
+                    desc: 'Hạn chế tối đa rủi ro vật nuôi chết hàng loạt do sốc nước hoặc thiếu Oxy.',
+                },
+                {
+                    title: 'Tiết kiệm điện năng',
+                    desc: 'Việc tự động hóa máy quạt nước giúp giảm chi phí điện vận hành lên đến 30%.',
+                },
+                {
+                    title: 'Quản lý từ xa',
+                    desc: 'Yên tâm theo dõi tình trạng ao nuôi mọi lúc mọi nơi thông qua ứng dụng di động.',
+                },
+            ],
+            outro: 'Với SÀI GÒN VALVE AQUA, việc nuôi trồng thủy sản trở nên dễ dàng, khoa học và đạt hiệu quả cao hơn bao giờ hết.',
+        },
+    },
 };
 
 export default function SolutionDetailPage() {
@@ -73,9 +169,9 @@ export default function SolutionDetailPage() {
     return (
         <div className="flex flex-col min-h-screen bg-white text-slate-900 antialiased">
             {/* Header / Hero Strip */}
-            <header className="bg-brand-secondary pt-32 pb-16 text-center text-white relative">
-                <div className="container mx-auto px-4 space-y-4">
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-[0.1em] leading-tight">
+            <header className="bg-brand-primary pt-32  text-center text-white relative">
+                <div className="container mx-auto px-4 py-10  space-y-4">
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-widest leading-tight">
                         {data.headerTitle}
                     </h1>
                     <nav className="flex items-center justify-center gap-2 text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">
@@ -89,7 +185,7 @@ export default function SolutionDetailPage() {
             </header>
 
             {/* Main Content Area */}
-            <main className="container mx-auto max-w-4xl px-4 sm:px-8 py-12 sm:py-20 space-y-16 sm:space-y-24">
+            <main className="container mx-auto  px-4 sm:px-8 py-12 sm:py-20 space-y-16 sm:space-y-24">
                 {/* 1. Overview Section */}
                 <article className="space-y-10">
                     {/* Brand Heading with Gold Bar */}
@@ -152,7 +248,7 @@ export default function SolutionDetailPage() {
                         </div>
                     </div>
 
-                    <div className="relative aspect-[16/9] lg:aspect-[21/9] w-full mt-10 overflow-hidden shadow-2xl rounded-sm">
+                    <div className="relative aspect-video lg:aspect-21/9 w-full mt-10 overflow-hidden shadow-2xl rounded-sm">
                         <Image
                             src={data.image2}
                             alt="Deployment Visual"
