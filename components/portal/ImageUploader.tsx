@@ -47,6 +47,8 @@ export function ImageUploader({
     const [uploadedImages, setUploadedImages] = React.useState<UploadedImage[]>([]);
     const [isLoadingImages, setIsLoadingImages] = React.useState(false);
     const [selectingFor, setSelectingFor] = React.useState<'main' | 'gallery'>('main');
+    const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const fetchUploadedImages = async () => {
@@ -67,9 +69,44 @@ export function ImageUploader({
         if (isDialogOpen) {
             fetchUploadedImages();
         }
-    }, [isDialogOpen]);
+        return () => {
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+        };
+    }, [isDialogOpen, previewUrl]);
 
-    const handleUpload = async (file: File) => {
+    const handleUpload = async () => {
+        if (!selectedFile) return;
+
+        setIsUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const response = await $api.post(API_ROUTES.UPLOAD, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            if (response.data.success) {
+                const url = response.data.data.url;
+                if (selectingFor === 'gallery' && onGalleryChange) {
+                    onGalleryChange([...gallery, url]);
+                } else {
+                    onChange(url);
+                }
+                toast.success('Tải ảnh thành công!');
+                fetchUploadedImages();
+                handleCancelUpload();
+                setIsDialogOpen(false);
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            toast.error('Không thể tải ảnh. Vui lòng thử lại.');
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const handleFileSelect = (file: File) => {
         if (!file) return;
 
         // Validate file type
@@ -85,32 +122,17 @@ export function ImageUploader({
             return;
         }
 
-        setIsUploading(true);
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
+        setSelectedFile(file);
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+    };
 
-            const response = await $api.post(API_ROUTES.UPLOAD, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-
-            if (response.data.success) {
-                const url = response.data.data.url;
-                if (selectingFor === 'gallery' && onGalleryChange) {
-                    onGalleryChange([...gallery, url]);
-                } else {
-                    onChange(url);
-                }
-                toast.success('Tải ảnh thành công!');
-                fetchUploadedImages();
-                setIsDialogOpen(false);
-            }
-        } catch (error) {
-            console.error('Upload error:', error);
-            toast.error('Không thể tải ảnh. Vui lòng thử lại.');
-        } finally {
-            setIsUploading(false);
+    const handleCancelUpload = () => {
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
         }
+        setSelectedFile(null);
+        setPreviewUrl(null);
     };
 
     const handleSelectImage = (url: string) => {
@@ -145,7 +167,7 @@ export function ImageUploader({
         e.preventDefault();
         setIsDragging(false);
         const file = e.dataTransfer.files[0];
-        if (file) handleUpload(file);
+        if (file) handleFileSelect(file);
     };
 
     const openDialogFor = (type: 'main' | 'gallery') => {
@@ -337,26 +359,19 @@ export function ImageUploader({
                         </TabsContent>
 
                         <TabsContent value="upload" className="flex-1 mt-4">
-                            <div
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
-                                onDrop={handleDrop}
-                                onClick={() => fileInputRef.current?.click()}
-                                className={cn(
-                                    'h-64 border-2 border-dashed rounded-none flex flex-col items-center justify-center cursor-pointer transition-all',
-                                    isDragging
-                                        ? 'border-brand-primary bg-brand-primary/5'
-                                        : 'border-slate-200 hover:border-brand-primary/50 hover:bg-slate-50',
-                                )}
-                            >
-                                {isUploading ? (
-                                    <div className="flex flex-col items-center gap-3">
-                                        <Loader2 className="h-12 w-12 animate-spin text-brand-primary" />
-                                        <span className="text-sm font-bold text-slate-400">
-                                            Đang tải lên...
-                                        </span>
-                                    </div>
-                                ) : (
+                            {!selectedFile ? (
+                                <div
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className={cn(
+                                        'h-64 border-2 border-dashed rounded-none flex flex-col items-center justify-center cursor-pointer transition-all',
+                                        isDragging
+                                            ? 'border-brand-primary bg-brand-primary/5'
+                                            : 'border-slate-200 hover:border-brand-primary/50 hover:bg-slate-50',
+                                    )}
+                                >
                                     <div className="flex flex-col items-center gap-4">
                                         <Upload className="h-16 w-16 text-slate-300" />
                                         <div className="space-y-2 text-center">
@@ -371,19 +386,72 @@ export function ImageUploader({
                                             </p>
                                         </div>
                                     </div>
-                                )}
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp,image/gif"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) handleUpload(file);
-                                        e.target.value = '';
-                                    }}
-                                />
-                            </div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp,image/gif"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) handleFileSelect(file);
+                                            e.target.value = '';
+                                        }}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="relative aspect-video w-full border border-slate-100 bg-slate-50 flex items-center justify-center overflow-hidden">
+                                        {previewUrl && (
+                                            <Image
+                                                src={previewUrl}
+                                                alt="Preview"
+                                                fill
+                                                className="object-contain"
+                                            />
+                                        )}
+                                        {isUploading && (
+                                            <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                                                <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] font-black uppercase text-slate-400">
+                                                Tên file
+                                            </span>
+                                            <span className="text-xs font-bold truncate max-w-[200px]">
+                                                {selectedFile.name}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={isUploading}
+                                                onClick={handleCancelUpload}
+                                                className="h-9 px-4 rounded-none text-[10px] font-black uppercase tracking-widest border-2"
+                                            >
+                                                Hủy
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                disabled={isUploading}
+                                                onClick={handleUpload}
+                                                className="h-9 px-6 rounded-none text-[10px] font-black uppercase tracking-widest bg-brand-primary hover:bg-brand-primary/90"
+                                            >
+                                                {isUploading ? (
+                                                    <Loader2 className="h-3 w-3 animate-spin mr-2" />
+                                                ) : (
+                                                    <Check className="h-3 w-3 mr-2" />
+                                                )}
+                                                Xác nhận tải lên
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </TabsContent>
                     </Tabs>
                 </DialogContent>
