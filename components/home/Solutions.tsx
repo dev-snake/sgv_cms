@@ -110,27 +110,27 @@ export default function Solutions() {
                                     animate={{ y: 0 }}
                                     exit={{ y: '-100%' }}
                                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                                    className="absolute inset-0 z-10 flex flex-col items-center justify-center p-12 text-center backdrop-blur-3xl border-b border-white/10 bg-white/5"
+                                    className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 text-center backdrop-blur-3xl border-b border-white/10 bg-white/5"
                                 >
                                     <motion.div
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: 0.2, duration: 0.4 }}
-                                        className="mb-12 relative group/logo"
+                                        className="mb-6 sm:mb-8 lg:mb-10 relative group/logo"
                                     >
                                         {/* Premium Logo Container */}
-                                        <div className="relative h-24 w-64 p-6 bg-white rounded-sm shadow-[0_0_50px_rgba(255,255,255,0.1)] mb-4 flex items-center justify-center">
+                                        <div className="relative h-14 w-36 sm:h-16 sm:w-44 lg:h-20 lg:w-52 p-3 sm:p-4 bg-white rounded-sm shadow-[0_0_30px_rgba(255,255,255,0.1)] mb-3 flex items-center justify-center">
                                             <Image
                                                 src="https://saigonvalve.vn/uploads/files/2024/08/05/NH-_PH-N_PH-I_-C_QUY-N__25_-removebg-preview.png"
                                                 alt="Sài Gòn Valve Logo"
                                                 fill
-                                                className="object-contain p-4"
+                                                className="object-contain p-2 sm:p-3"
                                             />
                                         </div>
                                         <div className="flex items-center justify-center gap-2">
-                                            <div className="h-px w-8 bg-brand-accent"></div>
+                                            <div className="h-px w-5 sm:w-6 bg-brand-accent"></div>
                                             <div className="size-1 rounded-full bg-brand-accent"></div>
-                                            <div className="h-px w-8 bg-brand-accent"></div>
+                                            <div className="h-px w-5 sm:w-6 bg-brand-accent"></div>
                                         </div>
                                     </motion.div>
 
@@ -138,28 +138,28 @@ export default function Solutions() {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.3 }}
-                                        className="space-y-6"
+                                        className="space-y-3 sm:space-y-4"
                                     >
-                                        <div className="space-y-2">
-                                            <h3 className="text-[10px] font-black text-brand-accent uppercase tracking-[0.5em]">
+                                        <div className="space-y-1 sm:space-y-2">
+                                            <h3 className="text-[8px] sm:text-[9px] font-black text-brand-accent uppercase tracking-[0.3em] sm:tracking-[0.4em]">
                                                 {item.subtitle}
                                             </h3>
-                                            <p className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight leading-none">
+                                            <p className="text-lg sm:text-xl lg:text-2xl font-black text-white uppercase tracking-tight leading-tight">
                                                 {item.brand} <br />
-                                                <span className="text-brand-accent">
+                                                <span className="text-brand-accent text-sm sm:text-base lg:text-lg">
                                                     {item.title}
                                                 </span>
                                             </p>
                                         </div>
 
-                                        <div className="pt-10">
+                                        <div className="pt-4 sm:pt-6 lg:pt-8">
                                             <Link
                                                 href={item.href}
-                                                className="group/btn relative inline-flex items-center gap-4 px-12 py-4 bg-white text-brand font-black text-[10px] tracking-[0.2em] uppercase transition-all hover:bg-brand-primary hover:text-white shadow-2xl overflow-hidden"
+                                                className="group/btn relative inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 lg:px-10 py-2.5 sm:py-3 bg-white text-brand font-black text-[8px] sm:text-[9px] tracking-[0.15em] sm:tracking-[0.2em] uppercase transition-all hover:bg-brand-primary hover:text-white shadow-xl overflow-hidden"
                                             >
                                                 <span className="relative z-10">XEM CHI TIẾT</span>
                                                 <ChevronRight
-                                                    size={14}
+                                                    size={12}
                                                     className="relative z-10 group-hover/btn:translate-x-1 transition-transform"
                                                 />
                                             </Link>
