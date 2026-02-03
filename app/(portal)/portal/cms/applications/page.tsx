@@ -247,27 +247,33 @@ export default function ApplicationsManagementPage() {
             </div>
 
             <Tabs defaultValue="list" className="space-y-8">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-1 px-8">
-                    <TabsList className="bg-transparent h-auto p-0 gap-8 rounded-none">
+                <div className="flex items-center justify-between">
+                    <TabsList className="h-auto p-1 bg-slate-100/80 rounded-none gap-1">
                         <TabsTrigger
                             value="list"
-                            className="bg-transparent border-b-2 border-transparent data-[state=active]:border-brand-primary data-[state=active]:bg-transparent rounded-none px-0 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 data-[state=active]:text-brand-primary transition-all flex items-center gap-2"
+                            className="data-[state=active]:bg-white data-[state=active]:text-brand-primary data-[state=active]:shadow-sm rounded-none px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 transition-all duration-200 gap-2"
                         >
                             <LayoutList size={14} /> Danh sách hồ sơ
                         </TabsTrigger>
                         <TabsTrigger
                             value="analytics"
-                            className="bg-transparent border-b-2 border-transparent data-[state=active]:border-brand-primary data-[state=active]:bg-transparent rounded-none px-0 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 data-[state=active]:text-brand-primary transition-all flex items-center gap-2"
+                            className="data-[state=active]:bg-white data-[state=active]:text-brand-primary data-[state=active]:shadow-sm rounded-none px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 transition-all duration-200 gap-2"
                         >
                             <PieChartIcon size={14} /> Biểu đồ phân tích
                         </TabsTrigger>
                     </TabsList>
+
+                    <div className="hidden md:flex items-center gap-3">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                            Tổng hồ sơ: <span className="text-brand-primary">{totalItems}</span>
+                        </span>
+                    </div>
                 </div>
 
                 <TabsContent value="list" className="space-y-8 mt-0 border-none p-0">
                     {/* Filters & Table */}
                     <div className="space-y-6">
-                        <div className="flex flex-col md:flex-row gap-4 p-6 bg-slate-50 border border-slate-100">
+                        <div className="flex flex-col md:flex-row gap-4 p-6">
                             <div className="relative flex-1">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <input
@@ -281,7 +287,7 @@ export default function ApplicationsManagementPage() {
                         </div>
 
                         {/* Table */}
-                        <div className="bg-white border border-slate-100 overflow-hidden shadow-sm">
+                        <div className="bg-white overflow-hidden shadow-sm">
                             {isLoading ? (
                                 <div className="flex items-center justify-center h-64">
                                     <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
