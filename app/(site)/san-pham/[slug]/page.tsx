@@ -367,33 +367,33 @@ export default function ProductDetailPage() {
                         </div>
 
                         <div className="space-y-12">
-                            <div className="bg-slate-900 p-12 text-white space-y-8 relative overflow-hidden">
+                            <div className="bg-brand-primary p-12 text-white space-y-8 relative overflow-hidden">
                                 <Globe2
                                     size={120}
-                                    className="absolute -bottom-10 -right-10 text-white/5"
+                                    className="absolute -bottom-10 -right-10 text-white"
                                 />
                                 <h4 className="text-xl font-bold uppercase leading-tight italic text-brand-accent">
                                     Hỗ trợ dự án
                                 </h4>
-                                <p className="text-xs font-medium text-slate-400 leading-relaxed">
+                                <p className="text-xs font-medium text-slate-200 leading-relaxed">
                                     {product.tech_summary ||
                                         'Sài Gòn Valve cung cấp đầy đủ chứng chỉ CO/CQ và hỗ trợ kỹ thuật tận nơi cho các dự án trọng điểm.'}
                                 </p>
                                 <div className="space-y-6 pt-6 pt-b">
                                     <div className="flex items-center gap-4">
-                                        <ShieldCheck className="text-brand-primary" size={24} />
+                                        <ShieldCheck className="text-white" size={24} />
                                         <span className="text-[10px] font-bold uppercase tracking-widest">
                                             Bảo hành {product.warranty || '12 tháng'}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-4">
-                                        <FileText className="text-brand-primary" size={24} />
+                                        <FileText className="text-white" size={24} />
                                         <span className="text-[10px] font-bold uppercase tracking-widest">
                                             Đầy đủ CO/CQ chính hãng
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-4">
-                                        <Globe2 className="text-brand-primary" size={24} />
+                                        <Globe2 className="text-white" size={24} />
                                         <span className="text-[10px] font-bold uppercase tracking-widest">
                                             Xuất xứ: {product.origin || 'Chính hãng'}
                                         </span>
