@@ -14,6 +14,7 @@ const publicPaths = [
 
 export default async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
+    const method = request.method;
 
     // 1. Allow public paths explicitly
     if (publicPaths.some((path) => pathname === path || pathname.startsWith(path))) {
