@@ -83,10 +83,10 @@ const SOLUTIONS_DATA: Record<string, any> = {
         description:
             'Giải pháp nông nghiệp chính xác giúp người nông dân và các trang trại quy mô lớn tự động hóa quy trình chăm sóc cây trồng dựa trên dữ liệu thực tế từ đất và môi trường, đảm bảo cây trồng phát triển tối ưu với mức tiêu thụ tài nguyên thấp nhất.',
         gallery: [
-            'https://images.unsplash.com/photo-1523348830342-d31bbfa81395?auto=format&fit=crop&q=80&w=1200',
+            'https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
             'https://images.unsplash.com/photo-1622383563227-04401ab4e5ea?auto=format&fit=crop&q=80&w=1200',
             'https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&q=80&w=1200',
-            'https://images.unsplash.com/photo-1586771107445-d3ca888129ee?auto=format&fit=crop&q=80&w=1200',
+            'https://images.unsplash.com/photo-1620200423727-8127f75d7f53?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         ],
         features: [
             {
@@ -302,15 +302,15 @@ export default function SolutionDetailPage() {
 
                         {/* Right: Technical Specs & Benefits */}
                         <div className="space-y-12 lg:sticky lg:top-44">
-                            <div className="bg-slate-900 text-white p-10 sm:p-12 shadow-2xl relative overflow-hidden">
+                            <div className="bg-brand-primary text-white p-10 sm:p-12 shadow-2xl relative overflow-hidden">
                                 <div className="absolute top-0 right-0 size-32 bg-brand-primary/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                                 <h3 className="text-lg font-black uppercase tracking-widest mb-10 flex items-center gap-4">
-                                    <Cpu className="text-brand-primary" /> THÔNG SỐ KỸ THUẬT
+                                    <Cpu className="text-white" /> THÔNG SỐ KỸ THUẬT
                                 </h3>
                                 <ul className="space-y-6">
                                     {data.technical_specs.map((spec: string, idx: number) => (
                                         <li key={idx} className="flex items-start gap-4">
-                                            <div className="mt-1.5 size-1.5 rounded-full bg-brand-primary shrink-0"></div>
+                                            <div className="mt-1.5 size-1.5 rounded-full bg-white shrink-0"></div>
                                             <span className="text-sm font-bold text-white/80 leading-relaxed uppercase tracking-tight">
                                                 {spec}
                                             </span>

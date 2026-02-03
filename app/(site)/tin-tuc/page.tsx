@@ -31,7 +31,6 @@ interface NewsArticle {
     image_url: string;
 }
 
-const ITEMS_PER_PAGE = 6;
 
 // Helper to format date in Vietnamese
 function formatDate(dateString: string | null): string {
@@ -57,7 +56,7 @@ export default function NewsPage() {
                 params: {
                     status: 'published',
                     page,
-                    limit: ITEMS_PER_PAGE + 1,
+                    limit: 8,
                 },
             });
             if (response.data.success) {
