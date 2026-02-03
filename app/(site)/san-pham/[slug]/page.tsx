@@ -248,9 +248,9 @@ export default function ProductDetailPage() {
                                 <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tighter uppercase leading-none">
                                     {product.name}
                                 </h1>
-                                <p className="text-xl text-muted-foreground font-medium leading-relaxed italic border-l-4 border-slate-100 pl-8">
-                                    {product.description}
-                                </p>
+                                <p className="text-xl text-muted-foreground font-medium leading-relaxed italic border-l-4 border-slate-100 pl-8"
+                                    dangerouslySetInnerHTML={{ __html: product.description }}
+                                />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-10 border-y border-slate-100">
