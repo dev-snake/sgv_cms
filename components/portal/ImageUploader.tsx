@@ -33,10 +33,12 @@ interface ImageUploaderProps {
     aspectRatio?: 'video' | 'square';
 }
 
+const EMPTY_ARRAY: string[] = [];
+
 export function ImageUploader({
     value,
     onChange,
-    gallery = [],
+    gallery = EMPTY_ARRAY,
     onGalleryChange,
     className,
     aspectRatio = 'video',
@@ -70,17 +72,33 @@ export function ImageUploader({
     React.useEffect(() => {
         if (isDialogOpen) {
             fetchUploadedImages();
-            // Initialize temp states
+            // Initialize temp states only if they differ
             if (selectingFor === 'main') {
-                setTempSelectedUrl(value);
+                if (tempSelectedUrl !== value) {
+                    setTempSelectedUrl(value);
+                }
             } else {
-                setTempSelectedUrls([...gallery]);
+                // Use a simple length and content check for gallery
+                const isGalleryDifferent =
+                    tempSelectedUrls.length !== gallery.length ||
+                    tempSelectedUrls.some((url, i) => url !== gallery[i]);
+
+                if (isGalleryDifferent) {
+                    setTempSelectedUrls([...gallery]);
+                }
             }
         } else {
             // Reset states when closing
-            handleCancelUpload();
-            setTempSelectedUrl(null);
-            setTempSelectedUrls([]);
+            // Only call reset functions if there is something to reset to avoid infinite loops
+            if (selectedFile || previewUrl) {
+                handleCancelUpload();
+            }
+            if (tempSelectedUrl !== null) {
+                setTempSelectedUrl(null);
+            }
+            if (tempSelectedUrls.length > 0) {
+                setTempSelectedUrls([]);
+            }
         }
         return () => {
             if (previewUrl) URL.revokeObjectURL(previewUrl);
