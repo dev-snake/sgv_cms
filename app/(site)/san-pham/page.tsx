@@ -140,29 +140,30 @@ export default function ProductArchive() {
     return (
         <div className="flex flex-col min-h-screen bg-white pt-24">
             {/* Page Header */}
-            <section className="relative py-20 bg-slate-950 overflow-hidden">
-                <div className="absolute inset-0 z-0 opacity-40">
+            <section className="relative py-20 bg-gradient-to-br from-brand-primary via-brand-secondary to-brand-primary overflow-hidden">
+                <div className="absolute inset-0 z-0 opacity-30">
                     <Image
                         src="/uploads/images/2026/01/19/1768814857344-hfho0c.png"
                         alt="Projects Background"
                         fill
-                        className="object-cover"
+                        className="object-cover brightness-110"
                         priority
                     />
-                    <div className="absolute inset-0 bg-linear-to-b from-slate-950/80 via-slate-950/40 to-white/0"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/70 via-brand-secondary/50 to-brand-primary/80"></div>
                 </div>
+                <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-accent/10 rounded-full blur-3xl"></div>
                 <div className="container relative z-10 mx-auto px-4 lg:px-8">
                     <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
                         <div className="space-y-6 max-w-2xl">
-                            <div className="inline-flex items-center gap-3  border-accent text-white  border bg-amber-600/10  px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em]  backdrop-blur-md">
-                                <span className="h-1.5 w-1.5 rounded-full bg-brand-accent"></span>
+                            <div className="inline-flex items-center gap-3 border-brand-accent text-brand-accent border bg-brand-accent/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] backdrop-blur-md">
+                                <span className="h-1.5 w-1.5 rounded-full bg-brand-accent animate-pulse"></span>
                                 Sản phẩm & Giải pháp
                             </div>
-                            <h1 className="text-5xl sm:text-6xl font-black text-white tracking-tighter uppercase leading-none">
+                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tighter uppercase leading-none drop-shadow-lg">
                                 THIẾT BỊ <br />
                                 <span className="text-brand-accent">CHUYÊN DỤNG</span>
                             </h1>
-                            <p className="text-slate-400 font-medium text-lg max-w-xl">
+                            <p className="text-slate-200 font-medium text-base sm:text-lg max-w-xl">
                                 Van công nghiệp, thiết bị đo lường và giải pháp IoT tiêu chuẩn Nhật
                                 Bản & Hàn Quốc cho ngành nước và hạ tầng kỹ thuật.
                             </p>
@@ -174,10 +175,10 @@ export default function ProductArchive() {
                                 placeholder="Tìm kiếm sản phẩm..."
                                 value={searchQuery}
                                 onChange={(e) => handleSearchChange(e.target.value)}
-                                className="w-full bg-white/5 backdrop-blur-md px-6 py-5 pl-14 text-sm font-bold border border-white/10 focus:outline-none focus:border-brand-accent text-white placeholder:text-white/30 transition-all"
+                                className="w-full bg-white/10 backdrop-blur-md px-6 py-5 pl-14 text-sm font-bold border border-white/20 focus:outline-none focus:border-brand-accent text-white placeholder:text-white/40 transition-all"
                             />
                             <Search
-                                className="absolute left-6 top-1/2 -translate-y-1/2 text-white/30"
+                                className="absolute left-6 top-1/2 -translate-y-1/2 text-white/40"
                                 size={20}
                             />
                         </div>
@@ -214,24 +215,7 @@ export default function ProductArchive() {
                                     </div>
                                 </div>
 
-                                <div className="bg-slate-900 p-8 text-white space-y-6">
-                                    <h4 className="text-lg font-bold uppercase leading-tight italic text-brand-accent">
-                                        Nhận báo giá ngay?
-                                    </h4>
-                                    <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest">
-                                        Phản hồi trong 2 giờ làm việc.
-                                    </p>
-                                    <Link
-                                        href="/lien-he"
-                                        className="flex items-center justify-between group py-4 border-t border-white/10 hover:text-brand-accent transition-all text-xs font-black uppercase tracking-widest"
-                                    >
-                                        Liên hệ
-                                        <ArrowRight
-                                            size={16}
-                                            className="transition-transform group-hover:translate-x-2"
-                                        />
-                                    </Link>
-                                </div>
+                       
                             </div>
                         </aside>
 
