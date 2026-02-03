@@ -49,6 +49,8 @@ export function ImageUploader({
     const [selectingFor, setSelectingFor] = React.useState<'main' | 'gallery'>('main');
     const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+    const [tempSelectedUrl, setTempSelectedUrl] = React.useState<string | null>(null);
+    const [tempSelectedUrls, setTempSelectedUrls] = React.useState<string[]>([]);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const fetchUploadedImages = async () => {
@@ -68,11 +70,22 @@ export function ImageUploader({
     React.useEffect(() => {
         if (isDialogOpen) {
             fetchUploadedImages();
+            // Initialize temp states
+            if (selectingFor === 'main') {
+                setTempSelectedUrl(value);
+            } else {
+                setTempSelectedUrls([...gallery]);
+            }
+        } else {
+            // Reset states when closing
+            handleCancelUpload();
+            setTempSelectedUrl(null);
+            setTempSelectedUrls([]);
         }
         return () => {
             if (previewUrl) URL.revokeObjectURL(previewUrl);
         };
-    }, [isDialogOpen, previewUrl]);
+    }, [isDialogOpen, previewUrl, selectingFor, value, gallery]);
 
     const handleUpload = async () => {
         if (!selectedFile) return;
@@ -136,12 +149,20 @@ export function ImageUploader({
     };
 
     const handleSelectImage = (url: string) => {
-        if (selectingFor === 'gallery' && onGalleryChange) {
-            if (!gallery.includes(url)) {
-                onGalleryChange([...gallery, url]);
-            }
+        if (selectingFor === 'gallery') {
+            setTempSelectedUrls((prev) =>
+                prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url],
+            );
         } else {
-            onChange(url);
+            setTempSelectedUrl(url);
+        }
+    };
+
+    const handleConfirmLibrarySelection = () => {
+        if (selectingFor === 'gallery' && onGalleryChange) {
+            onGalleryChange(tempSelectedUrls);
+        } else if (selectingFor === 'main' && tempSelectedUrl) {
+            onChange(tempSelectedUrl);
         }
         setIsDialogOpen(false);
     };
@@ -311,49 +332,90 @@ export function ImageUploader({
                             </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="library" className="flex-1 overflow-auto mt-4">
-                            {isLoadingImages ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
-                                </div>
-                            ) : uploadedImages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-                                    <FolderOpen size={48} className="mb-4" />
-                                    <p className="text-sm font-bold">Chưa có ảnh nào</p>
-                                    <p className="text-xs">Hãy tải ảnh lên để sử dụng</p>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-4 gap-3">
-                                    {uploadedImages.map((image) => (
-                                        <button
-                                            key={image.filename}
-                                            type="button"
-                                            onClick={() => handleSelectImage(image.url)}
-                                            className={cn(
-                                                'relative aspect-square border-2 transition-all group',
-                                                value === image.url || gallery.includes(image.url)
-                                                    ? 'border-brand-primary'
-                                                    : 'border-transparent hover:border-brand-primary/50',
-                                            )}
-                                        >
-                                            <Image
-                                                src={image.url}
-                                                alt={image.filename}
-                                                fill
-                                                unoptimized
-                                                className="object-cover"
-                                            />
-                                            {(value === image.url ||
-                                                gallery.includes(image.url)) && (
-                                                <div className="absolute top-1 right-1 p-1 bg-brand-primary text-white rounded-none">
-                                                    <Check size={10} />
-                                                </div>
-                                            )}
-                                            <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 text-[9px] opacity-0 group-hover:opacity-100 transition-opacity">
-                                                {formatFileSize(image.size)}
-                                            </div>
-                                        </button>
-                                    ))}
+                        <TabsContent
+                            value="library"
+                            className="flex-1 overflow-hidden mt-4 flex flex-col"
+                        >
+                            <div className="flex-1 overflow-auto min-h-0 pr-2">
+                                {isLoadingImages ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+                                    </div>
+                                ) : uploadedImages.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                                        <FolderOpen size={48} className="mb-4" />
+                                        <p className="text-sm font-bold">Chưa có ảnh nào</p>
+                                        <p className="text-xs">Hãy tải ảnh lên để sử dụng</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-4 gap-3">
+                                        {uploadedImages.map((image) => {
+                                            const isSelected =
+                                                selectingFor === 'main'
+                                                    ? tempSelectedUrl === image.url
+                                                    : tempSelectedUrls.includes(image.url);
+
+                                            return (
+                                                <button
+                                                    key={image.filename}
+                                                    type="button"
+                                                    onClick={() => handleSelectImage(image.url)}
+                                                    className={cn(
+                                                        'relative aspect-square border-2 transition-all group',
+                                                        isSelected
+                                                            ? 'border-brand-primary'
+                                                            : 'border-transparent hover:border-brand-primary/50',
+                                                    )}
+                                                >
+                                                    <Image
+                                                        src={image.url}
+                                                        alt={image.filename}
+                                                        fill
+                                                        unoptimized
+                                                        className="object-cover"
+                                                    />
+                                                    {isSelected && (
+                                                        <div className="absolute top-1 right-1 p-1 bg-brand-primary text-white rounded-none">
+                                                            <Check size={10} />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 text-[9px] opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {formatFileSize(image.size)}
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            {uploadedImages.length > 0 && (
+                                <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end gap-3">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setIsDialogOpen(false)}
+                                        className="h-9 px-4 rounded-none text-[10px] font-black uppercase tracking-widest border-2"
+                                    >
+                                        Hủy
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        onClick={handleConfirmLibrarySelection}
+                                        disabled={
+                                            selectingFor === 'main'
+                                                ? !tempSelectedUrl || tempSelectedUrl === value
+                                                : false
+                                        }
+                                        className="h-9 px-6 rounded-none text-[10px] font-black uppercase tracking-widest bg-brand-primary hover:bg-brand-primary/90"
+                                    >
+                                        <Check className="h-3 w-3 mr-2" />
+                                        Xác nhận chọn{' '}
+                                        {selectingFor === 'gallery' &&
+                                            tempSelectedUrls.length > 0 &&
+                                            `(${tempSelectedUrls.length})`}
+                                    </Button>
                                 </div>
                             )}
                         </TabsContent>
