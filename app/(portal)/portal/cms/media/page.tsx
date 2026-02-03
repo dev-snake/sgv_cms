@@ -38,6 +38,8 @@ export default function MediaManagementPage() {
     const [itemToDelete, setItemToDelete] = useState<UploadedImage | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     // Lightbox state
     const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -64,7 +66,7 @@ export default function MediaManagementPage() {
         fetchImages();
     }, []);
 
-    const handleUpload = async (file: File) => {
+    const handleSelectFile = (file: File) => {
         if (!file) return;
 
         // Validate file type
@@ -80,10 +82,25 @@ export default function MediaManagementPage() {
             return;
         }
 
+        setSelectedFile(file);
+        setPreviewUrl(URL.createObjectURL(file));
+    };
+
+    const handleClearSelection = () => {
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
+        setSelectedFile(null);
+        setPreviewUrl(null);
+    };
+
+    const handleUpload = async () => {
+        if (!selectedFile) return;
+
         setIsUploading(true);
         try {
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('file', selectedFile);
 
             const response = await $api.post(API_ROUTES.UPLOAD, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
@@ -91,6 +108,7 @@ export default function MediaManagementPage() {
 
             if (response.data.success) {
                 toast.success('Tải ảnh thành công!');
+                handleClearSelection();
                 fetchImages();
                 setUploadDialogOpen(false);
             }
@@ -272,37 +290,60 @@ export default function MediaManagementPage() {
                         </p>
                     </DialogHeader>
 
-                    <div
-                        onDragOver={(e) => {
-                            e.preventDefault();
-                            setIsDragging(true);
-                        }}
-                        onDragLeave={(e) => {
-                            e.preventDefault();
-                            setIsDragging(false);
-                        }}
-                        onDrop={(e) => {
-                            e.preventDefault();
-                            setIsDragging(false);
-                            const file = e.dataTransfer.files[0];
-                            if (file) handleUpload(file);
-                        }}
-                        onClick={() => fileInputRef.current?.click()}
-                        className={cn(
-                            'h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all group',
-                            isDragging
-                                ? 'border-brand-primary bg-brand-primary/5'
-                                : 'border-slate-200 hover:border-brand-primary/50 hover:bg-slate-50',
-                        )}
-                    >
-                        {isUploading ? (
-                            <div className="flex flex-col items-center gap-3">
-                                <Loader2 className="h-10 w-10 animate-spin text-brand-primary" />
-                                <span className="text-sm text-slate-500">Đang tải lên...</span>
+                    {selectedFile && previewUrl ? (
+                        // Preview selected file
+                        <div className="space-y-4">
+                            <div className="relative h-48 border border-slate-200 rounded-none overflow-hidden bg-slate-50">
+                                <Image
+                                    src={previewUrl}
+                                    alt="Preview"
+                                    fill
+                                    className="object-contain"
+                                />
+                                <button
+                                    onClick={handleClearSelection}
+                                    className="absolute top-2 right-2 bg-rose-500 hover:bg-rose-600 text-white p-1.5 rounded-none transition-colors"
+                                    title="Xóa ảnh đã chọn"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
                             </div>
-                        ) : (
+                            <div className="bg-slate-50 p-3 rounded-none">
+                                <p className="text-xs font-bold text-slate-700 truncate">
+                                    {selectedFile.name}
+                                </p>
+                                <p className="text-[10px] text-slate-400 mt-1">
+                                    {formatFileSize(selectedFile.size)}
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        // Dropzone for selecting file
+                        <div
+                            onDragOver={(e) => {
+                                e.preventDefault();
+                                setIsDragging(true);
+                            }}
+                            onDragLeave={(e) => {
+                                e.preventDefault();
+                                setIsDragging(false);
+                            }}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                setIsDragging(false);
+                                const file = e.dataTransfer.files[0];
+                                if (file) handleSelectFile(file);
+                            }}
+                            onClick={() => fileInputRef.current?.click()}
+                            className={cn(
+                                'h-48 border-2 border-dashed rounded-none flex flex-col items-center justify-center cursor-pointer transition-all group',
+                                isDragging
+                                    ? 'border-brand-primary bg-brand-primary/5'
+                                    : 'border-slate-200 hover:border-brand-primary/50 hover:bg-slate-50',
+                            )}
+                        >
                             <div className="flex flex-col items-center gap-3">
-                                <div className="p-3 rounded-full bg-slate-100 group-hover:bg-brand-primary/10 transition-colors">
+                                <div className="p-3 rounded-none bg-slate-100 group-hover:bg-brand-primary/10 transition-colors">
                                     <Upload className="h-6 w-6 text-slate-400 group-hover:text-brand-primary transition-colors" />
                                 </div>
                                 <div className="text-center">
@@ -315,28 +356,50 @@ export default function MediaManagementPage() {
                                     </p>
                                 </div>
                             </div>
-                        )}
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp,image/gif"
-                            className="hidden"
-                            onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleUpload(file);
-                                e.target.value = '';
-                            }}
-                        />
-                    </div>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleSelectFile(file);
+                                    e.target.value = '';
+                                }}
+                            />
+                        </div>
+                    )}
 
                     <div className="flex justify-end gap-2 mt-4">
                         <Button
                             variant="outline"
-                            onClick={() => setUploadDialogOpen(false)}
-                            className="text-sm"
+                            onClick={() => {
+                                handleClearSelection();
+                                setUploadDialogOpen(false);
+                            }}
+                            className="text-sm rounded-none"
                         >
                             Hủy
                         </Button>
+                        {selectedFile && (
+                            <Button
+                                onClick={handleUpload}
+                                disabled={isUploading}
+                                className="bg-brand-primary hover:bg-brand-secondary text-[10px] font-black uppercase tracking-widest px-6 rounded-none"
+                            >
+                                {isUploading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Đang tải...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        Xác nhận tải lên
+                                    </>
+                                )}
+                            </Button>
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>
