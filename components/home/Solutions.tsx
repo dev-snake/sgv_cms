@@ -102,7 +102,6 @@ export default function Solutions() {
                             />
                         </div>
 
-                        {/* Hover Overlay (Card revealing from top) */}
                         <AnimatePresence>
                             {hoveredIndex === idx && (
                                 <motion.div
@@ -169,7 +168,6 @@ export default function Solutions() {
                             )}
                         </AnimatePresence>
 
-                        {/* Default Caption */}
                         <div
                             className={cn(
                                 'absolute inset-x-0 bottom-0 p-8 pt-20 transition-opacity duration-300 bg-linear-to-t from-slate-950/80 to-transparent',
@@ -189,7 +187,6 @@ export default function Solutions() {
                             </div>
                         </div>
 
-                        {/* Border Accent */}
                         <div
                             className={cn(
                                 'absolute top-0 left-0 w-full h-1 bg-brand-accent transition-transform duration-500 origin-left',
