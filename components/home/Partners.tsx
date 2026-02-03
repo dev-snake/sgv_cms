@@ -3,7 +3,7 @@
 import { motion } from 'motion/react';
 import Image from 'next/image';
 
-const PARTNERS = [
+export const PARTNERS = [
     { name: 'Đối tác', logo: '/uploads/images/2026/02/02/1770023382773-fw807q.png' },
     { name: 'Đối tác', logo: '/uploads/images/2026/02/02/1770021778460-1ysjkc.png' },
 ];
@@ -39,17 +39,19 @@ export default function Partners() {
                             transition={{ delay: i * 0.1, duration: 0.4 }}
                             className="group w-48 sm:w-56 lg:w-64"
                         >
-                            <div className="relative h-32 sm:h-36 lg:h-40 w-full bg-white  border border-slate-200 shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 p-6 flex items-center justify-center overflow-hidden">
+                            <div className="relative h-32 sm:h-36 lg:h-40 w-full bg-white  border border-slate-200 shadow-sm hover:shadow-lg hover:border-brand-primary/30 transition-all duration-300 p-6 flex items-center justify-center overflow-hidden">
                                 {/* Background glow effect on hover */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                                <div className="relative w-full h-full grayscale group-hover:grayscale-0 opacity-70 group-hover:opacity-100 transition-all duration-300">
+                                <div className="relative w-full h-full group-hover:scale-105 transition-transform duration-300">
                                     <Image
                                         src={partner.logo}
                                         alt={partner.name}
                                         fill
+                                        quality={100}
                                         className="object-contain p-2 hover:cursor-pointer"
                                         sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                        style={{ imageRendering: 'auto' }}
                                     />
                                 </div>
                             </div>

@@ -24,6 +24,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { COMPANY_INFO } from '@/constants/site-info';
+import { PARTNERS } from '@/components/home/Partners';
 
 export default function AboutPage() {
     return (
@@ -427,42 +428,24 @@ export default function AboutPage() {
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="aspect-square bg-white border border-slate-100 flex items-center justify-center p-8 hover:shadow-lg transition-all">
-                                <Image
-                                    src="/uploads/images/2026/01/19/1768812644117-llzziw.png"
-                                    alt="OKM"
-                                    width={150}
-                                    height={150}
-                                    className="object-contain"
-                                />
-                            </div>
-                            <div className="aspect-square bg-white border border-slate-100 flex items-center justify-center p-8 hover:shadow-lg transition-all">
-                                <Image
-                                    src="/uploads/images/2026/01/19/1768812644117-llzziw.png"
-                                    alt="Noah"
-                                    width={150}
-                                    height={150}
-                                    className="object-contain"
-                                />
-                            </div>
-                            <div className="aspect-square bg-white border border-slate-100 flex items-center justify-center p-8 hover:shadow-lg transition-all">
-                                <Image
-                                    src="/uploads/images/2026/01/19/1768812644117-llzziw.png"
-                                    alt="Niigata"
-                                    width={150}
-                                    height={150}
-                                    className="object-contain"
-                                />
-                            </div>
-                            <div className="aspect-square bg-white border border-slate-100 flex items-center justify-center p-8 hover:shadow-lg transition-all">
-                                <Image
-                                    src="/uploads/images/2026/01/19/1768812644117-llzziw.png"
-                                    alt="Toaflex"
-                                    width={150}
-                                    height={150}
-                                    className="object-contain"
-                                />
-                            </div>
+                            {PARTNERS.map((partner, i) => (
+                                <div
+                                    key={i}
+                                    className="aspect-square bg-white border border-slate-100 flex items-center justify-center p-6 hover:shadow-lg hover:border-brand-primary/30 transition-all group"
+                                >
+                                    <div className="relative w-full h-full group-hover:scale-105 transition-transform duration-300">
+                                        <Image
+                                            src={partner.logo}
+                                            alt={partner.name}
+                                            fill
+                                            quality={100}
+                                            sizes="(max-width: 768px) 50vw, 25vw"
+                                            className="object-contain"
+                                            style={{ imageRendering: 'auto' }}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
