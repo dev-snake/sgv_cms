@@ -16,13 +16,13 @@ import { COMPANY_INFO } from '@/constants/site-info';
 
 export default function Footer() {
     return (
-        <footer className="bg-brand-primary pt-12 pb-6 text-white relative overflow-hidden">
+        <footer className="bg-brand-primary pt-10 pb-4 text-white relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-px bg-white/10"></div>
             <div className="absolute bottom-0 right-0 w-48 h-48 bg-brand-secondary/20 rounded-full blur-3xl -translate-y-10 translate-x-10"></div>
 
             <div className="container mx-auto px-4 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-10 border-b border-white/5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-8 border-b border-white/5">
                     {/* Brand Column */}
                     <div className="space-y-4">
                         <Link href="/" className="relative block h-12 w-44 group">
@@ -123,7 +123,7 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+                <div className="pt-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
                     <div className="space-y-1">
                         <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">
                             {COMPANY_INFO.copyright}
