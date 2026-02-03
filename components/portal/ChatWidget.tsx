@@ -252,27 +252,14 @@ export default function ChatWidget() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                                {sessionId && (
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={handleClearHistory}
-                                        className="text-white hover:bg-white/10"
-                                        title="Xóa lịch sử"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                )}
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setIsOpen(false)}
-                                    className="text-white hover:bg-white/10"
-                                >
-                                    <X className="w-5 h-5" />
-                                </Button>
-                            </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setIsOpen(false)}
+                                className="text-white hover:bg-white/10"
+                            >
+                                <X className="w-5 h-5" />
+                            </Button>
                         </div>
 
                         {/* Messages */}
