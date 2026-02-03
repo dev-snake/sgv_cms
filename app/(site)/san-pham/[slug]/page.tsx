@@ -201,41 +201,43 @@ export default function ProductDetailPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-4 gap-4">
-                                {allImages.length > 1 ? (
-                                    allImages.map((img: string, i: number) => (
-                                        <div
-                                            key={i}
-                                            className={cn(
-                                                'relative aspect-square bg-slate-50 border border-slate-100 p-2 transition-all cursor-zoom-in overflow-hidden group',
-                                                currentImageIndex === i
-                                                    ? 'border-brand-primary opacity-100 shadow-md'
-                                                    : 'opacity-60 hover:opacity-100',
-                                            )}
-                                            onClick={() => openLightbox(i)}
-                                        >
+                            <div className="relative group">
+                                <div className="flex flex-row gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                                    {allImages.length > 1 ? (
+                                        allImages.map((img: string, i: number) => (
+                                            <div
+                                                key={i}
+                                                className={cn(
+                                                    'relative aspect-square w-24 sm:w-28 shrink-0 bg-slate-50 border border-slate-100 p-2 transition-all cursor-zoom-in overflow-hidden group/thumb',
+                                                    currentImageIndex === i
+                                                        ? 'border-brand-primary opacity-100 shadow-md'
+                                                        : 'opacity-60 hover:opacity-100',
+                                                )}
+                                                onClick={() => openLightbox(i)}
+                                            >
+                                                <Image
+                                                    src={img}
+                                                    alt={`Thumbnail ${i}`}
+                                                    fill
+                                                    className="object-contain p-2 group-hover/thumb:scale-110 transition-transform"
+                                                />
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="aspect-square w-24 bg-slate-50 border border-slate-100 p-4 opacity-100 shadow-inner">
                                             <Image
-                                                src={img}
-                                                alt={`Thumbnail ${i}`}
-                                                fill
-                                                className="object-contain p-2 group-hover:scale-110 transition-transform"
+                                                src={
+                                                    product.image_url ||
+                                                    'https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png'
+                                                }
+                                                alt="Thumb"
+                                                width={100}
+                                                height={100}
+                                                className="object-contain"
                                             />
                                         </div>
-                                    ))
-                                ) : (
-                                    <div className="aspect-square bg-slate-50 border border-slate-100 p-4 opacity-100 shadow-inner">
-                                        <Image
-                                            src={
-                                                product.image_url ||
-                                                'https://saigonvalve.vn/uploads/files/2025/03/19/VAN-C-NG-TL.png'
-                                            }
-                                            alt="Thumb"
-                                            width={100}
-                                            height={100}
-                                            className="object-contain"
-                                        />
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -248,7 +250,8 @@ export default function ProductDetailPage() {
                                 <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tighter uppercase leading-none">
                                     {product.name}
                                 </h1>
-                                <p className="text-xl text-muted-foreground font-medium leading-relaxed italic border-l-4 border-slate-100 pl-8"
+                                <p
+                                    className="text-xl text-muted-foreground font-medium leading-relaxed italic border-l-4 border-slate-100 pl-8"
                                     dangerouslySetInnerHTML={{ __html: product.description }}
                                 />
                             </div>
