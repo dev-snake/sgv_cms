@@ -29,13 +29,18 @@ interface Product {
     status: string;
 }
 
+interface Category {
+    id: string;
+    name: string;
+}
+
 const ITEMS_PER_PAGE = 6;
 
 export default function ProductArchive() {
     const [products, setProducts] = useState<Product[]>([]);
-    const [categories, setCategories] = useState<string[]>(['Tất cả']);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedCategory, setSelectedCategory] = useState('Tất cả');
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const debouncedSearch = useDebounce(searchQuery, 500);
     const [currentPage, setCurrentPage] = useState(1);
@@ -57,7 +62,7 @@ export default function ProductArchive() {
                     page,
                     limit: ITEMS_PER_PAGE,
                     search: debouncedSearch || undefined,
-                    category: selectedCategory !== 'Tất cả' ? selectedCategory : undefined,
+                    categoryId: selectedCategoryId || undefined,
                 },
             });
             if (response.data.success) {
@@ -81,14 +86,10 @@ export default function ProductArchive() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await $api.get(`${API_ROUTES.PRODUCTS}?status=active&limit=100`);
+                const response = await $api.get(`${API_ROUTES.CATEGORIES}?type=product`);
                 if (response.data.success) {
                     const data = response.data.data || [];
-                    const uniqueCategories = [
-                        'Tất cả',
-                        ...new Set(data.map((p: Product) => p.category).filter(Boolean)),
-                    ];
-                    setCategories(uniqueCategories as string[]);
+                    setCategories(data);
                 }
             } catch (error) {
                 console.error('Error fetching categories:', error);
@@ -99,7 +100,7 @@ export default function ProductArchive() {
 
     useEffect(() => {
         fetchProducts(currentPage);
-    }, [currentPage, debouncedSearch, selectedCategory]);
+    }, [currentPage, debouncedSearch, selectedCategoryId]);
 
     if (loading && products.length === 0) {
         return (
@@ -111,8 +112,8 @@ export default function ProductArchive() {
 
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
 
-    const handleCategoryChange = (cat: string) => {
-        setSelectedCategory(cat);
+    const handleCategoryChange = (categoryId: string | null) => {
+        setSelectedCategoryId(categoryId);
         setCurrentPage(1);
     };
 
@@ -186,18 +187,30 @@ export default function ProductArchive() {
                                         CHUYÊN MỤC
                                     </h4>
                                     <div className="flex flex-wrap gap-2 lg:flex-col">
+                                        {/* "Tất cả" button */}
+                                        <button
+                                            onClick={() => handleCategoryChange(null)}
+                                            className={cn(
+                                                'px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest transition-all hover:cursor-pointer',
+                                                selectedCategoryId === null
+                                                    ? 'bg-brand-primary text-white '
+                                                    : 'bg-white text-muted-foreground hover:bg-slate-50 hover:text-brand-primary',
+                                            )}
+                                        >
+                                            Tất cả
+                                        </button>
                                         {categories.map((cat) => (
                                             <button
-                                                key={cat}
-                                                onClick={() => handleCategoryChange(cat)}
+                                                key={cat.id}
+                                                onClick={() => handleCategoryChange(cat.id)}
                                                 className={cn(
-                                                    'px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest transition-all',
-                                                    selectedCategory === cat
-                                                        ? 'bg-brand-primary text-white shadow-xl'
+                                                    'px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest transition-all hover:cursor-pointer',
+                                                    selectedCategoryId === cat.id
+                                                        ? 'bg-brand-primary text-white '
                                                         : 'bg-white text-muted-foreground hover:bg-slate-50 hover:text-brand-primary',
                                                 )}
                                             >
-                                                {cat}
+                                                {cat.name}
                                             </button>
                                         ))}
                                     </div>
