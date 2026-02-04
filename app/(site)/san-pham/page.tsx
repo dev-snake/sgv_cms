@@ -130,7 +130,7 @@ export default function ProductArchive() {
         <div className="flex flex-col min-h-screen bg-white pt-24">
             {/* Page Header */}
             <section className="relative py-20 bg-gradient-to-br from-brand-primary via-brand-secondary to-brand-primary overflow-hidden">
-                <div className="absolute inset-0 z-0 opacity-30">
+                <div className="absolute inset-0 z-0 opacity-70">
                     <Image
                         src="/uploads/images/2026/01/19/1768814857344-hfho0c.png"
                         alt="Projects Background"
@@ -138,7 +138,6 @@ export default function ProductArchive() {
                         className="object-cover brightness-110"
                         priority
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/70 via-brand-secondary/50 to-brand-primary/80"></div>
                 </div>
                 <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-accent/10 rounded-full blur-3xl"></div>
                 <div className="container relative z-10 mx-auto px-4 lg:px-8">
