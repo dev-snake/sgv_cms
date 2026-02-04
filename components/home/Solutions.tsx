@@ -88,7 +88,7 @@ export default function Solutions() {
                         onMouseEnter={() => setHoveredIndex(idx)}
                         onMouseLeave={() => setHoveredIndex(null)}
                         className={cn(
-                            'relative overflow-hidden group cursor-pointer border-r border-white/5 last:border-0 h-[700px] flex-1 min-w-0 transition-all duration-500',
+                            'relative overflow-hidden group cursor-pointer  border-white/5 last:border-0 h-[700px] flex-1 min-w-0 transition-all duration-500',
                             hoveredIndex === idx ? 'z-10' : 'z-0',
                         )}
                     >
