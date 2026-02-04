@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { User, ChevronRight } from 'lucide-react';
 import {
     Pagination,
@@ -30,7 +30,6 @@ interface NewsArticle {
     readTime: string;
     image_url: string;
 }
-
 
 // Helper to format date in Vietnamese
 function formatDate(dateString: string | null): string {
@@ -76,6 +75,11 @@ export default function NewsPage() {
     useEffect(() => {
         fetchNews(currentPage);
     }, [currentPage]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     if (loading && news.length === 0) {
         return (
@@ -124,58 +128,56 @@ export default function NewsPage() {
                     <div className="flex flex-col lg:flex-row gap-20">
                         <div className="w-full space-y-16">
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                <AnimatePresence mode="popLayout">
-                                    {news.map((article) => (
-                                        <motion.div
-                                            key={article.id}
-                                            layout
-                                            initial={{ opacity: 0, scale: 0.95 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 0.95 }}
-                                            className="group relative bg-white overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-500 border border-slate-100"
-                                        >
-                                            <div className="relative aspect-4/3 w-full overflow-hidden">
-                                                <Image
-                                                    src={article.image_url}
-                                                    alt={article.title}
-                                                    fill
-                                                    className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                                                />
-                                                <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                            </div>
+                                {news.map((article, i) => (
+                                    <motion.div
+                                        key={article.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: i * 0.05 }}
+                                        className="group relative bg-white overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-500 border border-slate-100"
+                                    >
+                                        <div className="relative aspect-4/3 w-full overflow-hidden">
+                                            <Image
+                                                src={article.image_url}
+                                                alt={article.title}
+                                                fill
+                                                className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                                            />
+                                            <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        </div>
 
-                                            <div className="p-6 grow flex flex-col justify-between space-y-4">
-                                                <div className="space-y-3">
-                                                    <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-brand-primary">
-                                                        <span>{article.category || 'TIN TỨC'}</span>
-                                                        <span className="text-muted-foreground">
-                                                            {formatDate(article.published_at)}
-                                                        </span>
-                                                    </div>
-                                                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight leading-snug line-clamp-2 group-hover:text-brand-primary transition-colors">
-                                                        <Link href={`/tin-tuc/${article.slug}`}>
-                                                            {article.title}
-                                                        </Link>
-                                                    </h3>
-                                                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
-                                                        <User
-                                                            size={12}
-                                                            className="text-brand-primary"
-                                                        />
-                                                        {article.author || 'SGV Admin'}
-                                                    </div>
+                                        <div className="p-6 grow flex flex-col justify-between space-y-4">
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-brand-primary">
+                                                    <span>{article.category || 'TIN TỨC'}</span>
+                                                    <span className="text-muted-foreground">
+                                                        {formatDate(article.published_at)}
+                                                    </span>
                                                 </div>
-
-                                                <Link
-                                                    href={`/tin-tuc/${article.slug}`}
-                                                    className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-brand-primary transition-colors pt-2 border-t border-slate-50"
-                                                >
-                                                    XEM CHI TIẾT <ChevronRight size={14} />
-                                                </Link>
+                                                <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight leading-snug line-clamp-2 group-hover:text-brand-primary transition-colors">
+                                                    <Link href={`/tin-tuc/${article.slug}`}>
+                                                        {article.title}
+                                                    </Link>
+                                                </h3>
+                                                <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
+                                                    <User
+                                                        size={12}
+                                                        className="text-brand-primary"
+                                                    />
+                                                    {article.author || 'SGV Admin'}
+                                                </div>
                                             </div>
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
+
+                                            <Link
+                                                href={`/tin-tuc/${article.slug}`}
+                                                className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-brand-primary transition-colors pt-2 border-t border-slate-50"
+                                            >
+                                                XEM CHI TIẾT <ChevronRight size={14} />
+                                            </Link>
+                                        </div>
+                                    </motion.div>
+                                ))}
                             </div>
 
                             {/* Pagination */}
@@ -189,25 +191,30 @@ export default function NewsPage() {
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         if (currentPage > 1)
-                                                            setCurrentPage(currentPage - 1);
+                                                            handlePageChange(currentPage - 1);
                                                     }}
                                                     className={cn(
+                                                        'text-[9px] font-black uppercase tracking-widest',
                                                         currentPage === 1 &&
                                                             'pointer-events-none opacity-50',
                                                     )}
                                                 />
                                             </PaginationItem>
-                                            {[...Array(totalPages)].map((_, i) => (
-                                                <PaginationItem key={i}>
+                                            {Array.from(
+                                                { length: totalPages },
+                                                (_, i) => i + 1,
+                                            ).map((page) => (
+                                                <PaginationItem key={page}>
                                                     <PaginationLink
                                                         href="#"
-                                                        isActive={currentPage === i + 1}
                                                         onClick={(e) => {
                                                             e.preventDefault();
-                                                            setCurrentPage(i + 1);
+                                                            handlePageChange(page);
                                                         }}
+                                                        isActive={currentPage === page}
+                                                        className="text-[11px] font-black"
                                                     >
-                                                        {i + 1}
+                                                        {page}
                                                     </PaginationLink>
                                                 </PaginationItem>
                                             ))}
@@ -217,9 +224,10 @@ export default function NewsPage() {
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         if (currentPage < totalPages)
-                                                            setCurrentPage(currentPage + 1);
+                                                            handlePageChange(currentPage + 1);
                                                     }}
                                                     className={cn(
+                                                        'text-[9px] font-black uppercase tracking-widest',
                                                         currentPage === totalPages &&
                                                             'pointer-events-none opacity-50',
                                                     )}
