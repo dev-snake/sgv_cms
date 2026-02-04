@@ -44,7 +44,7 @@ export default async function proxy(request: NextRequest) {
     }
 
     // 4. Special case: Chat API routes are public (for guest users)
-    if (pathname.startsWith('/api/chat/') && ['POST', 'GET'].includes(method)) {
+    if (pathname.startsWith('/api/chat/') && ['POST', 'GET', 'PATCH'].includes(method)) {
         return NextResponse.next();
     }
 

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import $api from '@/utils/axios';
+import { $publicApi } from '@/utils/axios';
 import { API_ROUTES } from '@/constants/routes';
 import { io, Socket } from 'socket.io-client';
 
@@ -41,8 +41,6 @@ export default function ChatWidget() {
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const socketRef = useRef<Socket | null>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
-
-
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -79,12 +77,12 @@ export default function ChatWidget() {
 
         const initSession = async () => {
             try {
-                const res = await $api.post(API_ROUTES.CHAT.SESSIONS, { guestId });
+                const res = await $publicApi.post(API_ROUTES.CHAT.SESSIONS, { guestId });
                 const sessionPayload = res.data.data;
                 setSessionId(sessionPayload.id);
                 setSessionData(sessionPayload);
 
-                const msgRes = await $api.get(
+                const msgRes = await $publicApi.get(
                     `${API_ROUTES.CHAT.MESSAGES}?sessionId=${sessionPayload.id}`,
                 );
                 setMessages(msgRes.data.data || []);
@@ -103,7 +101,7 @@ export default function ChatWidget() {
 
     const handleUpdateSeen = async (id: string) => {
         try {
-            await $api.patch(`${API_ROUTES.CHAT.SESSIONS}/${id}`, { guestLastSeen: true });
+            await $publicApi.patch(`${API_ROUTES.CHAT.SESSIONS}/${id}`, { guestLastSeen: true });
         } catch (error) {
             // Silently fail
         }
@@ -186,7 +184,7 @@ export default function ChatWidget() {
         sendTypingStatus(false);
 
         try {
-            const res = await $api.post(API_ROUTES.CHAT.MESSAGES, {
+            const res = await $publicApi.post(API_ROUTES.CHAT.MESSAGES, {
                 sessionId,
                 content,
                 isFromWidget: true,
