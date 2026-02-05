@@ -42,21 +42,19 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useDebounce } from '@/hooks/use-debounce';
 import { PERMISSIONS } from '@/constants/rbac';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function NewsManagementPage() {
     const { hasPermission } = useAuth();
-    const [newsList, setNewsList] = useState<NewsArticle[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<NewsArticle | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [totalItems, setTotalItems] = useState(0);
 
     // Date Filter state
     const [date, setDate] = useState<DateRange | undefined>();
@@ -66,38 +64,53 @@ export default function NewsManagementPage() {
         setCurrentPage(1);
     }, [debouncedSearch]);
 
-    const fetchNews = async (
-        page: number,
-        limit: number,
-        search: string,
-        dateRange?: DateRange,
-    ) => {
-        setIsLoading(true);
-        try {
+    // Fetch news using react-query
+    const { data: newsData, isLoading } = useQuery<{
+        data: NewsArticle[];
+        meta: { total: number };
+    }>({
+        queryKey: [
+            'admin-news',
+            { page: currentPage, limit: pageSize, search: debouncedSearch, dateRange: date },
+        ],
+        queryFn: async () => {
             const res = await $api.get(API_ROUTES.NEWS, {
                 params: {
-                    page,
-                    limit,
-                    search: search || undefined,
-                    startDate: dateRange?.from?.toISOString(),
-                    endDate: dateRange?.to?.toISOString(),
+                    page: currentPage,
+                    limit: pageSize,
+                    search: debouncedSearch || undefined,
+                    startDate: date?.from?.toISOString(),
+                    endDate: date?.to?.toISOString(),
                 },
             });
-            setNewsList(res.data.data || []);
-            if (res.data.meta) {
-                setTotalItems(res.data.meta.total || 0);
+            if (res.data.success !== false) {
+                return {
+                    data: res.data.data || [],
+                    meta: res.data.meta || { total: 0 },
+                };
             }
-        } catch (error) {
-            console.error(error);
-            toast.error('Không thể tải danh sách tin tức');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            throw new Error('Failed to fetch news');
+        },
+    });
 
-    useEffect(() => {
-        fetchNews(currentPage, pageSize, debouncedSearch, date);
-    }, [currentPage, pageSize, debouncedSearch, date]);
+    const newsList = newsData?.data || [];
+    const totalItems = newsData?.meta?.total || 0;
+
+    // Delete mutation
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await $api.delete(`${API_ROUTES.NEWS}/${id}`);
+        },
+        onSuccess: () => {
+            toast.success('Đã xóa bài viết thành công');
+            queryClient.invalidateQueries({ queryKey: ['admin-news'] });
+            setDeleteDialogOpen(false);
+            setItemToDelete(null);
+        },
+        onError: () => {
+            toast.error('Lỗi khi xóa bài viết');
+        },
+    });
 
     const handleDeleteClick = (news: NewsArticle) => {
         setItemToDelete(news);
@@ -106,20 +119,7 @@ export default function NewsManagementPage() {
 
     const handleDeleteConfirm = async () => {
         if (!itemToDelete) return;
-
-        setIsDeleting(true);
-        try {
-            await $api.delete(`${API_ROUTES.NEWS}/${itemToDelete.id}`);
-            toast.success('Đã xóa bài viết thành công');
-            fetchNews(currentPage, pageSize, debouncedSearch, date);
-        } catch (error) {
-            console.error(error);
-            toast.error('Lỗi khi xóa bài viết');
-        } finally {
-            setIsDeleting(false);
-            setDeleteDialogOpen(false);
-            setItemToDelete(null);
-        }
+        deleteMutation.mutate(itemToDelete.id);
     };
 
     const getStatusBadge = (status: NewsArticle['status']) => {
@@ -435,7 +435,7 @@ export default function NewsManagementPage() {
                 description="Bài viết sẽ bị xóa vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác."
                 itemName={itemToDelete?.title}
                 itemLabel="Bài viết"
-                loading={isDeleting}
+                loading={deleteMutation.isPending}
             />
         </div>
     );

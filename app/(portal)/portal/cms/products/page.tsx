@@ -43,21 +43,19 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useDebounce } from '@/hooks/use-debounce';
 import { PERMISSIONS } from '@/constants/rbac';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function ProductsManagementPage() {
     const { hasPermission } = useAuth();
-    const [productsList, setProductsList] = useState<Product[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<Product | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [totalItems, setTotalItems] = useState(0);
 
     // Date Filter state
     const [date, setDate] = useState<DateRange | undefined>();
@@ -67,38 +65,54 @@ export default function ProductsManagementPage() {
         setCurrentPage(1);
     }, [debouncedSearch]);
 
-    const fetchProducts = async (
-        page: number,
-        limit: number,
-        search: string,
-        dateRange?: DateRange,
-    ) => {
-        setIsLoading(true);
-        try {
+    // Fetch products using react-query
+    const { data: productsData, isLoading } = useQuery<{
+        data: Product[];
+        meta: { total: number };
+    }>({
+        queryKey: [
+            'admin-products',
+            { page: currentPage, limit: pageSize, search: debouncedSearch, dateRange: date },
+        ],
+        queryFn: async () => {
             const res = await $api.get(API_ROUTES.PRODUCTS, {
                 params: {
-                    page,
-                    limit,
-                    search: search || undefined,
-                    startDate: dateRange?.from?.toISOString(),
-                    endDate: dateRange?.to?.toISOString(),
+                    page: currentPage,
+                    limit: pageSize,
+                    search: debouncedSearch || undefined,
+                    startDate: date?.from?.toISOString(),
+                    endDate: date?.to?.toISOString(),
                 },
             });
-            setProductsList(res.data.data || []);
-            if (res.data.meta) {
-                setTotalItems(res.data.meta.total || 0);
+            if (res.data.success !== false) {
+                return {
+                    data: res.data.data || [],
+                    meta: res.data.meta || { total: 0 },
+                };
             }
-        } catch (error) {
-            console.error(error);
-            toast.error('Không thể tải danh sách sản phẩm');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            throw new Error('Failed to fetch products');
+        },
+    });
 
-    useEffect(() => {
-        fetchProducts(currentPage, pageSize, debouncedSearch, date);
-    }, [currentPage, pageSize, debouncedSearch, date]);
+    const productsList = productsData?.data || [];
+    const totalItems = productsData?.meta?.total || 0;
+
+    // Delete mutation
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await $api.delete(`${API_ROUTES.PRODUCTS}/${id}`);
+        },
+        onSuccess: () => {
+            toast.success('Đã xóa sản phẩm thành công');
+            queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            setDeleteDialogOpen(false);
+            setItemToDelete(null);
+        },
+        onError: () => {
+            toast.error('Lỗi khi xóa sản phẩm');
+        },
+    });
 
     const handleDeleteClick = (product: Product) => {
         setItemToDelete(product);
@@ -107,20 +121,7 @@ export default function ProductsManagementPage() {
 
     const handleDeleteConfirm = async () => {
         if (!itemToDelete) return;
-
-        setIsDeleting(true);
-        try {
-            await $api.delete(`${API_ROUTES.PRODUCTS}/${itemToDelete.id}`);
-            toast.success('Đã xóa sản phẩm thành công');
-            fetchProducts(currentPage, pageSize, debouncedSearch, date);
-        } catch (error) {
-            console.error(error);
-            toast.error('Lỗi khi xóa sản phẩm');
-        } finally {
-            setIsDeleting(false);
-            setDeleteDialogOpen(false);
-            setItemToDelete(null);
-        }
+        deleteMutation.mutate(itemToDelete.id);
     };
 
     const getStatusBadge = (status: Product['status']) => {
@@ -180,7 +181,7 @@ export default function ProductsManagementPage() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-none border border-slate-100 overflow-hidden min-h-[500px]">
+            <div className="bg-white rounded-none border border-slate-100 overflow-hidden min-h-125">
                 {/* Table Filters */}
                 <div className="p-8 border-b border-slate-50 flex flex-col xl:flex-row gap-6 items-center justify-between bg-white">
                     <div className="relative w-full xl:w-1/2 group">
@@ -194,7 +195,7 @@ export default function ProductsManagementPage() {
                     </div>
                     <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
                         {/* Date Range Picker */}
-                        <div className="grid gap-2 w-full sm:w-[300px] ">
+                        <div className="grid gap-2 w-full sm:w-75">
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button
@@ -253,7 +254,7 @@ export default function ProductsManagementPage() {
 
                 {/* Table Content */}
                 {isLoading ? (
-                    <div className="flex items-center justify-center h-[400px]">
+                    <div className="flex items-center justify-center h-100">
                         <Loader2 size={40} className="animate-spin text-brand-primary opacity-20" />
                     </div>
                 ) : productsList.length > 0 ? (
@@ -303,7 +304,7 @@ export default function ProductsManagementPage() {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="max-w-[350px]">
+                                                <div className="max-w-87.5">
                                                     <div className="text-sm font-black text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-1 uppercase tracking-tight mb-0.5">
                                                         {product.name}
                                                     </div>
@@ -405,7 +406,7 @@ export default function ProductsManagementPage() {
                         </table>
                     </div>
                 ) : (
-                    <div className="p-24 text-center h-[500px] flex items-center justify-center flex-col">
+                    <div className="p-24 text-center h-125 flex items-center justify-center flex-col">
                         <Package size={64} className="text-slate-100 mb-6" />
                         <p className="text-slate-400 font-medium uppercase text-[10px] tracking-[0.2em]">
                             Không tìm thấy sản phẩm nào phù hợp.
@@ -437,7 +438,7 @@ export default function ProductsManagementPage() {
                 description="Sản phẩm sẽ bị xóa vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác."
                 itemName={itemToDelete?.name}
                 itemLabel="Sản phẩm"
-                loading={isDeleting}
+                loading={deleteMutation.isPending}
             />
         </div>
     );

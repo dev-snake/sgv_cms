@@ -49,6 +49,7 @@ import { TablePagination } from '@/components/portal/table-pagination';
 import { API_ROUTES } from '@/constants/routes';
 import { PieChartLabel } from '@/components/portal/charts/PieChartLabel';
 import { AreaChartGradient } from '@/components/portal/charts/AreaChartGradient';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface Contact {
     id: string;
@@ -83,16 +84,13 @@ const STATUS_CONFIG = {
 };
 
 export default function ContactsManagementPage() {
-    const [contacts, setContacts] = useState<Contact[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [stats, setStats] = useState<any>(null);
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [totalItems, setTotalItems] = useState(0);
 
     // Date Filter state
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
@@ -104,77 +102,92 @@ export default function ContactsManagementPage() {
     // Delete Dialog state
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<Contact | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Reset to page 1 when search changes
     useEffect(() => {
         setCurrentPage(1);
     }, [debouncedSearch]);
 
-    const fetchContacts = async (page: number, limit: number, search: string, dr?: DateRange) => {
-        setIsLoading(true);
-        try {
+    // Fetch contacts using react-query
+    const { data: contactsData, isLoading } = useQuery<{
+        data: Contact[];
+        meta: { total: number };
+    }>({
+        queryKey: [
+            'admin-contacts',
+            { page: currentPage, limit: pageSize, search: debouncedSearch, dateRange },
+        ],
+        queryFn: async () => {
             const res = await $api.get(API_ROUTES.CONTACTS, {
                 params: {
-                    page,
-                    limit,
-                    search: search || undefined,
-                    startDate: dr?.from?.toISOString(),
-                    endDate: dr?.to?.toISOString(),
+                    page: currentPage,
+                    limit: pageSize,
+                    search: debouncedSearch || undefined,
+                    startDate: dateRange?.from?.toISOString(),
+                    endDate: dateRange?.to?.toISOString(),
                 },
             });
-            setContacts(res.data.data || []);
-            if (res.data.meta) {
-                setTotalItems(res.data.meta.total || 0);
+            if (res.data.success !== false) {
+                return {
+                    data: res.data.data || [],
+                    meta: res.data.meta || { total: 0 },
+                };
             }
-        } catch (error) {
-            console.error('Error fetching contacts:', error);
-            toast.error('Không thể tải danh sách liên hệ');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            throw new Error('Failed to fetch contacts');
+        },
+    });
 
-    const fetchStats = async () => {
-        try {
+    // Fetch stats using react-query
+    const { data: stats } = useQuery<any>({
+        queryKey: ['admin-stats'],
+        queryFn: async () => {
             const res = await $api.get(API_ROUTES.STATS);
-            setStats(res.data.data);
-        } catch (error) {
-            console.error('Failed to fetch contact stats', error);
-        }
-    };
+            return res.data.data;
+        },
+    });
 
-    useEffect(() => {
-        fetchContacts(currentPage, pageSize, debouncedSearch, dateRange);
-        fetchStats();
-    }, [currentPage, pageSize, debouncedSearch, dateRange]);
+    const contacts = contactsData?.data || [];
+    const totalItems = contactsData?.meta?.total || 0;
 
-    const handleUpdateStatus = async (id: string, status: string) => {
-        try {
+    // Update status mutation
+    const updateStatusMutation = useMutation({
+        mutationFn: async ({ id, status }: { id: string; status: string }) => {
             await $api.patch(`${API_ROUTES.CONTACTS}/${id}`, { status });
+        },
+        onSuccess: () => {
             toast.success('Đã cập nhật trạng thái');
-            fetchContacts(currentPage, pageSize, debouncedSearch, dateRange);
-            fetchStats();
-        } catch {
+            queryClient.invalidateQueries({ queryKey: ['admin-contacts'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+        },
+        onError: () => {
             toast.error('Cập nhật thất bại');
-        }
-    };
+        },
+    });
 
-    const handleDelete = async () => {
-        if (!itemToDelete) return;
-        setIsDeleting(true);
-        try {
-            await $api.delete(`${API_ROUTES.CONTACTS}/${itemToDelete.id}`);
+    // Delete mutation
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await $api.delete(`${API_ROUTES.CONTACTS}/${id}`);
+        },
+        onSuccess: () => {
             toast.success('Đã xóa liên hệ');
-            fetchContacts(currentPage, pageSize, debouncedSearch, dateRange);
-            fetchStats();
+            queryClient.invalidateQueries({ queryKey: ['admin-contacts'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
             setDeleteDialogOpen(false);
             setItemToDelete(null);
-        } catch {
+        },
+        onError: () => {
             toast.error('Xóa liên hệ thất bại');
-        } finally {
-            setIsDeleting(false);
-        }
+        },
+    });
+
+    const handleUpdateStatus = (id: string, status: string) => {
+        updateStatusMutation.mutate({ id, status });
+    };
+
+    const handleDelete = () => {
+        if (!itemToDelete) return;
+        deleteMutation.mutate(itemToDelete.id);
     };
 
     // Prepare chart data
@@ -681,7 +694,7 @@ export default function ContactsManagementPage() {
                 open={deleteDialogOpen}
                 onOpenChange={setDeleteDialogOpen}
                 onConfirm={handleDelete}
-                loading={isDeleting}
+                loading={deleteMutation.isPending}
                 itemName={itemToDelete?.full_name || ''}
             />
         </div>

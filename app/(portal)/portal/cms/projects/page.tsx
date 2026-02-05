@@ -43,21 +43,19 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useDebounce } from '@/hooks/use-debounce';
 import { PERMISSIONS } from '@/constants/rbac';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function ProjectsManagementPage() {
     const { hasPermission } = useAuth();
-    const [projectsList, setProjectsList] = useState<Project[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<Project | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [totalItems, setTotalItems] = useState(0);
 
     // Date Filter state
     const [date, setDate] = useState<DateRange | undefined>();
@@ -67,38 +65,54 @@ export default function ProjectsManagementPage() {
         setCurrentPage(1);
     }, [debouncedSearch]);
 
-    const fetchProjects = async (
-        page: number,
-        limit: number,
-        search: string,
-        dateRange?: DateRange,
-    ) => {
-        setIsLoading(true);
-        try {
+    // Fetch projects using react-query
+    const { data: projectsData, isLoading } = useQuery<{
+        data: Project[];
+        meta: { total: number };
+    }>({
+        queryKey: [
+            'admin-projects',
+            { page: currentPage, limit: pageSize, search: debouncedSearch, dateRange: date },
+        ],
+        queryFn: async () => {
             const res = await $api.get(API_ROUTES.PROJECTS, {
                 params: {
-                    page,
-                    limit,
-                    search: search || undefined,
-                    startDate: dateRange?.from?.toISOString(),
-                    endDate: dateRange?.to?.toISOString(),
+                    page: currentPage,
+                    limit: pageSize,
+                    search: debouncedSearch || undefined,
+                    startDate: date?.from?.toISOString(),
+                    endDate: date?.to?.toISOString(),
                 },
             });
-            setProjectsList(res.data.data || []);
-            if (res.data.meta) {
-                setTotalItems(res.data.meta.total || 0);
+            if (res.data.success !== false) {
+                return {
+                    data: res.data.data || [],
+                    meta: res.data.meta || { total: 0 },
+                };
             }
-        } catch (error) {
-            console.error(error);
-            toast.error('Không thể tải danh sách dự án');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            throw new Error('Failed to fetch projects');
+        },
+    });
 
-    useEffect(() => {
-        fetchProjects(currentPage, pageSize, debouncedSearch, date);
-    }, [currentPage, pageSize, debouncedSearch, date]);
+    const projectsList = projectsData?.data || [];
+    const totalItems = projectsData?.meta?.total || 0;
+
+    // Delete mutation
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await $api.delete(`${API_ROUTES.PROJECTS}/${id}`);
+        },
+        onSuccess: () => {
+            toast.success('Đã xóa dự án thành công');
+            queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+            setDeleteDialogOpen(false);
+            setItemToDelete(null);
+        },
+        onError: () => {
+            toast.error('Lỗi khi xóa dự án');
+        },
+    });
 
     const handleDeleteClick = (project: Project) => {
         setItemToDelete(project);
@@ -107,20 +121,7 @@ export default function ProjectsManagementPage() {
 
     const handleDeleteConfirm = async () => {
         if (!itemToDelete) return;
-
-        setIsDeleting(true);
-        try {
-            await $api.delete(`${API_ROUTES.PROJECTS}/${itemToDelete.id}`);
-            toast.success('Đã xóa dự án thành công');
-            fetchProjects(currentPage, pageSize, debouncedSearch, date);
-        } catch (error) {
-            console.error(error);
-            toast.error('Lỗi khi xóa dự án');
-        } finally {
-            setIsDeleting(false);
-            setDeleteDialogOpen(false);
-            setItemToDelete(null);
-        }
+        deleteMutation.mutate(itemToDelete.id);
     };
 
     const getStatusBadge = (status: Project['status']) => {
@@ -446,7 +447,7 @@ export default function ProjectsManagementPage() {
                 description="Dự án sẽ bị xóa vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác."
                 itemName={itemToDelete?.name}
                 itemLabel="Dự án"
-                loading={isDeleting}
+                loading={deleteMutation.isPending}
             />
         </div>
     );

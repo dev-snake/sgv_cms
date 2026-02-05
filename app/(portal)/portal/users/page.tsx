@@ -13,7 +13,7 @@ import {
     Activity,
     Users,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
     DropdownMenu,
@@ -36,42 +36,51 @@ import { PieChartLabel } from '@/components/portal/charts/PieChartLabel';
 import { AreaChartGradient } from '@/components/portal/charts/AreaChartGradient';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LayoutList, PieChart as PieChartIcon } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function UsersManagementPage() {
-    const [users, setUsers] = useState<User[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [stats, setStats] = useState<any>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<User | null>(null);
     const { user: currentUser, hasPermission } = useAuth();
+    const queryClient = useQueryClient();
 
-    const fetchUsers = async () => {
-        setIsLoading(true);
-        try {
+    // Fetch users using react-query
+    const { data: usersData, isLoading } = useQuery<User[]>({
+        queryKey: ['admin-users'],
+        queryFn: async () => {
             const res = await $api.get(API_ROUTES.USERS);
-            setUsers(res.data.data || []);
-        } catch (error) {
-            console.error(error);
-            toast.error('Không thể tải danh sách tài khoản');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            return res.data.data || [];
+        },
+    });
 
-    const fetchStats = async () => {
-        try {
+    // Fetch stats using react-query
+    const { data: stats } = useQuery<any>({
+        queryKey: ['admin-stats'],
+        queryFn: async () => {
             const res = await $api.get(API_ROUTES.STATS);
-            setStats(res.data.data);
-        } catch (error) {
-            console.error('Failed to fetch user stats', error);
-        }
-    };
+            return res.data.data;
+        },
+    });
 
-    useEffect(() => {
-        fetchUsers();
-        fetchStats();
-    }, []);
+    const users = usersData || [];
+
+    // Delete mutation
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await $api.delete(`${API_ROUTES.USERS}/${id}`);
+        },
+        onSuccess: () => {
+            toast.success('Đã xóa tài khoản thành công');
+            queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+            setDeleteDialogOpen(false);
+            setItemToDelete(null);
+        },
+        onError: () => {
+            toast.error('Lỗi khi xóa tài khoản');
+        },
+    });
 
     const handleDeleteClick = (user: User) => {
         setItemToDelete(user);
@@ -80,18 +89,7 @@ export default function UsersManagementPage() {
 
     const handleDeleteConfirm = async () => {
         if (!itemToDelete) return;
-        try {
-            await $api.delete(`${API_ROUTES.USERS}/${itemToDelete.id}`);
-            toast.success('Đã xóa tài khoản thành công');
-            setUsers(users.filter((u) => u.id !== itemToDelete.id));
-            fetchStats();
-        } catch (error) {
-            console.error(error);
-            toast.error('Lỗi khi xóa tài khoản');
-        } finally {
-            setDeleteDialogOpen(false);
-            setItemToDelete(null);
-        }
+        deleteMutation.mutate(itemToDelete.id);
     };
 
     const filteredUsers = users.filter(

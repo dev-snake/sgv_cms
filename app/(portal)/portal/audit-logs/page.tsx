@@ -31,15 +31,13 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useDebounce } from '@/hooks/use-debounce';
+import { useQuery } from '@tanstack/react-query';
 
 export default function AuditLogsPage() {
-    const [logs, setLogs] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const debouncedSearch = useDebounce(searchQuery, 500);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [totalItems, setTotalItems] = useState(0);
     const [moduleFilter, setModuleFilter] = useState('all');
     const [actionFilter, setActionFilter] = useState('all');
     const [selectedLog, setSelectedLog] = useState<any>(null);
@@ -49,9 +47,22 @@ export default function AuditLogsPage() {
         setPage(1);
     }, [debouncedSearch]);
 
-    const fetchLogs = async () => {
-        setIsLoading(true);
-        try {
+    // Fetch logs using react-query
+    const { data: logsData, isLoading } = useQuery<{
+        data: any[];
+        meta: { total: number };
+    }>({
+        queryKey: [
+            'admin-audit-logs',
+            {
+                page,
+                limit: pageSize,
+                search: debouncedSearch,
+                module: moduleFilter,
+                action: actionFilter,
+            },
+        ],
+        queryFn: async () => {
             const res = await $api.get(API_ROUTES.AUDIT_LOGS, {
                 params: {
                     page,
@@ -61,19 +72,18 @@ export default function AuditLogsPage() {
                     action: actionFilter !== 'all' ? actionFilter : undefined,
                 },
             });
-            setLogs(res.data.data || []);
-            setTotalItems(res.data.meta?.total || 0);
-        } catch (error) {
-            console.error(error);
-            toast.error('Không thể tải nhật ký hoạt động');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            if (res.data.success !== false) {
+                return {
+                    data: res.data.data || [],
+                    meta: res.data.meta || { total: 0 },
+                };
+            }
+            throw new Error('Failed to fetch audit logs');
+        },
+    });
 
-    useEffect(() => {
-        fetchLogs();
-    }, [page, pageSize, debouncedSearch, moduleFilter, actionFilter]);
+    const logs = logsData?.data || [];
+    const totalItems = logsData?.meta?.total || 0;
 
     const getActionBadge = (action: string) => {
         switch (action) {
