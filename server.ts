@@ -4,6 +4,7 @@ import next from 'next';
 import { Server } from 'socket.io';
 import { chatStreamManager } from './services/chat-stream';
 import { notificationService } from './services/notification-service';
+import { cronService } from './services/cron-service';
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
@@ -74,5 +75,8 @@ app.prepare().then(() => {
         })
         .listen(port, () => {
             console.log(`> Ready on http://${hostname}:${port}`);
+
+            // Initialize cron jobs after server is ready
+            cronService.init();
         });
 });
