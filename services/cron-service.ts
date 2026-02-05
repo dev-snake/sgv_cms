@@ -4,7 +4,7 @@ import { auditLogs } from '@/db/schema';
 import { lt, sql } from 'drizzle-orm';
 
 // Configuration
-const AUDIT_LOG_RETENTION_DAYS = parseInt(process.env.AUDIT_LOG_RETENTION_DAYS || '90', 10);
+const AUDIT_LOG_RETENTION_DAYS = parseInt(process.env.AUDIT_LOG_RETENTION_DAYS || '30', 10);
 
 /**
  * Cron Service - Manages all scheduled tasks
