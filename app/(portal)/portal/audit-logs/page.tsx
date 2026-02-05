@@ -3,12 +3,9 @@
 import { useState, useEffect } from 'react';
 import {
     Search,
-    Calendar,
     User,
     Activity,
     Info,
-    Filter,
-    ArrowUpDown,
     ShieldAlert,
     Clock,
     Eye,
@@ -26,7 +23,6 @@ import {
 import { TablePagination } from '@/components/portal/table-pagination';
 import $api from '@/utils/axios';
 import { API_ROUTES } from '@/constants/routes';
-import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -243,7 +239,7 @@ export default function AuditLogsPage() {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto min-h-[400px]">
+                <div className="overflow-x-auto min-h-100">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-50/50 border-b border-slate-100">

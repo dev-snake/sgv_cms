@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -81,76 +82,72 @@ const STATUS_CONFIG = {
 
 export default function JobsManagementPage() {
     const { hasPermission } = useAuth();
-    const [jobs, setJobs] = useState<JobPosting[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [stats, setStats] = useState<any>(null);
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<JobPosting | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [totalItems, setTotalItems] = useState(0);
 
     // Reset to page 1 when search changes
     useEffect(() => {
         setCurrentPage(1);
     }, [debouncedSearch]);
 
-    const fetchJobs = async (page: number, limit: number, search: string) => {
-        setIsLoading(true);
-        try {
+    // Query for jobs list
+    const { data: jobsData, isLoading } = useQuery<{
+        data: JobPosting[];
+        meta: { total: number };
+    }>({
+        queryKey: ['jobs', currentPage, pageSize, debouncedSearch],
+        queryFn: async () => {
             const res = await $api.get(`${API_ROUTES.JOBS}`, {
                 params: {
-                    page,
-                    limit,
-                    search: search || undefined,
+                    page: currentPage,
+                    limit: pageSize,
+                    search: debouncedSearch || undefined,
                 },
             });
-            setJobs(res.data.data || []);
-            if (res.data.meta) {
-                setTotalItems(res.data.meta.total || 0);
-            }
-        } catch (error) {
-            console.error(error);
-            toast.error('Không thể tải danh sách tuyển dụng');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            return res.data;
+        },
+    });
 
-    const fetchStats = async () => {
-        try {
+    // Query for stats
+    const { data: statsData } = useQuery<{ data: any }>({
+        queryKey: ['stats'],
+        queryFn: async () => {
             const res = await $api.get(API_ROUTES.STATS);
-            setStats(res.data.data);
-        } catch (error) {
-            console.error('Failed to fetch job stats', error);
-        }
-    };
+            return res.data;
+        },
+    });
 
-    useEffect(() => {
-        fetchJobs(currentPage, pageSize, debouncedSearch);
-        fetchStats();
-    }, [currentPage, pageSize, debouncedSearch]);
+    const jobs = jobsData?.data || [];
+    const totalItems = jobsData?.meta?.total || 0;
+    const stats = statsData?.data;
+
+    // Delete mutation
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await $api.delete(`${API_ROUTES.JOBS}/${id}`);
+        },
+        onSuccess: () => {
+            toast.success('Đã xóa tin tuyển dụng');
+            queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            queryClient.invalidateQueries({ queryKey: ['stats'] });
+            setDeleteDialogOpen(false);
+            setItemToDelete(null);
+        },
+        onError: () => {
+            toast.error('Không thể xóa tin tuyển dụng');
+        },
+    });
 
     const handleDelete = async () => {
         if (!itemToDelete) return;
-        setIsDeleting(true);
-        try {
-            await $api.delete(`${API_ROUTES.JOBS}/${itemToDelete.id}`);
-            toast.success('Đã xóa tin tuyển dụng');
-            fetchJobs(currentPage, pageSize, debouncedSearch);
-            fetchStats();
-        } catch {
-            toast.error('Không thể xóa tin tuyển dụng');
-        } finally {
-            setIsDeleting(false);
-            setDeleteDialogOpen(false);
-            setItemToDelete(null);
-        }
+        deleteMutation.mutate(itemToDelete.id);
     };
 
     // Prepare chart data
@@ -489,7 +486,7 @@ export default function JobsManagementPage() {
                 open={deleteDialogOpen}
                 onOpenChange={setDeleteDialogOpen}
                 onConfirm={handleDelete}
-                loading={isDeleting}
+                loading={deleteMutation.isPending}
                 itemName={itemToDelete?.title || ''}
             />
         </div>

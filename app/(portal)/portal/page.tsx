@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
     FileText,
@@ -21,26 +20,19 @@ import { PORTAL_ROUTES, API_ROUTES } from '@/constants/routes';
 import $api from '@/utils/axios';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { useQuery } from '@tanstack/react-query';
 
 export default function DashboardPage() {
-    const [stats, setStats] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [updateTime, setUpdateTime] = useState<string>('');
+    const { data: statsData, isLoading: loading } = useQuery<{ data: any }>({
+        queryKey: ['stats'],
+        queryFn: async () => {
+            const res = await $api.get(API_ROUTES.STATS);
+            return res.data;
+        },
+    });
 
-    useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const res = await $api.get(API_ROUTES.STATS);
-                setStats(res.data.data);
-                setUpdateTime(format(new Date(), 'hh:mm a', { locale: vi }));
-            } catch (error) {
-                console.error('Failed to fetch dashboard stats', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchStats();
-    }, []);
+    const stats = statsData?.data;
+    const updateTime = format(new Date(), 'hh:mm a', { locale: vi });
 
     const statsConfig = [
         {
@@ -79,7 +71,7 @@ export default function DashboardPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center min-h-100">
                 <Loader2 className="h-10 w-10 animate-spin text-brand-primary opacity-20" />
             </div>
         );

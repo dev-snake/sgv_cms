@@ -35,6 +35,7 @@ import { API_ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 import { RadialChartGrid } from '@/components/portal/charts/RadialChartGrid';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface Notification {
     id: string;
@@ -53,61 +54,67 @@ const notificationLabels = {
 };
 
 export default function NotificationsPage() {
-    const [notifications, setNotifications] = React.useState<Notification[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [unreadCount, setUnreadCount] = React.useState(0);
+    const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = React.useState('all');
     const [searchTerm, setSearchTerm] = React.useState('');
     const [page, setPage] = React.useState(1);
-    const [totalItems, setTotalItems] = React.useState(0);
     const { user } = useAuth();
 
-    const fetchNotifications = async () => {
-        setIsLoading(true);
-        try {
+    // Query for notifications
+    const { data: notificationsData, isLoading } = useQuery<{
+        data: Notification[];
+        meta: { unreadCount: number; total: number };
+    }>({
+        queryKey: ['notifications', page],
+        queryFn: async () => {
             const res = await $api.get(API_ROUTES.NOTIFICATIONS, {
                 params: {
                     page,
                     limit: 10,
                 },
             });
-            setNotifications(res.data.data || []);
-            setUnreadCount(res.data.meta?.unreadCount || 0);
-            setTotalItems(res.data.meta?.total || res.data.data?.length || 0);
-        } catch (error) {
-            console.error(error);
-            toast.error('Không thể tải danh sách thông báo');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            return res.data;
+        },
+    });
 
-    React.useEffect(() => {
-        fetchNotifications();
-    }, [page]);
+    const notifications = notificationsData?.data || [];
+    const unreadCount = notificationsData?.meta?.unreadCount || 0;
+    const totalItems = notificationsData?.meta?.total || notifications.length;
+
+    // Mark as read mutation
+    const markAsReadMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await $api.patch(API_ROUTES.NOTIFICATIONS, { id });
+        },
+        onSuccess: () => {
+            toast.success('Đã đánh dấu là đã đọc');
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        },
+        onError: () => {
+            toast.error('Lỗi khi đánh dấu đã đọc');
+        },
+    });
+
+    // Mark all as read mutation
+    const markAllAsReadMutation = useMutation({
+        mutationFn: async () => {
+            await $api.patch(API_ROUTES.NOTIFICATIONS, { all: true });
+        },
+        onSuccess: () => {
+            toast.success('Đã đánh dấu tất cả là đã đọc');
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        },
+        onError: () => {
+            toast.error('Lỗi khi đánh dấu tất cả đã đọc');
+        },
+    });
 
     const handleMarkAsRead = async (id: string) => {
-        try {
-            await $api.patch(API_ROUTES.NOTIFICATIONS, { id });
-            setNotifications(notifications.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
-            setUnreadCount((prev) => Math.max(0, prev - 1));
-            toast.success('Đã đánh dấu là đã đọc');
-        } catch (error) {
-            console.error(error);
-            toast.error('Lỗi khi đánh dấu đã đọc');
-        }
+        markAsReadMutation.mutate(id);
     };
 
     const handleMarkAllAsRead = async () => {
-        try {
-            await $api.patch(API_ROUTES.NOTIFICATIONS, { all: true });
-            setNotifications(notifications.map((n) => ({ ...n, is_read: true })));
-            setUnreadCount(0);
-            toast.success('Đã đánh dấu tất cả là đã đọc');
-        } catch (error) {
-            console.error(error);
-            toast.error('Lỗi khi đánh dấu tất cả đã đọc');
-        }
+        markAllAsReadMutation.mutate();
     };
 
     const filteredNotifications = React.useMemo(() => {

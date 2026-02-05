@@ -1,6 +1,5 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
 import { BarChart3, Clock, RefreshCcw, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -12,28 +11,25 @@ import { RadialChartShape } from '@/components/portal/charts/RadialChartShape';
 import { PieChartLabel } from '@/components/portal/charts/PieChartLabel';
 import { RadarChartGridCircleFill } from '@/components/portal/charts/RadarChartGridCircleFill';
 import { AreaChartGradient } from '@/components/portal/charts/AreaChartGradient';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function AnalyticsPage() {
-    const [stats, setStats] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [updateTime, setUpdateTime] = useState<string>('');
+    const queryClient = useQueryClient();
 
-    const fetchStats = useCallback(async () => {
-        setLoading(true);
-        try {
+    const { data: statsData, isLoading: loading } = useQuery<{ data: any }>({
+        queryKey: ['stats'],
+        queryFn: async () => {
             const res = await $api.get(API_ROUTES.STATS);
-            setStats(res.data.data);
-            setUpdateTime(format(new Date(), 'hh:mm a', { locale: vi }));
-        } catch (error) {
-            console.error('Failed to fetch analytics stats', error);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+            return res.data;
+        },
+    });
 
-    useEffect(() => {
-        fetchStats();
-    }, [fetchStats]);
+    const stats = statsData?.data;
+    const updateTime = format(new Date(), 'hh:mm a', { locale: vi });
+
+    const refetchStats = () => {
+        queryClient.invalidateQueries({ queryKey: ['stats'] });
+    };
 
     // Data for Charts
     const distributionData = [
@@ -126,7 +122,7 @@ export default function AnalyticsPage() {
                         </div>
                     </div>
                     <button
-                        onClick={fetchStats}
+                        onClick={refetchStats}
                         className="bg-brand-primary text-white px-5 py-3 hover:bg-brand-secondary transition-all flex items-center gap-2 group active:scale-95"
                     >
                         <RefreshCcw
