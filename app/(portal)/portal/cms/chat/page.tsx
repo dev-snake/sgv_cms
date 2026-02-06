@@ -310,7 +310,7 @@ export default function ChatAdminPage() {
                             Real-time Chat
                         </span>
                     </div>
-                    <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-900 border-l-4 md:border-l-8 border-[#002d6b] pl-3 md:pl-6 leading-none">
+                    <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tight pt-1 text-slate-900 border-l-4 md:border-l-8 border-[#002d6b] pl-3 md:pl-6 leading-none">
                         Hỗ trợ Khách hàng
                     </h1>
                     <p className="text-slate-500 font-medium italic text-xs max-w-2xl leading-relaxed">
