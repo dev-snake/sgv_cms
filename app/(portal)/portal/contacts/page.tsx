@@ -55,27 +55,41 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface Contact {
     id: string;
-    full_name: string;
+    name: string;
     email: string;
-    phone: string;
-    subject: string;
+    phone: string | null;
+    address: string | null;
+    subject: string | null;
     message: string;
-    status: 'pending' | 'processed' | 'spam';
+    status: 'new' | 'read' | 'replied' | 'archived' | 'spam';
     created_at: string;
+    updated_at: string;
 }
 
 const STATUS_CONFIG = {
-    pending: {
-        label: 'Cần xử lý',
+    new: {
+        label: 'Mới',
+        color: 'bg-blue-500/10 text-blue-600',
+        icon: MessageSquare,
+        chartColor: '#3b82f6',
+    },
+    read: {
+        label: 'Đã đọc',
         color: 'bg-amber-500/10 text-amber-600',
         icon: Clock,
         chartColor: '#f59e0b',
     },
-    processed: {
-        label: 'Đã xử lý',
+    replied: {
+        label: 'Đã trả lời',
         color: 'bg-emerald-500/10 text-emerald-600',
         icon: CheckCircle2,
         chartColor: '#10b981',
+    },
+    archived: {
+        label: 'Đã lưu trữ',
+        color: 'bg-slate-500/10 text-slate-500',
+        icon: Building,
+        chartColor: '#64748b',
     },
     spam: {
         label: 'Spam',
@@ -415,12 +429,18 @@ export default function ContactsManagementPage() {
                                             >
                                                 <td className="p-3 md:p-6">
                                                     <p className="text-sm font-black text-slate-900 uppercase tracking-tight">
-                                                        {contact.full_name}
+                                                        {contact.name}
                                                     </p>
+                                                    {contact.address && (
+                                                        <p className="text-[10px] text-slate-400 mt-0.5 truncate max-w-[200px]">
+                                                            {contact.address}
+                                                        </p>
+                                                    )}
                                                 </td>
                                                 <td className="p-3 md:p-6 max-w-50 hidden lg:table-cell">
                                                     <p className="text-[10px] font-black text-[#002d6b] uppercase truncate flex items-center gap-2">
-                                                        <Building size={12} /> {contact.subject}
+                                                        <Building size={12} />{' '}
+                                                        {contact.subject || 'Không có chủ đề'}
                                                     </p>
                                                 </td>
                                                 <td className="p-3 md:p-6 hidden md:table-cell">
@@ -432,13 +452,15 @@ export default function ContactsManagementPage() {
                                                             />
                                                             {contact.email}
                                                         </div>
-                                                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600">
-                                                            <Phone
-                                                                size={12}
-                                                                className="text-slate-300"
-                                                            />
-                                                            {contact.phone}
-                                                        </div>
+                                                        {contact.phone && (
+                                                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600">
+                                                                <Phone
+                                                                    size={12}
+                                                                    className="text-slate-300"
+                                                                />
+                                                                {contact.phone}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </td>
                                                 <td className="p-3 md:p-6 whitespace-nowrap hidden sm:table-cell">
@@ -502,22 +524,7 @@ export default function ContactsManagementPage() {
                                                                     onClick={() =>
                                                                         handleUpdateStatus(
                                                                             contact.id,
-                                                                            'processed',
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <CheckCircle2
-                                                                        size={14}
-                                                                        className="text-emerald-500"
-                                                                    />{' '}
-                                                                    Đã xử lý
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    className="text-[10px] font-black uppercase tracking-tight cursor-pointer gap-3 px-3 py-2"
-                                                                    onClick={() =>
-                                                                        handleUpdateStatus(
-                                                                            contact.id,
-                                                                            'pending',
+                                                                            'read',
                                                                         )
                                                                     }
                                                                 >
@@ -525,7 +532,37 @@ export default function ContactsManagementPage() {
                                                                         size={14}
                                                                         className="text-amber-500"
                                                                     />{' '}
-                                                                    Chờ xử lý
+                                                                    Đã đọc
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem
+                                                                    className="text-[10px] font-black uppercase tracking-tight cursor-pointer gap-3 px-3 py-2"
+                                                                    onClick={() =>
+                                                                        handleUpdateStatus(
+                                                                            contact.id,
+                                                                            'replied',
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <CheckCircle2
+                                                                        size={14}
+                                                                        className="text-emerald-500"
+                                                                    />{' '}
+                                                                    Đã trả lời
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem
+                                                                    className="text-[10px] font-black uppercase tracking-tight cursor-pointer gap-3 px-3 py-2"
+                                                                    onClick={() =>
+                                                                        handleUpdateStatus(
+                                                                            contact.id,
+                                                                            'archived',
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Building
+                                                                        size={14}
+                                                                        className="text-slate-500"
+                                                                    />{' '}
+                                                                    Lưu trữ
                                                                 </DropdownMenuItem>
                                                                 <DropdownMenuItem
                                                                     className="text-[10px] font-black uppercase tracking-tight cursor-pointer gap-3 px-3 py-2"
@@ -620,7 +657,7 @@ export default function ContactsManagementPage() {
                         </div>
                         <SheetTitle className="text-xl md:text-3xl font-black uppercase tracking-tighter italic text-white flex items-center gap-3 md:gap-4">
                             <MessageSquare className="size-6 md:size-8 text-[#fbbf24] shrink-0" />
-                            {selectedContact?.subject}
+                            {selectedContact?.subject || selectedContact?.name}
                         </SheetTitle>
                         <SheetDescription className="text-white/60 font-medium italic text-sm">
                             Thông tin liên hệ chi tiết được hệ thống ghi nhận từ Cổng thông tin
@@ -636,7 +673,7 @@ export default function ContactsManagementPage() {
                                         Khách hàng
                                     </span>
                                     <p className="text-sm font-black text-slate-900 uppercase">
-                                        {selectedContact.full_name}
+                                        {selectedContact.name}
                                     </p>
                                 </div>
                                 <div className="space-y-1.5 text-right">
@@ -664,10 +701,21 @@ export default function ContactsManagementPage() {
                                         Số điện thoại
                                     </span>
                                     <p className="text-sm font-black text-slate-900">
-                                        {selectedContact.phone}
+                                        {selectedContact.phone || 'Chưa cung cấp'}
                                     </p>
                                 </div>
                             </div>
+
+                            {selectedContact.address && (
+                                <div className="space-y-1.5">
+                                    <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">
+                                        Địa chỉ
+                                    </span>
+                                    <p className="text-sm text-slate-700">
+                                        {selectedContact.address}
+                                    </p>
+                                </div>
+                            )}
 
                             <div className="space-y-4">
                                 <span className="text-[10px] font-black uppercase text-[#002d6b] tracking-[0.2em] flex items-center gap-2">
@@ -701,15 +749,15 @@ export default function ContactsManagementPage() {
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
-                                    {selectedContact.status !== 'processed' && (
+                                    {selectedContact.status !== 'replied' && (
                                         <Button
                                             className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-none h-12 px-6 text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-emerald-500/20"
                                             onClick={() => {
-                                                handleUpdateStatus(selectedContact.id, 'processed');
+                                                handleUpdateStatus(selectedContact.id, 'replied');
                                                 setIsSheetOpen(false);
                                             }}
                                         >
-                                            Phê duyệt xử lý
+                                            Đánh dấu đã trả lời
                                         </Button>
                                     )}
                                     {selectedContact.status !== 'spam' && (
@@ -736,7 +784,7 @@ export default function ContactsManagementPage() {
                 onOpenChange={setDeleteDialogOpen}
                 onConfirm={handleDelete}
                 loading={deleteMutation.isPending}
-                itemName={itemToDelete?.full_name || ''}
+                itemName={itemToDelete?.name || ''}
             />
         </div>
     );
