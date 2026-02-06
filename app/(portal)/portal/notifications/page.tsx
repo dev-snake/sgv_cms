@@ -3,9 +3,6 @@
 import $api from '@/utils/axios';
 import {
     Bell,
-    MessageSquare,
-    Mail,
-    Briefcase,
     ExternalLink,
     Check,
     CheckCheck,

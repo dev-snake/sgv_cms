@@ -16,6 +16,8 @@ import {
     Eye,
     LayoutList,
     PieChart as PieChartIcon,
+    FileSpreadsheet,
+    X,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import {
@@ -190,6 +192,31 @@ export default function ContactsManagementPage() {
         deleteMutation.mutate(itemToDelete.id);
     };
 
+    const handleExportExcel = async () => {
+        try {
+            const res = await $api.get(`${API_ROUTES.CONTACTS}/export`, {
+                params: {
+                    search: debouncedSearch || undefined,
+                    startDate: dateRange?.from?.toISOString(),
+                    endDate: dateRange?.to?.toISOString(),
+                },
+                responseType: 'blob',
+            });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `lien-he_${format(new Date(), 'dd-MM-yyyy')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            toast.success('Đã xuất file Excel thành công');
+        } catch (error) {
+            console.error('Export failed:', error);
+            toast.error('Không thể xuất file Excel');
+        }
+    };
+
     // Prepare chart data
     const statusChartData = stats?.contactStats
         ? Object.entries(stats.contactStats).map(([status, count]) => {
@@ -270,62 +297,74 @@ export default function ContactsManagementPage() {
                 </div>
 
                 <TabsContent value="list" className="space-y-4 md:space-y-6 mt-0 border-none p-0">
-                    <div className="flex flex-col gap-3 md:gap-4 p-3 md:p-6 bg-slate-50 border border-slate-100">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 md:p-4 bg-slate-50 border border-slate-100">
                         <div className="relative flex-1">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                             <input
-                                placeholder="TÌM THEO TÊN, EMAIL, SỐ ĐIỆN THOẠI, CHỦ ĐỀ..."
-                                className="w-full h-12 pl-12 pr-4 bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-brand-primary/20"
+                                placeholder="TÌM THEO TÊN, EMAIL, SĐT, CHỦ ĐỀ..."
+                                className="w-full h-10 pl-12 pr-4 bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-brand-primary/20"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
 
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className={cn(
-                                        'h-12 justify-start text-left font-black uppercase tracking-widest text-[10px] rounded-none border-slate-100 bg-white min-w-60',
-                                        !dateRange && 'text-slate-400',
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange?.from ? (
-                                        dateRange.to ? (
-                                            <>
-                                                {format(dateRange.from, 'dd/MM/yyyy')} -{' '}
-                                                {format(dateRange.to, 'dd/MM/yyyy')}
-                                            </>
+                        <div className="flex items-center gap-2">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className={cn(
+                                            'h-10 justify-start text-left font-black uppercase tracking-widest text-[10px] rounded-none border-slate-100 bg-white w-[200px] shrink-0',
+                                            !dateRange && 'text-slate-400',
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                                        {dateRange?.from ? (
+                                            dateRange.to ? (
+                                                <>
+                                                    {format(dateRange.from, 'dd/MM/yy')} -{' '}
+                                                    {format(dateRange.to, 'dd/MM/yy')}
+                                                </>
+                                            ) : (
+                                                format(dateRange.from, 'dd/MM/yy')
+                                            )
                                         ) : (
-                                            format(dateRange.from, 'dd/MM/yyyy')
-                                        )
-                                    ) : (
-                                        'Lọc theo khoảng ngày'
-                                    )}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="end">
-                                <Calendar
-                                    initialFocus
-                                    mode="range"
-                                    defaultMonth={dateRange?.from}
-                                    selected={dateRange}
-                                    onSelect={setDateRange}
-                                    numberOfMonths={2}
-                                />
-                            </PopoverContent>
-                        </Popover>
+                                            'Lọc theo ngày'
+                                        )}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="end">
+                                    <Calendar
+                                        initialFocus
+                                        mode="range"
+                                        defaultMonth={dateRange?.from}
+                                        selected={dateRange}
+                                        onSelect={setDateRange}
+                                        numberOfMonths={2}
+                                    />
+                                </PopoverContent>
+                            </Popover>
 
-                        {dateRange && (
+                            {dateRange && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setDateRange(undefined)}
+                                    className="h-10 w-10 shrink-0 rounded-none text-rose-500 hover:bg-rose-50"
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
+
                             <Button
-                                variant="ghost"
-                                onClick={() => setDateRange(undefined)}
-                                className="h-12 px-4 rounded-none text-rose-500 hover:bg-rose-50 font-black text-[10px] uppercase tracking-widest"
+                                variant="outline"
+                                onClick={handleExportExcel}
+                                className="h-10 px-4 rounded-none  bg-green-600 hover:bg-green-600 hover:text-white hover:opacity-80 text-[10px] font-black uppercase tracking-widest text-white   shrink-0 gap-2 hover:cursor-pointer"
                             >
-                                Xóa lọc
+                                <FileSpreadsheet className="h-4 w-4" />
+                                <span className="hidden sm:inline">Xuất Excel</span>
                             </Button>
-                        )}
+                        </div>
                     </div>
 
                     <div className="bg-white border border-slate-100 shadow-sm overflow-hidden">
@@ -345,7 +384,7 @@ export default function ContactsManagementPage() {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full min-w-[700px]">
+                                <table className="w-full min-w-175">
                                     <thead>
                                         <tr className="border-b border-slate-50 bg-slate-50/50">
                                             <th className="text-left p-3 md:p-6 text-[9px] font-black uppercase tracking-widest text-slate-400">
