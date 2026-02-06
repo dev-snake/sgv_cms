@@ -87,11 +87,11 @@ export default function AnalyticsPage() {
     }
 
     return (
-        <div className="space-y-10 pb-20">
+        <div className="space-y-6 md:space-y-10 pb-10 md:pb-20">
             {/* Header section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
                 <div className="space-y-2">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <span className="px-2 py-0.5 bg-brand-primary text-white text-[8px] font-black uppercase tracking-widest">
                             Live Engine
                         </span>
@@ -100,7 +100,7 @@ export default function AnalyticsPage() {
                             Đang đồng bộ
                         </span>
                     </div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none border-l-8 border-brand-primary pl-6">
+                    <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight uppercase leading-none border-l-4 md:border-l-8 border-brand-primary pl-4 md:pl-6">
                         Phân tích & Thống kê
                     </h1>
                     <p className="text-slate-500 font-medium italic text-xs max-w-2xl leading-relaxed">
@@ -109,8 +109,8 @@ export default function AnalyticsPage() {
                     </p>
                 </div>
 
-                <div className="flex gap-2">
-                    <div className="bg-white border border-slate-200 px-4 py-3 flex items-center gap-3 shadow-xs">
+                <div className="flex gap-2 w-full md:w-auto">
+                    <div className="bg-white border border-slate-200 px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 shadow-xs flex-1 md:flex-initial">
                         <Calendar size={14} className="text-slate-400" />
                         <div className="flex flex-col">
                             <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
@@ -123,7 +123,7 @@ export default function AnalyticsPage() {
                     </div>
                     <button
                         onClick={refetchStats}
-                        className="bg-brand-primary text-white px-5 py-3 hover:bg-brand-secondary transition-all flex items-center gap-2 group active:scale-95"
+                        className="bg-brand-primary text-white px-4 md:px-5 py-2 md:py-3 hover:bg-brand-secondary transition-all flex items-center gap-2 group active:scale-95"
                     >
                         <RefreshCcw
                             size={14}
@@ -137,7 +137,7 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Main Charts Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
                 {/* Total Reach - Shape Chart */}
                 <RadialChartShape
                     title="Tổng quy mô nội dung"
@@ -231,11 +231,11 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Footer Info Section */}
-            <div className="bg-slate-50 border border-slate-200 p-10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-10 opacity-5 rotate-12">
+            <div className="bg-slate-50 border border-slate-200 p-5 md:p-10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-10 opacity-5 rotate-12 hidden md:block">
                     <BarChart3 size={200} />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-10">
                     <div className="space-y-4">
                         <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                             Trạng thái API

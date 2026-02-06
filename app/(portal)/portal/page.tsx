@@ -77,10 +77,10 @@ export default function DashboardPage() {
         );
     }
     return (
-        <div className="space-y-10">
+        <div className="space-y-6 md:space-y-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">
+                    <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">
                         Tổng quan
                     </h1>
                     <p className="text-slate-500 font-medium italic mt-2 text-sm">
@@ -95,21 +95,21 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                 {statsConfig.map((stat) => (
                     <Link key={stat.title} href={stat.href}>
-                        <div className="bg-white p-8 rounded-none border border-slate-100 hover:border-brand-primary/20 hover:bg-slate-50/30 transition-all group relative overflow-hidden">
+                        <div className="bg-white p-4 md:p-8 rounded-none border border-slate-100 hover:border-brand-primary/20 hover:bg-slate-50/30 transition-all group relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-brand-primary/5 to-transparent rounded-none -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
 
-                            <div className="space-y-6 relative">
+                            <div className="space-y-3 md:space-y-6 relative">
                                 <div
                                     className={cn(
-                                        'inline-flex p-4 rounded-none',
+                                        'inline-flex p-2.5 md:p-4 rounded-none',
                                         stat.bg,
                                         stat.color,
                                     )}
                                 >
-                                    <stat.icon size={24} />
+                                    <stat.icon className="size-5 md:size-6" />
                                 </div>
                                 <div>
                                     <div className="flex items-center justify-between mb-1">
@@ -121,7 +121,7 @@ export default function DashboardPage() {
                                             className="text-slate-300 group-hover:text-brand-primary transition-colors"
                                         />
                                     </div>
-                                    <div className="text-4xl font-black text-slate-900 tracking-tighter">
+                                    <div className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter">
                                         {stat.value}
                                     </div>
                                 </div>
@@ -139,9 +139,9 @@ export default function DashboardPage() {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
                 <div className="lg:col-span-2 bg-white rounded-none border border-slate-100 overflow-hidden">
-                    <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-white">
+                    <div className="p-4 md:p-8 border-b border-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
                         <div className="flex items-center gap-3">
                             <div className="h-2 w-8 bg-brand-primary rounded-none"></div>
                             <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">
@@ -160,9 +160,9 @@ export default function DashboardPage() {
                         {stats?.recentActivities?.map((item: any, i: number) => (
                             <div
                                 key={i}
-                                className="flex items-center justify-between p-6 hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                                className="flex items-center justify-between p-3 md:p-6 hover:bg-slate-50/50 transition-colors group cursor-pointer gap-3"
                             >
-                                <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-3 md:gap-6 min-w-0 flex-1">
                                     <div className="hidden md:flex h-12 w-12 items-center justify-center rounded-none bg-slate-50 text-slate-400 group-hover:bg-brand-primary/10 group-hover:text-brand-primary transition-all">
                                         <FileText size={20} />
                                     </div>
@@ -212,7 +212,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="space-y-8">
-                    <div className="bg-white rounded-none border border-slate-100 p-8 space-y-8 relative overflow-hidden">
+                    <div className="bg-white rounded-none border border-slate-100 p-4 md:p-8 space-y-6 md:space-y-8 relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 rotate-12 opacity-5">
                             <Settings size={120} />
                         </div>
@@ -287,7 +287,7 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    <div className="bg-linear-to-br from-brand-primary to-brand-secondary rounded-none p-8 text-white border border-white/10 relative overflow-hidden group">
+                    <div className="bg-linear-to-br from-brand-primary to-brand-secondary rounded-none p-5 md:p-8 text-white border border-white/10 relative overflow-hidden group">
                         <div className="absolute -bottom-8 -right-8 h-48 w-48 bg-white/5 rounded-none blur-3xl group-hover:scale-125 transition-transform duration-1000"></div>
                         <div className="space-y-6 relative">
                             <div className="h-12 w-12 bg-white/10 rounded-none flex items-center justify-center backdrop-blur-md">
